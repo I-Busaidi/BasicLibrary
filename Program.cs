@@ -105,7 +105,7 @@ namespace BasicLibrary
                         break;
 
                     case 2:
-                        //BorrowBook();
+                        BorrowBook();
                         break;
 
                     case 3:
@@ -156,9 +156,11 @@ namespace BasicLibrary
                 BookNumber = i + 1;
                 sb.Append("Book ").Append(BookNumber).Append(" name : ").Append(Books[i].BName);
                 sb.AppendLine();
-                sb.Append("Book ").Append(BookNumber).Append(" Author : ").Append(Books[i].BAuthor);
+                sb.Append(" Author : ").Append(Books[i].BAuthor);
                 sb.AppendLine();
-                sb.Append("Book ").Append(BookNumber).Append(" ID : ").Append(Books[i].ID);
+                sb.Append(" ID : ").Append(Books[i].ID);
+                sb.AppendLine();
+                sb.Append(" Qty : ").Append (Books[i].Qty);
                 sb.AppendLine().AppendLine();
                 Console.WriteLine(sb.ToString());
                 sb.Clear();
@@ -192,7 +194,7 @@ namespace BasicLibrary
                     sb.AppendLine($"{count}. Book Name: {Books[i].BName} | Quantity: {Books[i].Qty}");
                     count++;
                     AuthBooks = true;
-                    BookIds.Add( BookIndex );
+                    BookIds.Add( i );
                 }
 
             }
@@ -237,7 +239,6 @@ namespace BasicLibrary
             }
         }
 
-
         static void BorrowBook(int BookIndex = -1)
         {
             if (BookIndex == -1)
@@ -257,7 +258,10 @@ namespace BasicLibrary
                             SearchForBook();
                             break;
                         case 2:
-                            //ViewAndBorrow();
+                            ViewAllBooks();
+                            Console.WriteLine("Enter the number from the list of book to borrow:");
+                            int BookChoice = int.Parse(Console.ReadLine());
+                            BorrowBook(BookChoice - 1);
                             break;
                         case 0:
                             SaveBooksToFile();
@@ -269,9 +273,15 @@ namespace BasicLibrary
             }
             else
             {
+                Console.WriteLine("Enter the quantity to borrow:");
+                int BorrowQty = int.Parse(Console.ReadLine());
 
+                Books[BookIndex] = (Books[BookIndex].BName, Books[BookIndex].BAuthor, Books[BookIndex].ID, (Books[BookIndex].Qty - BorrowQty));
+                Console.WriteLine($"{BorrowQty} x {Books[BookIndex].BName} borrowed successfully!");
+                SaveBooksToFile();
             }
         }
+
         static void LoadBooksFromFile()
         {
             try
@@ -307,7 +317,7 @@ namespace BasicLibrary
                 {
                     foreach (var book in Books)
                     {
-                        writer.WriteLine($"{book.BName}|{book.BAuthor}|{book.ID}");
+                        writer.WriteLine($"{book.BName}|{book.BAuthor}|{book.ID}|{book.Qty}");
                     }
                 }
                 Console.WriteLine("Books saved to file successfully.");
