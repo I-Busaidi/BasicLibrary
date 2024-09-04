@@ -61,7 +61,7 @@ namespace BasicLibrary
                         break;
 
                     case 3:
-                        SearchForBook();
+                        SearchForBook(false);
                         break;
 
                     case 0:
@@ -101,7 +101,7 @@ namespace BasicLibrary
                 switch (choice)
                 {
                     case 1:
-                        SearchForBook();
+                        SearchForBook(true);
                         break;
 
                     case 2:
@@ -168,7 +168,7 @@ namespace BasicLibrary
             }
         }
 
-        static void SearchForBook()
+        static void SearchForBook(bool AdmnOrUsr)
         {
             Console.WriteLine("Enter the book or author name to search");
             string name = Console.ReadLine();  
@@ -198,7 +198,7 @@ namespace BasicLibrary
                 }
 
             }
-            if (AuthBooks)
+            if (AuthBooks && AdmnOrUsr)
             {
                 Console.WriteLine("Choose a book to borrow:");
                 Console.WriteLine(sb.ToString());
@@ -216,6 +216,10 @@ namespace BasicLibrary
             if (!flag && !AuthBooks)
             { 
                 Console.WriteLine("Book not found"); 
+            }
+            else if (!AdmnOrUsr && AuthBooks)
+            {
+                Console.WriteLine(sb.ToString());
             }
             else
             {
@@ -255,7 +259,7 @@ namespace BasicLibrary
                     switch (Choice)
                     {
                         case 1:
-                            SearchForBook();
+                            SearchForBook(true);
                             break;
                         case 2:
                             ViewAllBooks();
@@ -280,6 +284,19 @@ namespace BasicLibrary
                 Console.WriteLine($"{BorrowQty} x {Books[BookIndex].BName} borrowed successfully!");
                 SaveBooksToFile();
             }
+        }
+
+        static void ReturnBook()
+        {
+            ViewAllBooks();
+            Console.WriteLine("Enter the number from the list of book to return:");
+            int BookChoice = int.Parse(Console.ReadLine());
+            Console.WriteLine("Enter the quantity to return:");
+            int ReturnQty = int.Parse(Console.ReadLine());
+
+            Books[BookChoice - 1] = (Books[BookChoice - 1].BName, Books[BookChoice - 1].BAuthor, Books[BookChoice - 1].ID, (Books[BookChoice - 1].Qty + ReturnQty));
+            Console.WriteLine($"{ReturnQty} x {Books[BookChoice - 1].BName} returned successfully!");
+            SaveBooksToFile();
         }
 
         static void LoadBooksFromFile()
