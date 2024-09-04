@@ -7,7 +7,6 @@ namespace BasicLibrary
     {
         static List<(string BName, string BAuthor, int ID, int Qty)> Books = new List<(string BName, string BAuthor, int ID, int Qty)>();
         static string filePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryBooks.txt";
-        static string BorrowersList = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\Borrows.txt";
 
         static void Main(string[] args)
         {
@@ -110,6 +109,7 @@ namespace BasicLibrary
                 {
                     Console.WriteLine("Invalid input, please try again: ");
                 }
+                Console.Clear();
                 switch (choice)
                 {
                     case 1:
@@ -289,6 +289,7 @@ namespace BasicLibrary
                 bool ExitBorrow = false;
                 do
                 {
+                    Console.Clear();
                     Console.WriteLine("Choose a method:" +
                         "\n1. Search by book / author name." +
                         "\n2. Browse available books." +
@@ -299,6 +300,7 @@ namespace BasicLibrary
                     {
                         Console.WriteLine("Invalid input, please try again: ");
                     }
+                    Console.Clear();
                     switch (Choice)
                     {
                         case 1:
