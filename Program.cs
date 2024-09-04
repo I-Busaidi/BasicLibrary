@@ -4,7 +4,7 @@ namespace BasicLibrary
 {
     internal class Program
     {
-        static List<(string BName, string BAuthor, int ID)> Books = new List<(string BName, string BAuthor, int ID)>();
+        static List<(string BName, string BAuthor, int ID, int Qty)> Books = new List<(string BName, string BAuthor, int ID, int Qty)>();
         static string filePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryBooks.txt";
 
         static void Main(string[] args)
@@ -129,14 +129,17 @@ namespace BasicLibrary
             Console.WriteLine("Enter Book Name");
             string name = Console.ReadLine();   
 
-            Console.WriteLine("Enter Book Author");
+            Console.WriteLine($"Enter Author Name of \"{name}\": ");
             string author= Console.ReadLine();  
 
-            Console.WriteLine("Enter Book ID");
+            Console.WriteLine($"Enter ID of \"{name}\": ");
             int ID = int.Parse(Console.ReadLine());
 
-            Books.Add(  ( name, author, ID )  );
-            Console.WriteLine("Book Added Succefully");
+            Console.WriteLine($"Enter available quantity of \"{name}\": ");
+            int Qty = int.Parse(Console.ReadLine());
+
+            Books.Add(  ( name, author, ID,  Qty)  );
+            Console.WriteLine($"Book \"{name}\" Added Succefully");
 
         }
 
@@ -178,7 +181,7 @@ namespace BasicLibrary
             }
 
             if (flag != true)
-            { Console.WriteLine("book not found"); }
+            { Console.WriteLine("Book not found"); }
         }
 
         static void LoadBooksFromFile()
@@ -193,9 +196,9 @@ namespace BasicLibrary
                         while ((line = reader.ReadLine()) != null)
                         {
                             var parts = line.Split('|');
-                            if (parts.Length == 3)
+                            if (parts.Length == 4)
                             {
-                                Books.Add((parts[0], parts[1], int.Parse(parts[2])));
+                                Books.Add((parts[0], parts[1], int.Parse(parts[2]), int.Parse(parts[3])));
                             }
                         }
                     }
