@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Security.Cryptography;
+using System.Text;
 
 namespace BasicLibrary
 {
@@ -6,6 +7,7 @@ namespace BasicLibrary
     {
         static List<(string BName, string BAuthor, int ID, int Qty)> Books = new List<(string BName, string BAuthor, int ID, int Qty)>();
         static string filePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryBooks.txt";
+        static string BorrowersList = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\Borrows.txt";
 
         static void Main(string[] args)
         {
@@ -16,7 +18,10 @@ namespace BasicLibrary
             {
                 Console.Clear();
                 Console.WriteLine("Enter (1) for admin access | (2) for user access | (0) to Exit:");
-                AccessLevel = int.Parse(Console.ReadLine());
+                while (!int.TryParse(Console.ReadLine(), out AccessLevel))
+                {
+                    Console.WriteLine("Invalid input, please try again: ");
+                }
 
                 switch (AccessLevel)
                 {
@@ -48,7 +53,11 @@ namespace BasicLibrary
                 Console.WriteLine("\n3. Search for Book");
                 Console.WriteLine("\n\n0. Exit");
 
-                int choice = int.Parse(Console.ReadLine());
+                int choice;
+                while (!int.TryParse(Console.ReadLine(), out choice))
+                {
+                    Console.WriteLine("Invalid input, please try again: ");
+                }
 
                 switch (choice)
                 {
@@ -96,8 +105,11 @@ namespace BasicLibrary
                 Console.WriteLine("\n3. Return book");
                 Console.WriteLine("\n0. Exit");
 
-                int choice = int.Parse(Console.ReadLine());
-
+                int choice;
+                while (!int.TryParse(Console.ReadLine(), out choice))
+                {
+                    Console.WriteLine("Invalid input, please try again: ");
+                }
                 switch (choice)
                 {
                     case 1:
@@ -109,7 +121,7 @@ namespace BasicLibrary
                         break;
 
                     case 3:
-                        //ReturnBook();
+                        ReturnBook();
                         break;
 
                     case 0:
@@ -126,20 +138,35 @@ namespace BasicLibrary
             } while (ExitFlag != true);
         }
 
-        static void AddnNewBook() 
+        static void AddnNewBook()
         { 
             Console.WriteLine("Enter Book Name");
-            string name = Console.ReadLine();   
+            string name;
+            while (string.IsNullOrEmpty(name = Console.ReadLine()))
+            {
+                Console.WriteLine("Invalid Input, please try again: ");
+            }
 
             Console.WriteLine($"Enter Author Name of \"{name}\": ");
-            string author= Console.ReadLine();  
+            string author;
+            while (string.IsNullOrEmpty(author = Console.ReadLine()))
+            {
+                Console.WriteLine("Invalid Input, please try again: ");
+            }
 
             Console.WriteLine($"Enter ID of \"{name}\": ");
-            int ID = int.Parse(Console.ReadLine());
+            int ID;
+            while ((!int.TryParse(Console.ReadLine(), out ID)) || (ID < 0))
+            {
+                Console.WriteLine("Invalid input, please try again:");
+            }
 
             Console.WriteLine($"Enter available quantity of \"{name}\": ");
-            int Qty = int.Parse(Console.ReadLine());
-
+            int Qty;
+            while ((!int.TryParse(Console.ReadLine(), out Qty)) || (Qty < 1))
+            {
+                Console.WriteLine("Invalid input, please try again:");
+            }
             Books.Add(( name, author, ID,  Qty));
             Console.WriteLine($"Book \"{name}\" Added Succefully");
 
@@ -171,7 +198,11 @@ namespace BasicLibrary
         static void SearchForBook(bool AdmnOrUsr)
         {
             Console.WriteLine("Enter the book or author name to search");
-            string name = Console.ReadLine();  
+            string name;
+            while (string.IsNullOrEmpty(name = Console.ReadLine()))
+            {
+                Console.WriteLine("Invalid Input, please try again: ");
+            }
             bool flag=false;
             bool AuthBooks = false;
             int BookIndex = -1;
@@ -202,7 +233,11 @@ namespace BasicLibrary
             {
                 Console.WriteLine("Choose a book to borrow:");
                 Console.WriteLine(sb.ToString());
-                int BookChoice = int.Parse(Console.ReadLine());
+                int BookChoice;
+                while((!int.TryParse(Console.ReadLine(), out BookChoice))||(BookChoice < 1) ||(BookChoice > BookIds.Count))
+                {
+                    Console.WriteLine("Invalid input, please try again:");
+                }
                 for (int i = 0; i<BookIds.Count;i++)
                 {
                     if((BookChoice - 1) == BookIds[i])
@@ -230,7 +265,11 @@ namespace BasicLibrary
                 else
                 {
                     Console.WriteLine("Borrow book? (1)Yes / (2)No:");
-                    int BorrowConf = int.Parse(Console.ReadLine());
+                    int BorrowConf;
+                    while((!int.TryParse(Console.ReadLine(), out BorrowConf))||(BorrowConf>2) ||(BorrowConf<1))
+                    {
+                        Console.WriteLine("Invalid input, please try again:");
+                    }
                     if (BorrowConf != 1)
                     {
                         Console.WriteLine("Returning to menu...");
@@ -255,7 +294,11 @@ namespace BasicLibrary
                         "\n2. Browse available books." +
                         "\n\n0. Exit");
 
-                    int Choice = int.Parse(Console.ReadLine());
+                    int Choice;
+                    while(!int.TryParse(Console.ReadLine(), out Choice))
+                    {
+                        Console.WriteLine("Invalid input, please try again: ");
+                    }
                     switch (Choice)
                     {
                         case 1:
@@ -264,7 +307,11 @@ namespace BasicLibrary
                         case 2:
                             ViewAllBooks();
                             Console.WriteLine("Enter the number from the list of book to borrow:");
-                            int BookChoice = int.Parse(Console.ReadLine());
+                            int BookChoice;
+                            while((!int.TryParse(Console.ReadLine(), out BookChoice))||(BookChoice < 1) ||(BookChoice > Books.Count))
+                            {
+                                Console.WriteLine("Invalid input, please try again:");
+                            }
                             BorrowBook(BookChoice - 1);
                             break;
                         case 0:
@@ -272,14 +319,21 @@ namespace BasicLibrary
                             Console.WriteLine("Returning to menu...");
                             ExitBorrow = true;
                             break;
+
+                        default:
+                            Console.WriteLine("Invalid input, please try again:");
+                            break;
                     }
                 }while (!ExitBorrow);
             }
             else
             {
                 Console.WriteLine("Enter the quantity to borrow:");
-                int BorrowQty = int.Parse(Console.ReadLine());
-
+                int BorrowQty;
+                while ((!int.TryParse(Console.ReadLine(), out BorrowQty)) || (BorrowQty < 1) || (BorrowQty > 5) || (BorrowQty > Books[BookIndex].Qty))
+                {
+                    Console.WriteLine("Invalid input or exceeds limit, please try again:");
+                }
                 Books[BookIndex] = (Books[BookIndex].BName, Books[BookIndex].BAuthor, Books[BookIndex].ID, (Books[BookIndex].Qty - BorrowQty));
                 Console.WriteLine($"{BorrowQty} x {Books[BookIndex].BName} borrowed successfully!");
                 SaveBooksToFile();
@@ -288,11 +342,19 @@ namespace BasicLibrary
 
         static void ReturnBook()
         {
+            int BookChoice;
             ViewAllBooks();
             Console.WriteLine("Enter the number from the list of book to return:");
-            int BookChoice = int.Parse(Console.ReadLine());
+            while ((!int.TryParse(Console.ReadLine(), out BookChoice)) || (BookChoice < 1) || (BookChoice > Books.Count))
+            {
+                Console.WriteLine("Invalid input, please try again: ");
+            }
             Console.WriteLine("Enter the quantity to return:");
-            int ReturnQty = int.Parse(Console.ReadLine());
+            int ReturnQty;
+            while ((!int.TryParse(Console.ReadLine(), out ReturnQty)) || (ReturnQty < 1) || (ReturnQty > 5))
+            {
+                Console.WriteLine("Invalid input, please try again: ");
+            }
 
             Books[BookChoice - 1] = (Books[BookChoice - 1].BName, Books[BookChoice - 1].BAuthor, Books[BookChoice - 1].ID, (Books[BookChoice - 1].Qty + ReturnQty));
             Console.WriteLine($"{ReturnQty} x {Books[BookChoice - 1].BName} returned successfully!");
