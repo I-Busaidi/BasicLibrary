@@ -82,6 +82,7 @@ namespace BasicLibrary
 
             } while (ExitFlag != true);
         }
+
         static void UserMenu()
         {
             bool ExitFlag = false;
@@ -124,6 +125,7 @@ namespace BasicLibrary
                 Console.ReadKey ();
             } while (ExitFlag != true);
         }
+
         static void AddnNewBook() 
         { 
             Console.WriteLine("Enter Book Name");
@@ -138,7 +140,7 @@ namespace BasicLibrary
             Console.WriteLine($"Enter available quantity of \"{name}\": ");
             int Qty = int.Parse(Console.ReadLine());
 
-            Books.Add(  ( name, author, ID,  Qty)  );
+            Books.Add(( name, author, ID,  Qty));
             Console.WriteLine($"Book \"{name}\" Added Succefully");
 
         }
@@ -166,7 +168,7 @@ namespace BasicLibrary
 
         static void SearchForBook()
         {
-            Console.WriteLine("Enter the book name you want");
+            Console.WriteLine("Enter the book or author name to search");
             string name = Console.ReadLine();  
             bool flag=false;
 
@@ -174,16 +176,39 @@ namespace BasicLibrary
             {
                 if (Books[i].BName == name)
                 {
-                    Console.WriteLine("Book Author is : " + Books[i].BAuthor);
+                    Console.WriteLine($"Book details:" +
+                        $"\nName: {Books[i].BName} | Author: {Books[i].BAuthor} | Qty: {Books[i].Qty}");
                     flag = true;
                     break;
                 }
+
             }
 
             if (flag != true)
             { Console.WriteLine("Book not found"); }
         }
 
+        static void BorrowBook(int BookIndex = -1)
+        {
+            if (BookIndex == -1)
+            {
+                Console.WriteLine("Choose a method:" +
+                    "\n1. Search by book / author name." +
+                    "\n2. Browse available books." +
+                    "\n\n0. Exit");
+
+                int Choice = int.Parse(Console.ReadLine());
+                switch (Choice)
+                {
+                    case 1:
+                        SearchForBook();
+                        break;
+                    case 2:
+
+                        break;
+                }
+            }
+        }
         static void LoadBooksFromFile()
         {
             try
