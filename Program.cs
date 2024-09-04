@@ -174,6 +174,7 @@ namespace BasicLibrary
             bool AuthBooks = false;
             int BookIndex = -1;
             int count = 1;
+            List<int> BookIds = new List<int>();
             StringBuilder sb = new StringBuilder();
             sb.Clear();
             for (int i = 0; i< Books.Count;i++)
@@ -191,6 +192,7 @@ namespace BasicLibrary
                     sb.AppendLine($"{count}. Book Name: {Books[i].BName} | Quantity: {Books[i].Qty}");
                     count++;
                     AuthBooks = true;
+                    BookIds.Add( BookIndex );
                 }
 
             }
@@ -198,7 +200,15 @@ namespace BasicLibrary
             {
                 Console.WriteLine("Choose a book to borrow:");
                 Console.WriteLine(sb.ToString());
-
+                int BookChoice = int.Parse(Console.ReadLine());
+                for (int i = 0; i<BookIds.Count;i++)
+                {
+                    if((BookChoice - 1) == BookIds[i])
+                    {
+                        BookIndex = BookIds[i];
+                        break;
+                    }
+                }
             }
 
             if (!flag && !AuthBooks)
