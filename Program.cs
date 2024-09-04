@@ -171,42 +171,95 @@ namespace BasicLibrary
             Console.WriteLine("Enter the book or author name to search");
             string name = Console.ReadLine();  
             bool flag=false;
-
-            for(int i = 0; i< Books.Count;i++)
+            bool AuthBooks = false;
+            int BookIndex = -1;
+            int count = 1;
+            StringBuilder sb = new StringBuilder();
+            sb.Clear();
+            for (int i = 0; i< Books.Count;i++)
             {
                 if (Books[i].BName == name)
                 {
                     Console.WriteLine($"Book details:" +
                         $"\nName: {Books[i].BName} | Author: {Books[i].BAuthor} | Qty: {Books[i].Qty}");
+                    BookIndex = i;
                     flag = true;
                     break;
                 }
+                if (Books[i].BAuthor == name)
+                {
+                    sb.AppendLine($"{count}. Book Name: {Books[i].BName} | Quantity: {Books[i].Qty}");
+                    count++;
+                    AuthBooks = true;
+                }
+
+            }
+            if (AuthBooks)
+            {
+                Console.WriteLine("Choose a book to borrow:");
+                Console.WriteLine(sb.ToString());
 
             }
 
-            if (flag != true)
-            { Console.WriteLine("Book not found"); }
+            if (!flag && !AuthBooks)
+            { 
+                Console.WriteLine("Book not found"); 
+            }
+            else
+            {
+                if (Books[BookIndex].Qty <= 0)
+                {
+                    Console.WriteLine("Sorry, book is out of stock.");
+                }
+                else
+                {
+                    Console.WriteLine("Borrow book? (1)Yes / (2)No:");
+                    int BorrowConf = int.Parse(Console.ReadLine());
+                    if (BorrowConf != 1)
+                    {
+                        Console.WriteLine("Returning to menu...");
+                    }
+                    else
+                    {
+                        BorrowBook(BookIndex);
+                    }
+                }
+            }
         }
+
 
         static void BorrowBook(int BookIndex = -1)
         {
             if (BookIndex == -1)
             {
-                Console.WriteLine("Choose a method:" +
-                    "\n1. Search by book / author name." +
-                    "\n2. Browse available books." +
-                    "\n\n0. Exit");
-
-                int Choice = int.Parse(Console.ReadLine());
-                switch (Choice)
+                bool ExitBorrow = false;
+                do
                 {
-                    case 1:
-                        SearchForBook();
-                        break;
-                    case 2:
+                    Console.WriteLine("Choose a method:" +
+                        "\n1. Search by book / author name." +
+                        "\n2. Browse available books." +
+                        "\n\n0. Exit");
 
-                        break;
-                }
+                    int Choice = int.Parse(Console.ReadLine());
+                    switch (Choice)
+                    {
+                        case 1:
+                            SearchForBook();
+                            break;
+                        case 2:
+                            //ViewAndBorrow();
+                            break;
+                        case 0:
+                            SaveBooksToFile();
+                            Console.WriteLine("Returning to menu...");
+                            ExitBorrow = true;
+                            break;
+                    }
+                }while (!ExitBorrow);
+            }
+            else
+            {
+
             }
         }
         static void LoadBooksFromFile()
