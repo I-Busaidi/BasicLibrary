@@ -6,69 +6,137 @@ namespace BasicLibrary
     {
         static List<(string BName, string BAuthor, int ID)> Books = new List<(string BName, string BAuthor, int ID)>();
         static string filePath = "C:\\Users\\Karim\\Downloads\\OutSystem_Course\\GitHubRepos\\Data\\lib.txt";
-        //checkout testing
+
         static void Main(string[] args)
-        {// downloaded form ahmed device 
-            bool ExitFlag = false;
+        {
             LoadBooksFromFile();
+            int AccessLevel;
+            bool StopApp = false;
             do
             {
-                Console.WriteLine("Welcome to Lirary");
-                Console.WriteLine("\n Enter the char of operation you need :");
-                Console.WriteLine("\n A- Add New Book");
-                Console.WriteLine("\n B- Display All Books");
-                Console.WriteLine("\n C- Search for Book by Name");
-                Console.WriteLine("\n D- Save and Exit");
+                Console.Clear();
+                Console.WriteLine("Enter (1) for admin access | (2) for user access | (0) to Exit:");
+                AccessLevel = int.Parse(Console.ReadLine());
 
-                string choice = Console.ReadLine();
+                switch (AccessLevel)
+                {
+                    case 1:
+                        AdminMenu();
+                        break;
+
+                    case 2:
+                        UserMenu();
+                        break;
+
+                    case 0:
+                        StopApp = true;
+                        break;
+                }
+            } while (!StopApp);
+        }
+
+        static void AdminMenu()
+        {
+            bool ExitFlag = false;
+            do
+            {
+                Console.Clear();
+                Console.WriteLine("Welcome!\nAdmin Authorized:");
+                Console.WriteLine("\nEnter the number of the operation to perform:");
+                Console.WriteLine("\n1. Add New Book");
+                Console.WriteLine("\n2. Display All Books");
+                Console.WriteLine("\n3. Search for Book");
+                Console.WriteLine("\n\n0. Exit");
+
+                int choice = int.Parse(Console.ReadLine());
 
                 switch (choice)
                 {
-                    case "A":
+                    case 1:
                         AddnNewBook();
                         break;
 
-                    case "B":
+                    case 2:
                         ViewAllBooks();
                         break;
 
-                    case "C":
+                    case 3:
                         SearchForBook();
                         break;
 
-                    case "D":
+                    case 0:
                         SaveBooksToFile();
                         ExitFlag = true;
                         break;
 
                     default:
-                        Console.WriteLine("Sorry your choice was wrong");
+                        Console.WriteLine("Invalid choice, please try again.");
                         break;
 
 
 
                 }
 
-                Console.WriteLine("press any key to continue");
-                string cont = Console.ReadLine();
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
 
+            } while (ExitFlag != true);
+        }
+        static void UserMenu()
+        {
+            bool ExitFlag = false;
+            do
+            {
                 Console.Clear();
+                Console.WriteLine("Welcome to the Lirary!");
+                Console.WriteLine("\nEnter the number of the service required:");
+                Console.WriteLine("\n1. Search book");
+                Console.WriteLine("\n2. Borrow book");
+                Console.WriteLine("\n3. Return book");
+                Console.WriteLine("\n0. Exit");
 
+                int choice = int.Parse(Console.ReadLine());
+
+                switch (choice)
+                {
+                    case 1:
+                        SearchForBook();
+                        break;
+
+                    case 2:
+                        //BorrowBook();
+                        break;
+
+                    case 3:
+                        //ReturnBook();
+                        break;
+
+                    case 0:
+                        SaveBooksToFile();
+                        ExitFlag = true;
+                        break;
+
+                    default:
+                        Console.WriteLine("Invalid choice, please try again...");
+                        break;
+                }
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey ();
             } while (ExitFlag != true);
         }
         static void AddnNewBook() 
         { 
-                 Console.WriteLine("Enter Book Name");
-                 string name = Console.ReadLine();   
+            Console.WriteLine("Enter Book Name");
+            string name = Console.ReadLine();   
 
-                 Console.WriteLine("Enter Book Author");
-                 string author= Console.ReadLine();  
+            Console.WriteLine("Enter Book Author");
+            string author= Console.ReadLine();  
 
-                 Console.WriteLine("Enter Book ID");
-                 int ID = int.Parse(Console.ReadLine());
+            Console.WriteLine("Enter Book ID");
+            int ID = int.Parse(Console.ReadLine());
 
-                  Books.Add(  ( name, author, ID )  );
-                  Console.WriteLine("Book Added Succefully");
+            Books.Add(  ( name, author, ID )  );
+            Console.WriteLine("Book Added Succefully");
 
         }
 
