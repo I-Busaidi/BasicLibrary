@@ -5,17 +5,28 @@ namespace BasicLibrary
 {
     internal class Program
     {
+
+
+        //GLOBAL VARIABLES.
         static int CurrentUser = -1;
         static List<(int UserID, string UserEmail, string UserPass)> Users = new List<(int UserID, string UserEmail, string UserPass)>();
         static List<(string AdminEmail, string AdminPass)> Admins = new List<(string AdminEmail, string AdminPass)>() ;
         static List<(string BName, string BAuthor, int ID, int Qty)> Books = new List<(string BName, string BAuthor, int ID, int Qty)>();
+
+
+        //FILE PATHS.
         static string filePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryBooks.txt";
         static string adminsPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryAdmins.txt";
         static string UsersPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryUsers.txt";
 
+
+
+        //MAIN FUNCTION.
         static void Main(string[] args)
         {
-            Admins.Add(("Admin@BusaidiStore.com", "admin")); //Saving Master admin infor temporarily.
+            Admins.Add(("AdminMaster@BusaidiLib.com", "admin")); //Saving Master admin info temporarily for testing.
+            LoadAdminsFromFile();
+            LoadUsersFromFile();
             LoadBooksFromFile();
             int AccessLevel;
             bool StopApp = false;
@@ -31,34 +42,7 @@ namespace BasicLibrary
                 switch (AccessLevel)
                 {
                     case 1:
-                        string AdminID;
-                        string AdminPass;
-                        bool AdminFlag = false;
-                        Console.WriteLine("Enter Admin ID:");
-                        while (string.IsNullOrEmpty(AdminID = Console.ReadLine()))
-                        {
-                            Console.WriteLine("Invalid input, please try again:");
-                        }
-                        Console.WriteLine("Enter Admin Password:");
-                        while (string.IsNullOrEmpty(AdminPass = Console.ReadLine()))
-                        {
-                            Console.WriteLine("Invalid input, please try again:");
-                        }
-                        for (int i = 0; i < Admins.Count; i++)
-                        {
-                            if ((Admins[i].AdminEmail == AdminID) && (Admins[i].AdminPass == AdminPass))
-                            {
-                                AdminFlag = true;
-                            }
-                        }
-                        if(AdminFlag)
-                        {
-                            AdminMenu(AdminID, AdminPass);
-                        }
-                        else
-                        {
-                            Console.WriteLine("Invalid Admin Email or Password, please try again.");
-                        }
+                        AuthorityCheck();
                         break;
 
                     case 2:
@@ -72,6 +56,52 @@ namespace BasicLibrary
             } while (!StopApp);
         }
 
+
+
+        //ADMINS RELATED FUNCTIONS.
+        static void AuthorityCheck()
+        {
+            string AdminID;
+            string AdminPass;
+            bool AdminFlag = false;
+            bool MasterAdminFlag = false;
+            Console.WriteLine("Enter Admin ID:");
+            while (string.IsNullOrEmpty(AdminID = Console.ReadLine()))
+            {
+                Console.WriteLine("Invalid input, please try again:");
+            }
+            Console.WriteLine("Enter Admin Password:");
+            while (string.IsNullOrEmpty(AdminPass = Console.ReadLine()))
+            {
+                Console.WriteLine("Invalid input, please try again:");
+            }
+            for (int i = 0; i < Admins.Count; i++)
+            {
+                if ((Admins[i].AdminEmail == AdminID) && (Admins[i].AdminPass == AdminPass))
+                {
+                    AdminFlag = true;
+                }
+                if (AdminFlag)
+                {
+                    if (Admins[i].AdminEmail == "AdminMaster@BusaidiLib.com")
+                    {
+                        MasterAdminFlag = true;
+                    }
+                }
+            }
+            if (AdminFlag && !MasterAdminFlag)
+            {
+                AdminMenu();
+            }
+            else if (AdminFlag && MasterAdminFlag)
+            {
+                MasterAdmin();
+            }
+            else
+            {
+                Console.WriteLine("Invalid Admin Email or Password, please try again.");
+            }
+        }
         static void MasterAdmin()
         {
             bool ExitFlag = false;
@@ -117,10 +147,12 @@ namespace BasicLibrary
                         break;
 
                     case 6:
-                        //ManageUsers();
+                        ManageUsers();
                         break;
 
                     case 0:
+                        SaveAdminsToFile();
+                        SaveUsersToFile();
                         SaveBooksToFile();
                         ExitFlag = true;
                         break;
@@ -134,7 +166,6 @@ namespace BasicLibrary
 
             } while (ExitFlag != true);
         }
-
         static void ManageAdmins()
         {
             bool ExitFlag = false;
@@ -163,7 +194,6 @@ namespace BasicLibrary
                 }
             } while (!ExitFlag);
         }
-
         static void AddNewAdmin()
         {
             Console.WriteLine("Enter new Admin Email:");
@@ -181,7 +211,6 @@ namespace BasicLibrary
             Admins.Add((NewAdminEmail, NewAdminPass));
             Console.WriteLine($"Admin {NewAdminEmail} added successfully.");
         }
-
         static void EditAdmin()
         {
             bool ExitFlag = false;
@@ -249,7 +278,6 @@ namespace BasicLibrary
                 }
             } while (!ExitFlag);
         }
-
         static void ViewAllAdmins()
         {
             StringBuilder sb = new StringBuilder();
@@ -268,13 +296,106 @@ namespace BasicLibrary
 
             }
         }
+        static void AdminMenu()
+        {
+            bool ExitFlag = false;
+            do
+            {
+                Console.Clear();
+                Console.WriteLine("Welcome!\nAdmin Authorized:");
+                Console.WriteLine("\nEnter the number of the operation to perform:");
+                Console.WriteLine("\n1. Add New Book.");
+                Console.WriteLine("\n2. Display All Books.");
+                Console.WriteLine("\n3. Search for Book.");
+                Console.WriteLine("\n4. Edit Book Info.");
+                Console.WriteLine("\n\n0. Save & Exit.");
+
+                int choice;
+                while (!int.TryParse(Console.ReadLine(), out choice))
+                {
+                    Console.WriteLine("Invalid input, please try again: ");
+                }
+
+                switch (choice)
+                {
+                    case 1:
+                        AddnNewBook();
+                        break;
+
+                    case 2:
+                        ViewAllBooks();
+                        break;
+
+                    case 3:
+                        SearchForBook(false);
+                        break;
+
+                    case 4:
+                        EditBook();
+                        break;
+
+                    case 0:
+                        SaveBooksToFile();
+                        ExitFlag = true;
+                        break;
+
+                    default:
+                        Console.WriteLine("Invalid choice, please try again.");
+                        break;
+                }
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
+
+            } while (ExitFlag != true);
+        }
+        static void SaveAdminsToFile()
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(adminsPath))
+                {
+                    foreach (var admin in Admins)
+                    {
+                        writer.WriteLine($"{admin.AdminEmail}|{admin.AdminPass}");
+                    }
+                }
+                Console.WriteLine("Admins info saved to file successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving to file: {ex.Message}");
+            }
+        }
+        static void LoadAdminsFromFile()
+        {
+            try
+            {
+                if (File.Exists(adminsPath))
+                {
+                    using (StreamReader reader = new StreamReader(adminsPath))
+                    {
+                        string line;
+                        while ((line = reader.ReadLine()) != null)
+                        {
+                            var parts = line.Split('|');
+                            if (parts.Length == 2)
+                            {
+                                Admins.Add((parts[0], parts[1]));
+                            }
+                        }
+                    }
+                    Console.WriteLine("Admins loaded from file successfully.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading from file: {ex.Message}");
+            }
+        }
 
 
 
-
-
-
-
+        //USERS RELATED FUNCTIONS.
         static void ManageUsers()
         {
             bool ExitFlag = false;
@@ -303,7 +424,6 @@ namespace BasicLibrary
                 }
             } while (!ExitFlag);
         }
-
         static void AddNewUser()
         {
             Console.WriteLine("Enter new User Email:");
@@ -327,7 +447,6 @@ namespace BasicLibrary
             Users.Add((NewUserID, NewUserEmail, NewAdminPass));
             Console.WriteLine($"User {NewUserID} added successfully.");
         }
-
         static void EditUser()
         {
             bool ExitFlag = false;
@@ -394,7 +513,6 @@ namespace BasicLibrary
                 }
             } while (!ExitFlag);
         }
-
         static void ViewAllUsers()
         {
             StringBuilder sb = new StringBuilder();
@@ -415,70 +533,55 @@ namespace BasicLibrary
 
             }
         }
-
-
-
-
-
-
-
-
-
-        static void AdminMenu(string AdminID, string AdminPass)
+        static bool UserLogin()
         {
-            bool ExitFlag = false;
+            string UsrEmail;
+            string UsrPass;
+            Console.WriteLine("Enter user Email:");
+            while (string.IsNullOrEmpty(UsrEmail = Console.ReadLine()))
+            {
+                Console.WriteLine("Invalid input, please try again:");
+            }
+            Console.WriteLine("Enter user Password:");
+            while (string.IsNullOrEmpty(UsrPass = Console.ReadLine()))
+            {
+                Console.WriteLine("Invalid input, please try again:");
+            }
+            for (int i = 0; i < Users.Count; i++)
+            {
+                if ((Users[i].UserEmail == UsrEmail) && (Users[i].UserPass == UsrPass))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        static void UserMenu()
+        {
+            bool RegisterUser = false;
             do
             {
                 Console.Clear();
-                Console.WriteLine("Welcome!\nAdmin Authorized:");
-                Console.WriteLine("\nEnter the number of the operation to perform:");
-                Console.WriteLine("\n1. Add New Book.");
-                Console.WriteLine("\n2. Display All Books.");
-                Console.WriteLine("\n3. Search for Book.");
-                Console.WriteLine("\n4. Edit Book Info.");
-                Console.WriteLine("\n\n0. Save & Exit.");
-
-                int choice;
-                while (!int.TryParse(Console.ReadLine(), out choice))
+                Console.WriteLine("Welcome to Busaidi Library!\n\nEnter (1) to login | (2) to sign up | (0) to Exit");
+                int LoginSignUp;
+                while((!int.TryParse(Console.ReadLine(), out LoginSignUp))||(LoginSignUp > 2) ||(LoginSignUp < 0))
                 {
-                    Console.WriteLine("Invalid input, please try again: ");
+                    Console.WriteLine("Invalid input, please try again:");
                 }
-
-                switch (choice)
+                if (LoginSignUp == 1)
                 {
-                    case 1:
-                        AddnNewBook();
-                        break;
-
-                    case 2:
-                        ViewAllBooks();
-                        break;
-
-                    case 3:
-                        SearchForBook(false);
-                        break;
-
-                    case 4:
-                        EditBook();
-                        break;
-
-                    case 0:
-                        SaveBooksToFile();
-                        ExitFlag = true;
-                        break;
-
-                    default:
-                        Console.WriteLine("Invalid choice, please try again.");
-                        break;
+                    RegisterUser = UserLogin();
                 }
-                Console.WriteLine("Press any key to continue...");
-                Console.ReadKey();
-
-            } while (ExitFlag != true);
-        }
-
-        static void UserMenu()
-        {
+                else if (LoginSignUp == 2)
+                {
+                    AddNewUser();
+                }
+                else
+                {
+                    return;
+                }
+                
+            } while (!RegisterUser);
             bool ExitFlag = false;
             do
             {
@@ -520,10 +623,57 @@ namespace BasicLibrary
                         break;
                 }
                 Console.WriteLine("Press any key to continue...");
-                Console.ReadKey ();
+                Console.ReadKey();
             } while (ExitFlag != true);
         }
+        static void SaveUsersToFile()
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(UsersPath))
+                {
+                    foreach (var user in Users)
+                    {
+                        writer.WriteLine($"{user.UserID}|{user.UserEmail}|{user.UserPass}");
+                    }
+                }
+                Console.WriteLine("Users info saved to file successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving to file: {ex.Message}");
+            }
+        }
+        static void LoadUsersFromFile()
+        {
+            try
+            {
+                if (File.Exists(UsersPath))
+                {
+                    using (StreamReader reader = new StreamReader(UsersPath))
+                    {
+                        string line;
+                        while ((line = reader.ReadLine()) != null)
+                        {
+                            var parts = line.Split('|');
+                            if (parts.Length == 3)
+                            {
+                                Users.Add((int.Parse(parts[0]), parts[1], parts[3]));
+                            }
+                        }
+                    }
+                    Console.WriteLine("Admins loaded from file successfully.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading from file: {ex.Message}");
+            }
+        }
 
+
+
+        //BOOKS RELATED FUNCTIONS.
         static void AddnNewBook()
         { 
             Console.WriteLine("Enter Book Name");
@@ -557,7 +707,6 @@ namespace BasicLibrary
             Console.WriteLine($"Book \"{name}\" Added Succefully");
 
         }
-
         static void ViewAllBooks()
         {
             StringBuilder sb = new StringBuilder();
@@ -580,7 +729,6 @@ namespace BasicLibrary
 
             }
         }
-
         static void SearchForBook(bool AdmnOrUsr)
         {
             Console.WriteLine("Enter the book or author name to search");
@@ -667,7 +815,6 @@ namespace BasicLibrary
                 }
             }
         }
-
         static void BorrowBook(int BookIndex = -1)
         {
             if (BookIndex == -1)
@@ -727,7 +874,6 @@ namespace BasicLibrary
                 SaveBooksToFile();
             }
         }
-
         static void ReturnBook()
         {
             int BookChoice;
@@ -748,7 +894,6 @@ namespace BasicLibrary
             Console.WriteLine($"{ReturnQty} x {Books[BookChoice - 1].BName} returned successfully!");
             SaveBooksToFile();
         }
-
         static void LoadBooksFromFile()
         {
             try
@@ -775,7 +920,6 @@ namespace BasicLibrary
                 Console.WriteLine($"Error loading from file: {ex.Message}");
             }
         }
-
         static void SaveBooksToFile()
         {
             try
@@ -794,99 +938,6 @@ namespace BasicLibrary
                 Console.WriteLine($"Error saving to file: {ex.Message}");
             }
         }
-
-        static void SaveAdminsToFile()
-        {
-            try
-            {
-                using (StreamWriter writer = new StreamWriter(adminsPath))
-                {
-                    foreach (var admin in Admins)
-                    {
-                        writer.WriteLine($"{admin.AdminEmail}|{admin.AdminPass}");
-                    }
-                }
-                Console.WriteLine("Admins info saved to file successfully.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error saving to file: {ex.Message}");
-            }
-        }
-
-        static void LoadAdminsFromFile()
-        {
-            try
-            {
-                if (File.Exists(adminsPath))
-                {
-                    using (StreamReader reader = new StreamReader(adminsPath))
-                    {
-                        string line;
-                        while ((line = reader.ReadLine()) != null)
-                        {
-                            var parts = line.Split('|');
-                            if (parts.Length == 2)
-                            {
-                                Admins.Add((parts[0], parts[1]));
-                            }
-                        }
-                    }
-                    Console.WriteLine("Admins loaded from file successfully.");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error loading from file: {ex.Message}");
-            }
-        }
-
-        static void SaveUsersToFile()
-        {
-            try
-            {
-                using (StreamWriter writer = new StreamWriter(UsersPath))
-                {
-                    foreach (var user in Users)
-                    {
-                        writer.WriteLine($"{user.UserID}|{user.UserEmail}|{user.UserPass}");
-                    }
-                }
-                Console.WriteLine("Users info saved to file successfully.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error saving to file: {ex.Message}");
-            }
-        }
-
-        static void LoadUsersFromFile()
-        {
-            try
-            {
-                if (File.Exists(UsersPath))
-                {
-                    using (StreamReader reader = new StreamReader(UsersPath))
-                    {
-                        string line;
-                        while ((line = reader.ReadLine()) != null)
-                        {
-                            var parts = line.Split('|');
-                            if (parts.Length == 3)
-                            {
-                                Users.Add((int.Parse(parts[0]), parts[1], parts[3]));
-                            }
-                        }
-                    }
-                    Console.WriteLine("Admins loaded from file successfully.");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error loading from file: {ex.Message}");
-            }
-        }
-
         static void EditBook()
         {
             bool ExitFlag = false;
