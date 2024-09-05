@@ -10,9 +10,12 @@ namespace BasicLibrary
         static List<(string AdminEmail, string AdminPass)> Admins = new List<(string AdminEmail, string AdminPass)>() ;
         static List<(string BName, string BAuthor, int ID, int Qty)> Books = new List<(string BName, string BAuthor, int ID, int Qty)>();
         static string filePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryBooks.txt";
+        static string adminsPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryAdmins.txt";
+        static string UsersPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryUsers.txt";
 
         static void Main(string[] args)
         {
+            Admins.Add(("Admin@BusaidiStore.com", "admin"));
             LoadBooksFromFile();
             int AccessLevel;
             bool StopApp = false;
@@ -412,5 +415,96 @@ namespace BasicLibrary
             }
         }
 
+        static void SaveAdminsToFile()
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(adminsPath))
+                {
+                    foreach (var admin in Admins)
+                    {
+                        writer.WriteLine($"{admin.AdminEmail}|{admin.AdminPass}");
+                    }
+                }
+                Console.WriteLine("Admins info saved to file successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving to file: {ex.Message}");
+            }
+        }
+
+        static void LoadAdminsFromFile()
+        {
+            try
+            {
+                if (File.Exists(adminsPath))
+                {
+                    using (StreamReader reader = new StreamReader(adminsPath))
+                    {
+                        string line;
+                        while ((line = reader.ReadLine()) != null)
+                        {
+                            var parts = line.Split('|');
+                            if (parts.Length == 2)
+                            {
+                                Admins.Add((parts[0], parts[1]));
+                            }
+                        }
+                    }
+                    Console.WriteLine("Admins loaded from file successfully.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading from file: {ex.Message}");
+            }
+        }
+
+        static void SaveUsersToFile()
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(UsersPath))
+                {
+                    foreach (var user in Users)
+                    {
+                        writer.WriteLine($"{user.UserID}|{user.UserEmail}|{user.UserPass}");
+                    }
+                }
+                Console.WriteLine("Users info saved to file successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving to file: {ex.Message}");
+            }
+        }
+
+        static void LoadUsersFromFile()
+        {
+            try
+            {
+                if (File.Exists(UsersPath))
+                {
+                    using (StreamReader reader = new StreamReader(UsersPath))
+                    {
+                        string line;
+                        while ((line = reader.ReadLine()) != null)
+                        {
+                            var parts = line.Split('|');
+                            if (parts.Length == 3)
+                            {
+                                Users.Add((int.Parse(parts[0]), parts[1], parts[3]));
+                            }
+                        }
+                    }
+                    Console.WriteLine("Admins loaded from file successfully.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading from file: {ex.Message}");
+            }
+        }
     }
 }
