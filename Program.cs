@@ -5,6 +5,9 @@ namespace BasicLibrary
 {
     internal class Program
     {
+        static int CurrentUser = -1;
+        static List<(int UserID, string UserEmail, string UserPass)> Users = new List<(int UserID, string UserEmail, string UserPass)>();
+        static List<(string AdminEmail, string AdminPass)> Admins = new List<(string AdminEmail, string AdminPass)>() ;
         static List<(string BName, string BAuthor, int ID, int Qty)> Books = new List<(string BName, string BAuthor, int ID, int Qty)>();
         static string filePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryBooks.txt";
 
