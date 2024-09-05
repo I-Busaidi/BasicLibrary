@@ -140,7 +140,7 @@ namespace BasicLibrary
             bool ExitFlag = false;
             do
             {
-                Console.WriteLine("\nChoose an option:\n1. Register new admin.\n2. Edit existing admin.\n3. Remove an admin.\n\n0. Save & Exit.");
+                Console.WriteLine("\nChoose an option:\n1. Register new admin.\n2. Edit existing admin.\n\n0. Save & Exit.");
                 int Choice;
                 while ((!int.TryParse(Console.ReadLine(), out Choice))||(Choice > 3)||(Choice < 0))
                 {
@@ -153,12 +153,9 @@ namespace BasicLibrary
                         break;
 
                     case 2:
-                        //EditAdmin();
+                        EditAdmin();
                         break;
 
-                    case 3:
-                        //RemoveAdmin();
-                        break;
 
                     case 0:
                         ExitFlag = true;
@@ -183,6 +180,93 @@ namespace BasicLibrary
             }
             Admins.Add((NewAdminEmail, NewAdminPass));
             Console.WriteLine($"Admin {NewAdminEmail} added successfully.");
+        }
+
+        static void EditAdmin()
+        {
+            bool ExitFlag = false;
+            do
+            {
+                Console.Clear();
+                ViewAllAdmins();
+                Console.WriteLine("\n0. Exit");
+                Console.WriteLine("\nChoose an admin to edit:");
+                int ChosenAdmin;
+                while ((!int.TryParse(Console.ReadLine(), out ChosenAdmin)) || (ChosenAdmin > Admins.Count) || (ChosenAdmin < 0))
+                {
+                    Console.WriteLine("\nInvalid input, please try again:");
+                }
+                if (ChosenAdmin == 0)
+                {
+                    return;
+                }
+                Console.WriteLine("\nChoose an editing option:\n1. Edit Admin Email.\n2. Edit Admin Password.\n3. Remove Admin.\n\n0. Exit.");
+                int EditChoice;
+                while ((!int.TryParse(Console.ReadLine(), out EditChoice)) || (EditChoice > 3) || (EditChoice < 0))
+                {
+                    Console.WriteLine("\nInvalid option, please try again.");
+                }
+
+                switch (EditChoice)
+                {
+                    case 0:
+                        ExitFlag = true;
+                        break;
+
+                    case 1:
+                        Console.WriteLine($"\nEnter the new Email for {Admins[ChosenAdmin - 1].AdminEmail}: ");
+                        string NewEmail;
+                        while (string.IsNullOrEmpty(NewEmail = Console.ReadLine()))
+                        {
+                            Console.WriteLine("Invalid input, please try again:");
+                        }
+                        string OldEmail = Admins[ChosenAdmin - 1].AdminEmail;
+                        Admins[ChosenAdmin - 1] = (NewEmail, Admins[ChosenAdmin - 1].AdminPass);
+                        Console.WriteLine($"Admin \"{OldEmail}\" Email changed to: {NewEmail}.");
+                        break;
+
+                    case 2:
+                        Console.WriteLine($"\nEnter the new Password for {Admins[ChosenAdmin - 1].AdminEmail}: ");
+                        string NewPass;
+                        while (string.IsNullOrEmpty(NewPass = Console.ReadLine()))
+                        {
+                            Console.WriteLine("Invalid input, please try again:");
+                        }
+                        string OldPass = Admins[ChosenAdmin - 1].AdminPass;
+                        Admins[ChosenAdmin - 1] = (Admins[ChosenAdmin - 1].AdminEmail, NewPass);
+                        Console.WriteLine($"\"{Admins[ChosenAdmin - 1].AdminEmail}\" Password changed from: {OldPass} to: {NewPass}.");
+                        break;
+
+                    case 3:
+                        string RemovedAdmin = Admins[ChosenAdmin - 1].AdminEmail;
+                        Admins.RemoveAt(ChosenAdmin - 1);
+                        Console.WriteLine($"Admin \"{RemovedAdmin}\" has been removed from the Admins File.");
+                        break;
+
+                    default:
+                        Console.WriteLine("Invalid input, please try again.");
+                        break;
+                }
+            } while (!ExitFlag);
+        }
+
+        static void ViewAllAdmins()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            int AdmnNumber = 0;
+
+            for (int i = 0; i < Admins.Count; i++)
+            {
+                AdmnNumber = i + 1;
+                sb.Append("Admin ").Append(AdmnNumber).Append(" Email: ").Append(Admins[i].AdminEmail);
+                sb.AppendLine();
+                sb.Append(" Password: ").Append(Admins[i].AdminPass);
+                sb.AppendLine().AppendLine();
+                Console.WriteLine(sb.ToString());
+                sb.Clear();
+
+            }
         }
 
         static void AdminMenu(string AdminID, string AdminPass)
@@ -666,9 +750,9 @@ namespace BasicLibrary
                 {
                     return;
                 }
-                Console.WriteLine("\nChoose an editing option:\n1. Edit Book Name.\n2. Edit Book Author.\n3. Add quantity.\n4. Remove Book.");
+                Console.WriteLine("\nChoose an editing option:\n1. Edit Book Name.\n2. Edit Book Author.\n3. Add quantity.\n4. Remove Book.\n\n0. Exit.");
                 int EditChoice;
-                while ((!int.TryParse(Console.ReadLine(), out EditChoice)) || (EditChoice > 4) || (EditChoice < 1))
+                while ((!int.TryParse(Console.ReadLine(), out EditChoice)) || (EditChoice > 4) || (EditChoice < 0))
                 {
                     Console.WriteLine("\nInvalid option, please try again.");
                 }
