@@ -269,6 +269,161 @@ namespace BasicLibrary
             }
         }
 
+
+
+
+
+
+
+        static void ManageUsers()
+        {
+            bool ExitFlag = false;
+            do
+            {
+                Console.WriteLine("\nChoose an option:\n1. Register new User.\n2. Edit existing User.\n\n0. Save & Exit.");
+                int Choice;
+                while ((!int.TryParse(Console.ReadLine(), out Choice)) || (Choice > 3) || (Choice < 0))
+                {
+                    Console.WriteLine("Invalid input, please try again:");
+                }
+                switch (Choice)
+                {
+                    case 1:
+                        AddNewUser();
+                        break;
+
+                    case 2:
+                        EditUser();
+                        break;
+
+
+                    case 0:
+                        ExitFlag = true;
+                        break;
+                }
+            } while (!ExitFlag);
+        }
+
+        static void AddNewUser()
+        {
+            Console.WriteLine("Enter new User Email:");
+            int NewUserID;
+            while ((!int.TryParse(Console.ReadLine(), out NewUserID))||(NewUserID < 0))
+            {
+                Console.WriteLine("Invalid ID, please try again:");
+            }
+            Console.WriteLine($"Enter User Email for User {NewUserID}:");
+            string NewUserEmail;
+            while (string.IsNullOrEmpty(NewUserEmail = Console.ReadLine()))
+            {
+                Console.WriteLine("Invalid Email, please try again:");
+            }
+            Console.WriteLine($"Enter the password for {NewUserID}:");
+            string NewAdminPass;
+            while (string.IsNullOrEmpty(NewAdminPass = Console.ReadLine()))
+            {
+                Console.WriteLine("Invalid Password, please try again:");
+            }
+            Users.Add((NewUserID, NewUserEmail, NewAdminPass));
+            Console.WriteLine($"User {NewUserID} added successfully.");
+        }
+
+        static void EditUser()
+        {
+            bool ExitFlag = false;
+            do
+            {
+                Console.Clear();
+                ViewAllUsers();
+                Console.WriteLine("\n0. Exit");
+                Console.WriteLine("\nChoose a user to edit:");
+                int ChosenUser;
+                while ((!int.TryParse(Console.ReadLine(), out ChosenUser)) || (ChosenUser > Users.Count) || (ChosenUser < 0))
+                {
+                    Console.WriteLine("\nInvalid input, please try again:");
+                }
+                if (ChosenUser == 0)
+                {
+                    return;
+                }
+                Console.WriteLine("\nChoose an editing option:\n1. Edit User Email.\n2. Edit User Password.\n3. Remove User.\n\n0. Exit.");
+                int EditChoice;
+                while ((!int.TryParse(Console.ReadLine(), out EditChoice)) || (EditChoice > 3) || (EditChoice < 0))
+                {
+                    Console.WriteLine("\nInvalid option, please try again.");
+                }
+
+                switch (EditChoice)
+                {
+                    case 0:
+                        ExitFlag = true;
+                        break;
+
+                    case 1:
+                        Console.WriteLine($"\nEnter the new Email for user {Users[ChosenUser - 1].UserID}: ");
+                        string NewEmail;
+                        while (string.IsNullOrEmpty(NewEmail = Console.ReadLine()))
+                        {
+                            Console.WriteLine("Invalid input, please try again:");
+                        }
+                        Users[ChosenUser - 1] = (Users[ChosenUser-1].UserID, NewEmail, Users[ChosenUser - 1].UserPass);
+                        Console.WriteLine($"User \"{Users[ChosenUser - 1].UserID}\" Email changed to: {NewEmail}.");
+                        break;
+
+                    case 2:
+                        Console.WriteLine($"\nEnter the new Password for user {Users[ChosenUser - 1].UserID}: ");
+                        string NewPass;
+                        while (string.IsNullOrEmpty(NewPass = Console.ReadLine()))
+                        {
+                            Console.WriteLine("Invalid input, please try again:");
+                        }
+                        string OldPass = Users[ChosenUser - 1].UserPass;
+                        Users[ChosenUser - 1] = (Users[ChosenUser - 1].UserID, Users[ChosenUser - 1].UserEmail, NewPass);
+                        Console.WriteLine($"\"{Users[ChosenUser - 1].UserID}\" Password changed from: {OldPass} to: {NewPass}.");
+                        break;
+
+                    case 3:
+                        int RemovedUser = Users[ChosenUser - 1].UserID;
+                        Users.RemoveAt(ChosenUser - 1);
+                        Console.WriteLine($"User \"{RemovedUser}\" has been removed from the Users File.");
+                        break;
+
+                    default:
+                        Console.WriteLine("Invalid input, please try again.");
+                        break;
+                }
+            } while (!ExitFlag);
+        }
+
+        static void ViewAllUsers()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            int UserNumber = 0;
+
+            for (int i = 0; i < Users.Count; i++)
+            {
+                UserNumber = i + 1;
+                sb.Append("User ").Append(UserNumber).Append(" Email: ").Append(Users[i].UserEmail);
+                sb.AppendLine();
+                sb.Append(" Password: ").Append(Users[i].UserPass);
+                sb.AppendLine();
+                sb.Append(" ID: ").Append(Users[i].UserID);
+                sb.AppendLine().AppendLine();
+                Console.WriteLine(sb.ToString());
+                sb.Clear();
+
+            }
+        }
+
+
+
+
+
+
+
+
+
         static void AdminMenu(string AdminID, string AdminPass)
         {
             bool ExitFlag = false;
