@@ -15,7 +15,7 @@ namespace BasicLibrary
 
         static void Main(string[] args)
         {
-            Admins.Add(("Admin@BusaidiStore.com", "admin"));
+            Admins.Add(("Admin@BusaidiStore.com", "admin")); //Saving Master admin infor temporarily.
             LoadBooksFromFile();
             int AccessLevel;
             bool StopApp = false;
@@ -31,7 +31,34 @@ namespace BasicLibrary
                 switch (AccessLevel)
                 {
                     case 1:
-                        AdminMenu();
+                        string AdminID;
+                        string AdminPass;
+                        bool AdminFlag = false;
+                        Console.WriteLine("Enter Admin ID:");
+                        while (string.IsNullOrEmpty(AdminID = Console.ReadLine()))
+                        {
+                            Console.WriteLine("Invalid input, please try again:");
+                        }
+                        Console.WriteLine("Enter Admin Password:");
+                        while (string.IsNullOrEmpty(AdminPass = Console.ReadLine()))
+                        {
+                            Console.WriteLine("Invalid input, please try again:");
+                        }
+                        for (int i = 0; i < Admins.Count; i++)
+                        {
+                            if ((Admins[i].AdminEmail == AdminID) && (Admins[i].AdminPass == AdminPass))
+                            {
+                                AdminFlag = true;
+                            }
+                        }
+                        if(AdminFlag)
+                        {
+                            AdminMenu(AdminID, AdminPass);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid Admin Email or Password, please try again.");
+                        }
                         break;
 
                     case 2:
@@ -45,18 +72,20 @@ namespace BasicLibrary
             } while (!StopApp);
         }
 
-        static void AdminMenu()
+        static void MasterAdmin()
         {
             bool ExitFlag = false;
             do
             {
                 Console.Clear();
-                Console.WriteLine("Welcome!\nAdmin Authorized:");
+                Console.WriteLine("Welcome!\nMaster Admin Authorized:");
                 Console.WriteLine("\nEnter the number of the operation to perform:");
-                Console.WriteLine("\n1. Add New Book");
-                Console.WriteLine("\n2. Display All Books");
-                Console.WriteLine("\n3. Search for Book");
-                Console.WriteLine("\n\n0. Exit");
+                Console.WriteLine("\n1. Add New Book.");
+                Console.WriteLine("\n2. Display All Books.");
+                Console.WriteLine("\n3. Search for Book.");
+                Console.WriteLine("\n4. Edit Book Info.");
+                Console.WriteLine("\n5. Manage Library Admins/Users.");
+                Console.WriteLine("\n\n0. Save & Exit.");
 
                 int choice;
                 while (!int.TryParse(Console.ReadLine(), out choice))
@@ -78,6 +107,14 @@ namespace BasicLibrary
                         SearchForBook(false);
                         break;
 
+                    case 4:
+                        EditBook();
+                        break;
+
+                    case 5:
+                        //ManageAdminsOrUsers();
+                        break;
+
                     case 0:
                         SaveBooksToFile();
                         ExitFlag = true;
@@ -86,11 +123,60 @@ namespace BasicLibrary
                     default:
                         Console.WriteLine("Invalid choice, please try again.");
                         break;
+                }
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
 
+            } while (ExitFlag != true);
+        }
 
+        static void AdminMenu(string AdminID, string AdminPass)
+        {
+            bool ExitFlag = false;
+            do
+            {
+                Console.Clear();
+                Console.WriteLine("Welcome!\nAdmin Authorized:");
+                Console.WriteLine("\nEnter the number of the operation to perform:");
+                Console.WriteLine("\n1. Add New Book.");
+                Console.WriteLine("\n2. Display All Books.");
+                Console.WriteLine("\n3. Search for Book.");
+                Console.WriteLine("\n4. Edit Book Info.");
+                Console.WriteLine("\n\n0. Save & Exit.");
 
+                int choice;
+                while (!int.TryParse(Console.ReadLine(), out choice))
+                {
+                    Console.WriteLine("Invalid input, please try again: ");
                 }
 
+                switch (choice)
+                {
+                    case 1:
+                        AddnNewBook();
+                        break;
+
+                    case 2:
+                        ViewAllBooks();
+                        break;
+
+                    case 3:
+                        SearchForBook(false);
+                        break;
+
+                    case 4:
+                        EditBook();
+                        break;
+
+                    case 0:
+                        SaveBooksToFile();
+                        ExitFlag = true;
+                        break;
+
+                    default:
+                        Console.WriteLine("Invalid choice, please try again.");
+                        break;
+                }
                 Console.WriteLine("Press any key to continue...");
                 Console.ReadKey();
 
@@ -108,7 +194,7 @@ namespace BasicLibrary
                 Console.WriteLine("\n1. Search book");
                 Console.WriteLine("\n2. Borrow book");
                 Console.WriteLine("\n3. Return book");
-                Console.WriteLine("\n0. Exit");
+                Console.WriteLine("\n0. Save & Exit");
 
                 int choice;
                 while (!int.TryParse(Console.ReadLine(), out choice))
