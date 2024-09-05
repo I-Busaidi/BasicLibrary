@@ -8,16 +8,18 @@ namespace BasicLibrary
 
 
         //GLOBAL VARIABLES.
-        static int CurrentUser = -1;
+        static int CurrentUser;
         static List<(int UserID, string UserEmail, string UserPass)> Users = new List<(int UserID, string UserEmail, string UserPass)>();
         static List<(string AdminEmail, string AdminPass)> Admins = new List<(string AdminEmail, string AdminPass)>() ;
         static List<(string BName, string BAuthor, int ID, int Qty)> Books = new List<(string BName, string BAuthor, int ID, int Qty)>();
+        static List<(int UserID, int BookID, int BorrowQty)> Borrows = new List<(int UserID, int BookID, int BorrowQty)>();
 
 
         //FILE PATHS.
         static string filePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryBooks.txt";
         static string adminsPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryAdmins.txt";
         static string UsersPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryUsers.txt";
+        static string BorrowListPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\BorrowList.txt";
 
 
 
@@ -28,6 +30,7 @@ namespace BasicLibrary
             LoadAdminsFromFile();
             LoadUsersFromFile();
             LoadBooksFromFile();
+            LoadBorrowedListFromFile();
             int AccessLevel;
             bool StopApp = false;
             do
@@ -535,6 +538,7 @@ namespace BasicLibrary
         }
         static bool UserLogin()
         {
+
             string UsrEmail;
             string UsrPass;
             Console.WriteLine("Enter user Email:");
@@ -551,6 +555,7 @@ namespace BasicLibrary
             {
                 if ((Users[i].UserEmail == UsrEmail) && (Users[i].UserPass == UsrPass))
                 {
+                    CurrentUser = Users[i].UserID;
                     return true;
                 }
             }
@@ -562,6 +567,7 @@ namespace BasicLibrary
             do
             {
                 Console.Clear();
+                CurrentUser = -1;
                 Console.WriteLine("Welcome to Busaidi Library!\n\nEnter (1) to login | (2) to sign up | (0) to Exit");
                 int LoginSignUp;
                 while((!int.TryParse(Console.ReadLine(), out LoginSignUp))||(LoginSignUp > 2) ||(LoginSignUp < 0))
@@ -870,7 +876,9 @@ namespace BasicLibrary
                     Console.WriteLine("Invalid input or exceeds limit, please try again:");
                 }
                 Books[BookIndex] = (Books[BookIndex].BName, Books[BookIndex].BAuthor, Books[BookIndex].ID, (Books[BookIndex].Qty - BorrowQty));
+                Borrows.Add((CurrentUser, Books[BookIndex].ID, BorrowQty));
                 Console.WriteLine($"{BorrowQty} x {Books[BookIndex].BName} borrowed successfully!");
+                SaveBorrowedListToFile();
                 SaveBooksToFile();
             }
         }
@@ -1016,5 +1024,54 @@ namespace BasicLibrary
                 }
             } while (!ExitFlag);
         }
+
+
+
+        //STATISTICS FUNCTIONS.
+        static void SaveBorrowedListToFile()
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(BorrowListPath))
+                {
+                    foreach (var Borrow in Borrows)
+                    {
+                        writer.WriteLine($"{Borrow.UserID}|{Borrow.BookID}|{Borrow.BorrowQty}");
+                    }
+                }
+                Console.WriteLine("Borrowing info saved to file successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving to file: {ex.Message}");
+            }
+        }
+        static void LoadBorrowedListFromFile()
+        {
+            try
+            {
+                if (File.Exists(BorrowListPath))
+                {
+                    using (StreamReader reader = new StreamReader(BorrowListPath))
+                    {
+                        string line;
+                        while ((line = reader.ReadLine()) != null)
+                        {
+                            var parts = line.Split('|');
+                            if (parts.Length == 3)
+                            {
+                                Borrows.Add((int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2])));
+                            }
+                        }
+                    }
+                    Console.WriteLine("Borrowing info loaded from file successfully.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading from file: {ex.Message}");
+            }
+        }
+
     }
 }
