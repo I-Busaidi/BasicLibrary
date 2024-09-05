@@ -113,7 +113,7 @@ namespace BasicLibrary
                         break;
 
                     case 5:
-                        //ManageAdmins();
+                        ManageAdmins();
                         break;
 
                     case 6:
@@ -149,7 +149,7 @@ namespace BasicLibrary
                 switch (Choice)
                 {
                     case 1:
-                        //AddNewAdmin();
+                        AddNewAdmin();
                         break;
 
                     case 2:
@@ -167,6 +167,23 @@ namespace BasicLibrary
             } while (!ExitFlag);
         }
 
+        static void AddNewAdmin()
+        {
+            Console.WriteLine("Enter new Admin Email:");
+            string NewAdminEmail;
+            while(string.IsNullOrEmpty(NewAdminEmail = Console.ReadLine()))
+            {
+                Console.WriteLine("Invalid Email, please try again:");
+            }
+            Console.WriteLine($"Enter the password for {NewAdminEmail}:");
+            string NewAdminPass;
+            while (string.IsNullOrEmpty(NewAdminPass = Console.ReadLine()))
+            {
+                Console.WriteLine("Invalid Password, please try again:");
+            }
+            Admins.Add((NewAdminEmail, NewAdminPass));
+            Console.WriteLine($"Admin {NewAdminEmail} added successfully.");
+        }
 
         static void AdminMenu(string AdminID, string AdminPass)
         {
