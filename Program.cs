@@ -506,5 +506,84 @@ namespace BasicLibrary
                 Console.WriteLine($"Error loading from file: {ex.Message}");
             }
         }
+
+        static void EditBook()
+        {
+            bool ExitFlag = false;
+            do
+            {
+                Console.Clear();
+                ViewAllBooks();
+                Console.WriteLine("\n0. Exit");
+                Console.WriteLine("\nChoose a book to edit:");
+                int ChosenBook;
+                while ((!int.TryParse(Console.ReadLine(), out ChosenBook)) || (ChosenBook > Books.Count) || (ChosenBook < 0))
+                {
+                    Console.WriteLine("\nInvalid input, please try again:");
+                }
+                if (ChosenBook == 0)
+                {
+                    return;
+                }
+                Console.WriteLine("\nChoose an editing option:\n1. Edit Book Name.\n2. Edit Book Author.\n3. Add quantity.\n4. Remove Book.");
+                int EditChoice;
+                while ((!int.TryParse(Console.ReadLine(), out EditChoice)) || (EditChoice > 4) || (EditChoice < 1))
+                {
+                    Console.WriteLine("\nInvalid option, please try again.");
+                }
+
+                switch (EditChoice)
+                {
+                    case 0:
+                        ExitFlag = true;
+                        break;
+
+                    case 1:
+                        Console.WriteLine($"\nEnter the new name for {Books[ChosenBook - 1].BName}: ");
+                        string NewName;
+                        while(string.IsNullOrEmpty(NewName = Console.ReadLine()))
+                        {
+                            Console.WriteLine("Invalid input, please try again:");
+                        }
+                        string OldBName = Books[ChosenBook - 1].BName;
+                        Books[ChosenBook - 1] = (NewName, Books[ChosenBook - 1].BAuthor, Books[ChosenBook - 1].ID, Books[ChosenBook - 1].Qty);
+                        Console.WriteLine($"Book \"{OldBName}\" name changed to: {NewName}.");
+                        break;
+
+                    case 2:
+                        Console.WriteLine($"\nEnter the new author name for {Books[ChosenBook - 1].BName}: ");
+                        string NewAuth;
+                        while (string.IsNullOrEmpty(NewAuth = Console.ReadLine()))
+                        {
+                            Console.WriteLine("Invalid input, please try again:");
+                        }
+                        string OldAuth = Books[ChosenBook - 1].BAuthor;
+                        Books[ChosenBook - 1] = (Books[ChosenBook - 1].BName, NewAuth, Books[ChosenBook - 1].ID, Books[ChosenBook - 1].Qty);
+                        Console.WriteLine($"\"{Books[ChosenBook - 1].BName}\" Author changed from: {OldAuth} to: {NewAuth}.");
+                        break;
+
+                    case 3:
+                        Console.WriteLine($"\nEnter the additional quantity for {Books[ChosenBook - 1].BName}: ");
+                        int NewQty;
+                        while ((!int.TryParse(Console.ReadLine(), out NewQty))||(NewQty < 1))
+                        {
+                            Console.WriteLine("Invalid input, please try again:");
+                        }
+                        Books[ChosenBook - 1] = (Books[ChosenBook - 1].BName, Books[ChosenBook - 1].BAuthor, Books[ChosenBook - 1].ID, (Books[ChosenBook - 1].Qty + NewQty));
+                        Console.WriteLine($"{Books[ChosenBook - 1].BName} Quantity has been increased to {Books[ChosenBook - 1].Qty} successfully.");
+                        break;
+
+                    case 4:
+                        string RemovedBook = Books[ChosenBook - 1].BName;
+                        Books.RemoveAt(ChosenBook - 1);
+                        Console.WriteLine($"Book \"{RemovedBook}\" has been removed from the library File.");
+                        break;
+
+                    default:
+                        Console.WriteLine("Invalid input, please try again.");
+                        break;
+                }
+            } while (!ExitFlag);
+        }
     }
 }
