@@ -84,7 +84,8 @@ namespace BasicLibrary
                 Console.WriteLine("\n2. Display All Books.");
                 Console.WriteLine("\n3. Search for Book.");
                 Console.WriteLine("\n4. Edit Book Info.");
-                Console.WriteLine("\n5. Manage Library Admins/Users.");
+                Console.WriteLine("\n5. Manage Library Admins.");
+                Console.WriteLine("\n6. Manage Library Users.");
                 Console.WriteLine("\n\n0. Save & Exit.");
 
                 int choice;
@@ -112,7 +113,11 @@ namespace BasicLibrary
                         break;
 
                     case 5:
-                        //ManageAdminsOrUsers();
+                        //ManageAdmins();
+                        break;
+
+                    case 6:
+                        //ManageUsers();
                         break;
 
                     case 0:
@@ -129,6 +134,39 @@ namespace BasicLibrary
 
             } while (ExitFlag != true);
         }
+
+        static void ManageAdmins()
+        {
+            bool ExitFlag = false;
+            do
+            {
+                Console.WriteLine("\nChoose an option:\n1. Register new admin.\n2. Edit existing admin.\n3. Remove an admin.\n\n0. Save & Exit.");
+                int Choice;
+                while ((!int.TryParse(Console.ReadLine(), out Choice))||(Choice > 3)||(Choice < 0))
+                {
+                    Console.WriteLine("Invalid input, please try again:");
+                }
+                switch (Choice)
+                {
+                    case 1:
+                        //AddNewAdmin();
+                        break;
+
+                    case 2:
+                        //EditAdmin();
+                        break;
+
+                    case 3:
+                        //RemoveAdmin();
+                        break;
+
+                    case 0:
+                        ExitFlag = true;
+                        break;
+                }
+            } while (!ExitFlag);
+        }
+
 
         static void AdminMenu(string AdminID, string AdminPass)
         {
