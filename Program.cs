@@ -13,6 +13,7 @@ namespace BasicLibrary
         static List<(string AdminEmail, string AdminPass)> Admins = new List<(string AdminEmail, string AdminPass)>() ;
         static List<(string BName, string BAuthor, int ID, int Qty)> Books = new List<(string BName, string BAuthor, int ID, int Qty)>();
         static List<(int UserID, int BookID, int BorrowQty)> Borrows = new List<(int UserID, int BookID, int BorrowQty)>();
+        static List<(int UserID, int BookID)> RecommendationSource = new List<(int UserID, int BookID)>() ;
 
 
         //FILE PATHS.
@@ -20,6 +21,7 @@ namespace BasicLibrary
         static string adminsPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryAdmins.txt";
         static string UsersPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryUsers.txt";
         static string BorrowListPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\BorrowList.txt";
+        static string RecommendationSourcePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\RecommendationSourceList.txt";
 
 
 
@@ -1055,6 +1057,48 @@ namespace BasicLibrary
                         }
                     }
                     Console.WriteLine("Borrowing info loaded from file successfully.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading from file: {ex.Message}");
+            }
+        }
+        static void SaveRecommendationSourceToFile()
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(RecommendationSourcePath))
+                {
+                    foreach (var Source in RecommendationSource)
+                    {
+                        writer.WriteLine($"{Source.UserID}|{Source.BookID}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving to file: {ex.Message}");
+            }
+        }
+        static void LoadRecommendationSourceFromFile()
+        {
+            try
+            {
+                if (File.Exists(RecommendationSourcePath))
+                {
+                    using (StreamReader reader = new StreamReader(RecommendationSourcePath))
+                    {
+                        string line;
+                        while ((line = reader.ReadLine()) != null)
+                        {
+                            var parts = line.Split('|');
+                            if (parts.Length == 2)
+                            {
+                                RecommendationSource.Add((int.Parse(parts[0]), int.Parse(parts[1])));
+                            }
+                        }
+                    }
                 }
             }
             catch (Exception ex)
