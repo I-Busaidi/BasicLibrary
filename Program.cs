@@ -1,27 +1,26 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using System.Collections.Generic;
 
 namespace BasicLibrary
 {
     internal class Program
     {
-
-
         //GLOBAL VARIABLES.
         static int CurrentUser;
         static List<(int UserID, string UserEmail, string UserPass)> Users = new List<(int UserID, string UserEmail, string UserPass)>();
         static List<(string AdminEmail, string AdminPass)> Admins = new List<(string AdminEmail, string AdminPass)>() ;
         static List<(string BName, string BAuthor, int ID, int Qty)> Books = new List<(string BName, string BAuthor, int ID, int Qty)>();
-        static List<(int UserID, int BookID, int BorrowQty)> Borrows = new List<(int UserID, int BookID, int BorrowQty)>();
-        static List<(int UserID, int BookID)> RecommendationSource = new List<(int UserID, int BookID)>() ;
+        static List<(int UserID, int BookID, string BookName, int BorrowQty)> Borrows = new List<(int UserID, int BookID, string BookName, int BorrowQty)>();
+        static List<(int UserID, int BookID, string BookName)> RecommendationSource = new List<(int UserID, int BookID, string BookName)>() ;
 
 
         //FILE PATHS.
-        static string filePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryBooks.txt";
-        static string adminsPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryAdmins.txt";
-        static string UsersPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryUsers.txt";
-        static string BorrowListPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\BorrowList.txt";
-        static string RecommendationSourcePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\RecommendationSourceList.txt";
+        static string filePath = "D:\\GitHubPractice\\LibrarySystemFiles\\LibraryBooks.txt";
+        static string adminsPath = "D:\\GitHubPractice\\LibrarySystemFiles\\LibraryAdmins.txt";
+        static string UsersPath = "D:\\GitHubPractice\\LibrarySystemFiles\\LibraryUsers.txt";
+        static string BorrowListPath = "D:\\GitHubPractice\\LibrarySystemFiles\\BorrowList.txt";
+        static string RecommendationSourcePath = "D:\\GitHubPractice\\LibrarySystemFiles\\RecommendationSourceList.txt";
 
 
 
@@ -88,7 +87,7 @@ namespace BasicLibrary
                 }
                 if (AdminFlag)
                 {
-                    if (Admins[i].AdminEmail == "AdminMaster@BusaidiLib.com")
+                    if (i == 0)
                     {
                         MasterAdminFlag = true;
                     }
@@ -313,6 +312,7 @@ namespace BasicLibrary
                 Console.WriteLine("\n2. Display All Books.");
                 Console.WriteLine("\n3. Search for Book.");
                 Console.WriteLine("\n4. Edit Book Info.");
+                Console.WriteLine("\n5. Add new user.");
                 Console.WriteLine("\n\n0. Save & Exit.");
 
                 int choice;
@@ -337,6 +337,10 @@ namespace BasicLibrary
 
                     case 4:
                         EditBook();
+                        break;
+
+                    case 5:
+                        AddNewUser();
                         break;
 
                     case 0:
@@ -863,15 +867,22 @@ namespace BasicLibrary
             {
                 Console.WriteLine("Enter the quantity to borrow:");
                 int BorrowQty;
-                while ((!int.TryParse(Console.ReadLine(), out BorrowQty)) || (BorrowQty < 1) || (BorrowQty > 5) || (BorrowQty > Books[BookIndex].Qty))
+                while ((!int.TryParse(Console.ReadLine(), out BorrowQty)) || (BorrowQty < 1) || (BorrowQty > Books[BookIndex].Qty))
                 {
                     Console.WriteLine("Invalid input or exceeds limit, please try again:");
                 }
+
                 Books[BookIndex] = (Books[BookIndex].BName, Books[BookIndex].BAuthor, Books[BookIndex].ID, (Books[BookIndex].Qty - BorrowQty));
-                Borrows.Add((CurrentUser, Books[BookIndex].ID, BorrowQty));
+
+                Borrows.Add((CurrentUser, Books[BookIndex].ID, Books[BookIndex].BName, BorrowQty));
+
+                RecommendationSource.Add((CurrentUser, Books[BookIndex].ID, Books[BookIndex].BName));
+                Console.Clear();
                 Console.WriteLine($"{BorrowQty} x {Books[BookIndex].BName} borrowed successfully!");
                 SaveBorrowedListToFile();
                 SaveBooksToFile();
+                SaveRecommendationSourceToFile();
+                RecommendationBooks(Books[BookIndex].ID, Books[BookIndex].BName);
             }
         }
         static void ReturnBook()
@@ -885,12 +896,13 @@ namespace BasicLibrary
             }
             Console.WriteLine("Enter the quantity to return:");
             int ReturnQty;
-            while ((!int.TryParse(Console.ReadLine(), out ReturnQty)) || (ReturnQty < 1) || (ReturnQty > 5))
+            while ((!int.TryParse(Console.ReadLine(), out ReturnQty)) || (ReturnQty < 1))
             {
                 Console.WriteLine("Invalid input, please try again: ");
             }
 
             Books[BookChoice - 1] = (Books[BookChoice - 1].BName, Books[BookChoice - 1].BAuthor, Books[BookChoice - 1].ID, (Books[BookChoice - 1].Qty + ReturnQty));
+
             Console.WriteLine($"{ReturnQty} x {Books[BookChoice - 1].BName} returned successfully!");
             SaveBooksToFile();
         }
@@ -1019,7 +1031,7 @@ namespace BasicLibrary
 
 
 
-        //STATISTICS FUNCTIONS.
+        //UTILITY FUNCTIONS.
         static void SaveBorrowedListToFile()
         {
             try
@@ -1028,7 +1040,7 @@ namespace BasicLibrary
                 {
                     foreach (var Borrow in Borrows)
                     {
-                        writer.WriteLine($"{Borrow.UserID}|{Borrow.BookID}|{Borrow.BorrowQty}");
+                        writer.WriteLine($"{Borrow.UserID}|{Borrow.BookID}|{Borrow.BookName}|{Borrow.BorrowQty}");
                     }
                 }
                 Console.WriteLine("Borrowing info saved to file successfully.");
@@ -1050,9 +1062,9 @@ namespace BasicLibrary
                         while ((line = reader.ReadLine()) != null)
                         {
                             var parts = line.Split('|');
-                            if (parts.Length == 3)
+                            if (parts.Length == 4)
                             {
-                                Borrows.Add((int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2])));
+                                Borrows.Add((int.Parse(parts[0]), int.Parse(parts[1]), parts[2], int.Parse(parts[3])));
                             }
                         }
                     }
@@ -1072,7 +1084,7 @@ namespace BasicLibrary
                 {
                     foreach (var Source in RecommendationSource)
                     {
-                        writer.WriteLine($"{Source.UserID}|{Source.BookID}");
+                        writer.WriteLine($"{Source.UserID}|{Source.BookID}|{Source.BookName}");
                     }
                 }
             }
@@ -1095,7 +1107,7 @@ namespace BasicLibrary
                             var parts = line.Split('|');
                             if (parts.Length == 2)
                             {
-                                RecommendationSource.Add((int.Parse(parts[0]), int.Parse(parts[1])));
+                                RecommendationSource.Add((int.Parse(parts[0]), int.Parse(parts[1]), parts[2]));
                             }
                         }
                     }
@@ -1106,6 +1118,71 @@ namespace BasicLibrary
                 Console.WriteLine($"Error loading from file: {ex.Message}");
             }
         }
-
+        static void RecommendationBooks(int BorrowedBookID, string BorrowedBookName)
+        {
+            StringBuilder sb = new StringBuilder();
+            bool FoundBorrowedBook = false;
+            List<int> UsersWhoBorrowedBook = new List<int>();
+            List<(int ID, string name)> OtherBooksUsersBorrowed = new List<(int ID, string name)>();
+            
+            
+            for (int i = 0; i < RecommendationSource.Count; i++)
+            {
+                if (RecommendationSource[i].BookID == BorrowedBookID)
+                {
+                    UsersWhoBorrowedBook.Add(RecommendationSource[i].UserID);
+                    FoundBorrowedBook = true;
+                }
+            }
+            if (FoundBorrowedBook)
+            {
+                for (int i = 0; i < UsersWhoBorrowedBook.Count; i++)
+                {
+                    for(int j = 0; j < RecommendationSource.Count; j++)
+                    {
+                        if ((RecommendationSource[j].UserID == UsersWhoBorrowedBook[i]) && (RecommendationSource[j].BookID != BorrowedBookID))
+                        {
+                            OtherBooksUsersBorrowed.Add((RecommendationSource[j].BookID, RecommendationSource[j].BookName));
+                        }
+                    }
+                }
+                int count = 1;
+                sb.Clear();
+                for (int i = 0; i < OtherBooksUsersBorrowed.Count; i++)
+                {
+                    sb.AppendLine(count+". Book Name: "+OtherBooksUsersBorrowed[i].name + " | ID:"+ OtherBooksUsersBorrowed[i].ID);
+                    count++;
+                    if(count == 5)
+                    {
+                        break;
+                    }
+                }
+                Console.WriteLine($"People who borrowed \"{BorrowedBookName}\" also borrowed:");
+                Console.WriteLine(sb.ToString());
+                Console.WriteLine("Enter the number of the from the list if you want to borrow, or (0) to Exit:");
+                int Choice;
+                while ((!int.TryParse(Console.ReadLine(), out Choice))||(Choice > count) ||(Choice < 0))
+                {
+                    Console.WriteLine("Invalid input, please try again:");
+                }
+                if (Choice == 0)
+                {
+                    return;
+                }
+                else
+                {
+                    int Index = -1;
+                    for (int i = 0; i < Books.Count; i++)
+                    {
+                        if (OtherBooksUsersBorrowed[Choice - 1].ID == Books[i].ID)
+                        {
+                            Index = i;
+                            break;
+                        }
+                    }
+                    BorrowBook(Index);
+                }
+            }
+        }
     }
 }
