@@ -429,25 +429,20 @@ namespace BasicLibrary
         }
         static void AddNewUser()
         {
+            int NewUserID = Users.Count + 1;
             Console.WriteLine("Enter new User Email:");
-            int NewUserID;
-            while ((!int.TryParse(Console.ReadLine(), out NewUserID))||(NewUserID < 0))
-            {
-                Console.WriteLine("Invalid ID, please try again:");
-            }
-            Console.WriteLine($"Enter User Email for User {NewUserID}:");
             string NewUserEmail;
             while (string.IsNullOrEmpty(NewUserEmail = Console.ReadLine()))
             {
                 Console.WriteLine("Invalid Email, please try again:");
             }
-            Console.WriteLine($"Enter the password for {NewUserID}:");
-            string NewAdminPass;
-            while (string.IsNullOrEmpty(NewAdminPass = Console.ReadLine()))
+            Console.WriteLine($"Enter the password for {NewUserEmail}:");
+            string NewUserPass;
+            while (string.IsNullOrEmpty(NewUserPass = Console.ReadLine()))
             {
                 Console.WriteLine("Invalid Password, please try again:");
             }
-            Users.Add((NewUserID, NewUserEmail, NewAdminPass));
+            Users.Add((NewUserID, NewUserEmail, NewUserPass));
             Console.WriteLine($"User {NewUserID} added successfully.");
         }
         static void EditUser()
@@ -696,12 +691,7 @@ namespace BasicLibrary
                 Console.WriteLine("Invalid Input, please try again: ");
             }
 
-            Console.WriteLine($"Enter ID of \"{name}\": ");
-            int ID;
-            while ((!int.TryParse(Console.ReadLine(), out ID)) || (ID < 0))
-            {
-                Console.WriteLine("Invalid input, please try again:");
-            }
+            int ID = Books.Count + 1;
 
             Console.WriteLine($"Enter available quantity of \"{name}\": ");
             int Qty;
