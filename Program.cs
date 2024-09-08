@@ -205,9 +205,14 @@ namespace BasicLibrary
         }
         static void AddNewAdmin()
         {
+            List<string> ExistingAdmins = new List<string>();
+            for (int i = 0; i < Admins.Count; i++)
+            {
+                ExistingAdmins.Add(Admins[i].AdminEmail);
+            }
             Console.WriteLine("Enter new Admin Email:");
             string NewAdminEmail;
-            while(string.IsNullOrEmpty(NewAdminEmail = Console.ReadLine()))
+            while((string.IsNullOrEmpty(NewAdminEmail = Console.ReadLine())) || (!ExistingAdmins.Contains(NewAdminEmail)))
             {
                 Console.WriteLine("Invalid Email, please try again:");
             }
@@ -252,9 +257,14 @@ namespace BasicLibrary
                         break;
 
                     case 1:
+                        List<string> ExistingAdmins = new List<string>();
+                        for (int i = 0; i < Admins.Count; i++)
+                        {
+                            ExistingAdmins.Add(Admins[i].AdminEmail);
+                        }
                         Console.WriteLine($"\nEnter the new Email for {Admins[ChosenAdmin - 1].AdminEmail}: ");
                         string NewEmail;
-                        while (string.IsNullOrEmpty(NewEmail = Console.ReadLine()))
+                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine())) || (!ExistingAdmins.Contains(NewEmail)))
                         {
                             Console.WriteLine("Invalid input, please try again:");
                         }
@@ -276,9 +286,16 @@ namespace BasicLibrary
                         break;
 
                     case 3:
-                        string RemovedAdmin = Admins[ChosenAdmin - 1].AdminEmail;
-                        Admins.RemoveAt(ChosenAdmin - 1);
-                        Console.WriteLine($"Admin \"{RemovedAdmin}\" has been removed from the Admins File.");
+                        if (Admins.Count > 1)
+                        {
+                            string RemovedAdmin = Admins[ChosenAdmin - 1].AdminEmail;
+                            Admins.RemoveAt(ChosenAdmin - 1);
+                            Console.WriteLine($"Admin \"{RemovedAdmin}\" has been removed from the Admins File.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Cannot remove the last remaining admin.\nPlease add another admin account before deleting this account.");
+                        }
                         break;
 
                     default:
@@ -297,6 +314,10 @@ namespace BasicLibrary
             {
                 AdmnNumber = i + 1;
                 sb.Append("Admin ").Append(AdmnNumber).Append(" Email: ").Append(Admins[i].AdminEmail);
+                if(i == 0)
+                {
+                    sb.Append(" *ADMIN MASTER*");
+                }
                 sb.AppendLine();
                 sb.Append(" Password: ").Append(Admins[i].AdminPass);
                 sb.AppendLine().AppendLine();
@@ -441,14 +462,21 @@ namespace BasicLibrary
                         ExitFlag = true;
                         break;
                 }
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
             } while (!ExitFlag);
         }
         static void AddNewUser()
         {
-            int NewUserID = Users.Count + 1;
+            List<string> ExistingUsers = new List<string>();
+            for (int i = 0; i < Users.Count; i++)
+            {
+                ExistingUsers.Add(Users[i].UserEmail);
+            }
+            int NewUserID = Users[Users.Count - 1].UserID + 1;
             Console.WriteLine("Enter new User Email:");
             string NewUserEmail;
-            while (string.IsNullOrEmpty(NewUserEmail = Console.ReadLine()))
+            while ((string.IsNullOrEmpty(NewUserEmail = Console.ReadLine())) || (!ExistingUsers.Contains(NewUserEmail)))
             {
                 Console.WriteLine("Invalid Email, please try again:");
             }
@@ -493,9 +521,14 @@ namespace BasicLibrary
                         break;
 
                     case 1:
+                        List<string> ExistingUsers = new List<string>();
+                        for (int i = 0; i < Users.Count; i++)
+                        {
+                            ExistingUsers.Add(Users[i].UserEmail);
+                        }
                         Console.WriteLine($"\nEnter the new Email for user {Users[ChosenUser - 1].UserID}: ");
                         string NewEmail;
-                        while (string.IsNullOrEmpty(NewEmail = Console.ReadLine()))
+                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine())) || (!ExistingUsers.Contains(NewEmail)))
                         {
                             Console.WriteLine("Invalid input, please try again:");
                         }
@@ -525,6 +558,8 @@ namespace BasicLibrary
                         Console.WriteLine("Invalid input, please try again.");
                         break;
                 }
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
             } while (!ExitFlag);
         }
         static void ViewAllUsers()
@@ -692,10 +727,15 @@ namespace BasicLibrary
 
         //BOOKS RELATED FUNCTIONS.
         static void AddnNewBook()
-        { 
+        {
+            List<string> ExistingBooks = new List<string>();
+            for (int i = 0; i < Books.Count; i++)
+            {
+                ExistingBooks.Add(Books[i].BName);
+            }
             Console.WriteLine("Enter Book Name");
             string name;
-            while (string.IsNullOrEmpty(name = Console.ReadLine()))
+            while ((string.IsNullOrEmpty(name = Console.ReadLine())) || (!ExistingBooks.Contains(name)))
             {
                 Console.WriteLine("Invalid Input, please try again: ");
             }
@@ -707,7 +747,7 @@ namespace BasicLibrary
                 Console.WriteLine("Invalid Input, please try again: ");
             }
 
-            int ID = Books.Count + 1;
+            int ID = Books[Books.Count-1].ID + 1;
 
             Console.WriteLine($"Enter available quantity of \"{name}\": ");
             int Qty;
@@ -863,7 +903,9 @@ namespace BasicLibrary
                             Console.WriteLine("Invalid input, please try again:");
                             break;
                     }
-                }while (!ExitBorrow);
+                    Console.WriteLine("Press any key to continue...");
+                    Console.ReadKey();
+                } while (!ExitBorrow);
             }
             else
             {
@@ -1067,9 +1109,14 @@ namespace BasicLibrary
                         break;
 
                     case 1:
+                        List<string> ExistingBooks = new List<string>();
+                        for (int i = 0; i < Books.Count; i++)
+                        {
+                            ExistingBooks.Add(Books[i].BName);
+                        }
                         Console.WriteLine($"\nEnter the new name for {Books[ChosenBook - 1].BName}: ");
                         string NewName;
-                        while(string.IsNullOrEmpty(NewName = Console.ReadLine()))
+                        while((string.IsNullOrEmpty(NewName = Console.ReadLine())) || (!ExistingBooks.Contains(NewName)))
                         {
                             Console.WriteLine("Invalid input, please try again:");
                         }
@@ -1111,6 +1158,8 @@ namespace BasicLibrary
                         Console.WriteLine("Invalid input, please try again.");
                         break;
                 }
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
             } while (!ExitFlag);
         }
 
