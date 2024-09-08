@@ -201,6 +201,7 @@ namespace BasicLibrary
                         ExitFlag = true;
                         break;
                 }
+                Console.Clear();
             } while (!ExitFlag);
         }
         static void AddNewAdmin()
@@ -212,7 +213,7 @@ namespace BasicLibrary
             }
             Console.WriteLine("Enter new Admin Email:");
             string NewAdminEmail;
-            while((string.IsNullOrEmpty(NewAdminEmail = Console.ReadLine())) || (!ExistingAdmins.Contains(NewAdminEmail)))
+            while((string.IsNullOrEmpty(NewAdminEmail = Console.ReadLine())) || (ExistingAdmins.Contains(NewAdminEmail)))
             {
                 Console.WriteLine("Invalid Email, please try again:");
             }
@@ -264,7 +265,7 @@ namespace BasicLibrary
                         }
                         Console.WriteLine($"\nEnter the new Email for {Admins[ChosenAdmin - 1].AdminEmail}: ");
                         string NewEmail;
-                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine())) || (!ExistingAdmins.Contains(NewEmail)))
+                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine())) || (ExistingAdmins.Contains(NewEmail)))
                         {
                             Console.WriteLine("Invalid input, please try again:");
                         }
@@ -302,6 +303,8 @@ namespace BasicLibrary
                         Console.WriteLine("Invalid input, please try again.");
                         break;
                 }
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
             } while (!ExitFlag);
         }
         static void ViewAllAdmins()
@@ -476,7 +479,7 @@ namespace BasicLibrary
             int NewUserID = Users[Users.Count - 1].UserID + 1;
             Console.WriteLine("Enter new User Email:");
             string NewUserEmail;
-            while ((string.IsNullOrEmpty(NewUserEmail = Console.ReadLine())) || (!ExistingUsers.Contains(NewUserEmail)))
+            while ((string.IsNullOrEmpty(NewUserEmail = Console.ReadLine())) || (ExistingUsers.Contains(NewUserEmail)))
             {
                 Console.WriteLine("Invalid Email, please try again:");
             }
@@ -528,7 +531,7 @@ namespace BasicLibrary
                         }
                         Console.WriteLine($"\nEnter the new Email for user {Users[ChosenUser - 1].UserID}: ");
                         string NewEmail;
-                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine())) || (!ExistingUsers.Contains(NewEmail)))
+                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine())) || (ExistingUsers.Contains(NewEmail)))
                         {
                             Console.WriteLine("Invalid input, please try again:");
                         }
@@ -735,7 +738,7 @@ namespace BasicLibrary
             }
             Console.WriteLine("Enter Book Name");
             string name;
-            while ((string.IsNullOrEmpty(name = Console.ReadLine())) || (!ExistingBooks.Contains(name)))
+            while ((string.IsNullOrEmpty(name = Console.ReadLine())) || (ExistingBooks.Contains(name)))
             {
                 Console.WriteLine("Invalid Input, please try again: ");
             }
@@ -1116,7 +1119,7 @@ namespace BasicLibrary
                         }
                         Console.WriteLine($"\nEnter the new name for {Books[ChosenBook - 1].BName}: ");
                         string NewName;
-                        while((string.IsNullOrEmpty(NewName = Console.ReadLine())) || (!ExistingBooks.Contains(NewName)))
+                        while((string.IsNullOrEmpty(NewName = Console.ReadLine())) || (ExistingBooks.Contains(NewName)))
                         {
                             Console.WriteLine("Invalid input, please try again:");
                         }
