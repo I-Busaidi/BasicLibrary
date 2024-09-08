@@ -872,10 +872,27 @@ namespace BasicLibrary
                     Console.WriteLine("Invalid input or exceeds limit, please try again:");
                 }
 
+                bool BorrowedBefore = false;
+                int BorrowedBeforeIndex = -1;
                 Books[BookIndex] = (Books[BookIndex].BName, Books[BookIndex].BAuthor, Books[BookIndex].ID, (Books[BookIndex].Qty - BorrowQty));
-
-                Borrows.Add((CurrentUser, Books[BookIndex].ID, Books[BookIndex].BName, BorrowQty));
-
+                for (int i = 0; i < Borrows.Count; i++)
+                {
+                    if (Borrows[i].UserID == CurrentUser && Borrows[i].BookID == Books[BookIndex].ID)
+                    {
+                        BorrowedBefore = true;
+                        BorrowedBeforeIndex = i;
+                        break;
+                    }
+                }
+                if (BorrowedBefore)
+                {
+                    Borrows[BorrowedBeforeIndex] = (Borrows[BorrowedBeforeIndex].UserID, Borrows[BorrowedBeforeIndex].BookID, Borrows[BorrowedBeforeIndex].BookName, (Borrows[BorrowedBeforeIndex].BorrowQty + BorrowQty));
+                }
+                else
+                {
+                    Borrows.Add((CurrentUser, Books[BookIndex].ID, Books[BookIndex].BName, BorrowQty));
+                }
+                
                 RecommendationSource.Add((CurrentUser, Books[BookIndex].ID, Books[BookIndex].BName));
                 Console.Clear();
                 Console.WriteLine($"{BorrowQty} x {Books[BookIndex].BName} borrowed successfully!");
@@ -887,24 +904,90 @@ namespace BasicLibrary
         }
         static void ReturnBook()
         {
-            int BookChoice;
-            ViewAllBooks();
-            Console.WriteLine("Enter the number from the list of book to return:");
-            while ((!int.TryParse(Console.ReadLine(), out BookChoice)) || (BookChoice < 1) || (BookChoice > Books.Count))
+            bool UserBorrowed = false;
+            int BorrowedIndex = -1;
+            List<int> IDs = new List<int>();
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Borrowed Books:");
+            for (int i = 0; i < Borrows.Count; i++)
             {
-                Console.WriteLine("Invalid input, please try again: ");
+                if (Borrows[i].UserID == CurrentUser)
+                {
+                    IDs.Add(Borrows[i].BookID);
+                    UserBorrowed = true;
+                    sb.AppendLine($"ID: {Borrows[i].BookID} | Name: {Borrows[i].BookName} | Qty: {Borrows[i].BorrowQty}");
+                }
             }
-            Console.WriteLine("Enter the quantity to return:");
-            int ReturnQty;
-            while ((!int.TryParse(Console.ReadLine(), out ReturnQty)) || (ReturnQty < 1))
+            if (UserBorrowed)
             {
-                Console.WriteLine("Invalid input, please try again: ");
+                Console.WriteLine(sb.ToString());
+                int BookChoice;
+                Console.WriteLine("\n\n0. Exit");
+                Console.WriteLine("Enter the ID of book to return:");
+                while ((!int.TryParse(Console.ReadLine(), out BookChoice))||(BookChoice < 0) ||(!IDs.Contains(BookChoice)))
+                {
+                    Console.WriteLine("Invalid input, please try again: ");
+                }
+                if (BookChoice == 0)
+                {
+                    Console.WriteLine("Cancelling return process...");
+                }
+                else
+                {
+                    for (int i = 0; i < Borrows.Count; i++)
+                    {
+                        if ((Borrows[i].UserID == CurrentUser) && (Borrows[i].BookID == BookChoice))
+                        {
+                            BorrowedIndex = i;
+                            break;
+                        }
+                    }
+                    Console.WriteLine("Enter the quantity to return:");
+                    int ReturnQty;
+                    while ((!int.TryParse(Console.ReadLine(), out ReturnQty)) || (ReturnQty < 0) || (ReturnQty > Borrows[BorrowedIndex].BorrowQty))
+                    {
+                        Console.WriteLine("Invalid input or exceeds amount, please try again: ");
+                    }
+                    if (ReturnQty == 0)
+                    {
+                        Console.WriteLine("Cancelling return process...");
+                    }
+                    else
+                    {
+                        try
+                        {
+                            if (Borrows[BorrowedIndex].BorrowQty == ReturnQty)
+                            {
+                                Borrows.RemoveAt(BorrowedIndex);
+                            }
+                            else
+                            {
+                                Borrows[BorrowedIndex] = (Borrows[BorrowedIndex].UserID, Borrows[BorrowedIndex].BookID, Borrows[BorrowedIndex].BookName, (Borrows[BorrowedIndex].BorrowQty - ReturnQty));
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Could not update borrows list...{ex}");
+                        }
+
+                        for (int i = 0; i < Books.Count; i++)
+                        {
+                            if (Books[i].ID == BookChoice)
+                            {
+                                Books[i] = (Books[i].BName, Books[i].BAuthor, Books[i].ID, (Books[i].Qty + ReturnQty));
+                                break;
+                            }
+                        }
+
+                        Console.WriteLine($"{ReturnQty} x {Books[BookChoice - 1].BName} returned successfully!");
+                        SaveBooksToFile();
+                    }
+                }
             }
-
-            Books[BookChoice - 1] = (Books[BookChoice - 1].BName, Books[BookChoice - 1].BAuthor, Books[BookChoice - 1].ID, (Books[BookChoice - 1].Qty + ReturnQty));
-
-            Console.WriteLine($"{ReturnQty} x {Books[BookChoice - 1].BName} returned successfully!");
-            SaveBooksToFile();
+            else
+            {
+                Console.WriteLine("Current User Has No Borrowed Books...");
+            }
         }
         static void LoadBooksFromFile()
         {
