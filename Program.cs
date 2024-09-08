@@ -32,6 +32,7 @@ namespace BasicLibrary
             LoadUsersFromFile();
             LoadBooksFromFile();
             LoadBorrowedListFromFile();
+            LoadRecommendationSourceFromFile();
             int AccessLevel;
             bool StopApp = false;
             do
@@ -1233,7 +1234,7 @@ namespace BasicLibrary
         {
             try
             {
-                using (StreamWriter writer = new StreamWriter(RecommendationSourcePath))
+                using (StreamWriter writer = new StreamWriter(RecommendationSourcePath, true))
                 {
                     foreach (var Source in RecommendationSource)
                     {
@@ -1258,7 +1259,7 @@ namespace BasicLibrary
                         while ((line = reader.ReadLine()) != null)
                         {
                             var parts = line.Split('|');
-                            if (parts.Length == 2)
+                            if (parts.Length == 3)
                             {
                                 RecommendationSource.Add((int.Parse(parts[0]), int.Parse(parts[1]), parts[2]));
                             }
@@ -1471,10 +1472,10 @@ namespace BasicLibrary
                         FoundBook = true;
                         BookSum += Borrows[j].BorrowQty;
                     }
-                }
-                if (FoundBook)
-                {
-                    sb.AppendLine($"Book ID: {Books[i].ID} | Name: {Books[i].BName} | Amount Borrowed: {BookSum} | Amount Available: {Books[i].Qty}");
+                    if (FoundBook)
+                    {
+                        sb.AppendLine($"Book ID: {Books[i].ID} | Name: {Books[i].BName} | Amount Borrowed: {BookSum} | Amount Available: {Books[i].Qty}");
+                    }
                 }
             }
             Console.WriteLine("Borrowed Books Statistics:");
