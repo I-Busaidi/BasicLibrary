@@ -341,7 +341,7 @@ namespace BasicLibrary
                 Console.WriteLine("\n2. Display All Books.");
                 Console.WriteLine("\n3. Search for Book.");
                 Console.WriteLine("\n4. Edit Book Info.");
-                Console.WriteLine("\n5. Add new user.");
+                Console.WriteLine("\n5. Manage Usera.");
                 Console.WriteLine("\n6. View Library Report.");
                 Console.WriteLine("\n\n0. Save & Exit.");
 
@@ -370,7 +370,7 @@ namespace BasicLibrary
                         break;
 
                     case 5:
-                        AddNewUser();
+                        ManageUsers();
                         break;
 
                     case 6:
@@ -467,6 +467,7 @@ namespace BasicLibrary
                 }
                 Console.WriteLine("Press any key to continue...");
                 Console.ReadKey();
+                Console.Clear();
             } while (!ExitFlag);
         }
         static void AddNewUser()
@@ -476,7 +477,15 @@ namespace BasicLibrary
             {
                 ExistingUsers.Add(Users[i].UserEmail);
             }
-            int NewUserID = Users[Users.Count - 1].UserID + 1;
+            int NewUserID;
+            if (Users.Count > 0)
+            {
+                NewUserID = Users[Users.Count - 1].UserID + 1;
+            }
+            else
+            {
+                NewUserID = 1;
+            }
             Console.WriteLine("Enter new User Email:");
             string NewUserEmail;
             while ((string.IsNullOrEmpty(NewUserEmail = Console.ReadLine())) || (ExistingUsers.Contains(NewUserEmail)))
@@ -713,7 +722,7 @@ namespace BasicLibrary
                             var parts = line.Split('|');
                             if (parts.Length == 3)
                             {
-                                Users.Add((int.Parse(parts[0]), parts[1], parts[3]));
+                                Users.Add((int.Parse(parts[0]), parts[1], parts[2]));
                             }
                         }
                     }
@@ -750,8 +759,15 @@ namespace BasicLibrary
                 Console.WriteLine("Invalid Input, please try again: ");
             }
 
-            int ID = Books[Books.Count-1].ID + 1;
-
+            int ID;
+            if (Books.Count > 0)
+            {
+                ID = Books[Books.Count - 1].ID + 1;
+            }
+            else
+            {
+                ID = 1;
+            }
             Console.WriteLine($"Enter available quantity of \"{name}\": ");
             int Qty;
             while ((!int.TryParse(Console.ReadLine(), out Qty)) || (Qty < 1))
@@ -971,7 +987,7 @@ namespace BasicLibrary
                 int BookChoice;
                 Console.WriteLine("\n\n0. Exit");
                 Console.WriteLine("Enter the ID of book to return:");
-                while ((!int.TryParse(Console.ReadLine(), out BookChoice))||(BookChoice < 0) ||(!IDs.Contains(BookChoice)))
+                while ((!int.TryParse(Console.ReadLine(), out BookChoice))||(BookChoice < 0) || (!IDs.Contains(BookChoice)))
                 {
                     Console.WriteLine("Invalid input, please try again: ");
                 }
