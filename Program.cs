@@ -1,6 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BasicLibrary
 {
@@ -16,11 +17,11 @@ namespace BasicLibrary
 
 
         //FILE PATHS.
-        static string filePath = "D:\\GitHubPractice\\LibrarySystemFiles\\LibraryBooks.txt";
-        static string adminsPath = "D:\\GitHubPractice\\LibrarySystemFiles\\LibraryAdmins.txt";
-        static string UsersPath = "D:\\GitHubPractice\\LibrarySystemFiles\\LibraryUsers.txt";
-        static string BorrowListPath = "D:\\GitHubPractice\\LibrarySystemFiles\\BorrowList.txt";
-        static string RecommendationSourcePath = "D:\\GitHubPractice\\LibrarySystemFiles\\RecommendationSourceList.txt";
+        static string filePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryBooks.txt";
+        static string adminsPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryAdmins.txt";
+        static string UsersPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryUsers.txt";
+        static string BorrowListPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\BorrowList.txt";
+        static string RecommendationSourcePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\RecommendationSourceList.txt";
 
 
 
@@ -120,6 +121,7 @@ namespace BasicLibrary
                 Console.WriteLine("\n4. Edit Book Info.");
                 Console.WriteLine("\n5. Manage Library Admins.");
                 Console.WriteLine("\n6. Manage Library Users.");
+                Console.WriteLine("\n7. View Library Report.");
                 Console.WriteLine("\n\n0. Save & Exit.");
 
                 int choice;
@@ -152,6 +154,10 @@ namespace BasicLibrary
 
                     case 6:
                         ManageUsers();
+                        break;
+
+                    case 7:
+                        ReportLibStats();
                         break;
 
                     case 0:
@@ -313,6 +319,7 @@ namespace BasicLibrary
                 Console.WriteLine("\n3. Search for Book.");
                 Console.WriteLine("\n4. Edit Book Info.");
                 Console.WriteLine("\n5. Add new user.");
+                Console.WriteLine("\n6. View Library Report.");
                 Console.WriteLine("\n\n0. Save & Exit.");
 
                 int choice;
@@ -341,6 +348,10 @@ namespace BasicLibrary
 
                     case 5:
                         AddNewUser();
+                        break;
+
+                    case 6:
+                        ReportLibStats();
                         break;
 
                     case 0:
@@ -718,18 +729,10 @@ namespace BasicLibrary
             for (int i = 0; i < Books.Count; i++)
             {             
                 BookNumber = i + 1;
-                sb.Append("Book ").Append(BookNumber).Append(" name : ").Append(Books[i].BName);
-                sb.AppendLine();
-                sb.Append(" Author : ").Append(Books[i].BAuthor);
-                sb.AppendLine();
-                sb.Append(" ID : ").Append(Books[i].ID);
-                sb.AppendLine();
-                sb.Append(" Qty : ").Append (Books[i].Qty);
-                sb.AppendLine().AppendLine();
-                Console.WriteLine(sb.ToString());
-                sb.Clear();
-
+                sb.AppendLine($"{BookNumber}. Book: {Books[i].BName} | Author: {Books[i].BAuthor} | ID: {Books[i].ID} | Qty: {Books[i].Qty}");
             }
+            Console.WriteLine(sb.ToString());
+            sb.Clear();
         }
         static void SearchForBook(bool AdmnOrUsr)
         {
@@ -899,7 +902,7 @@ namespace BasicLibrary
                 SaveBorrowedListToFile();
                 SaveBooksToFile();
                 SaveRecommendationSourceToFile();
-                RecommendationBooks(Books[BookIndex].ID, Books[BookIndex].BName);
+                RecommendationBooks(Books[BookIndex].ID, Books[BookIndex].BName, CurrentUser);
             }
         }
         static void ReturnBook()
@@ -1201,7 +1204,7 @@ namespace BasicLibrary
                 Console.WriteLine($"Error loading from file: {ex.Message}");
             }
         }
-        static void RecommendationBooks(int BorrowedBookID, string BorrowedBookName)
+        static void RecommendationBooks(int BorrowedBookID, string BorrowedBookName ,int UserID)
         {
             StringBuilder sb = new StringBuilder();
             bool FoundBorrowedBook = false;
@@ -1211,7 +1214,7 @@ namespace BasicLibrary
             
             for (int i = 0; i < RecommendationSource.Count; i++)
             {
-                if (RecommendationSource[i].BookID == BorrowedBookID)
+                if ((RecommendationSource[i].BookID == BorrowedBookID) && (RecommendationSource[i].UserID != UserID))
                 {
                     UsersWhoBorrowedBook.Add(RecommendationSource[i].UserID);
                     FoundBorrowedBook = true;
@@ -1266,6 +1269,158 @@ namespace BasicLibrary
                     BorrowBook(Index);
                 }
             }
+        }
+        static void ReportLibStats(int PageNo = 1)
+        {
+            while (true)
+            {
+                if (PageNo == 1)
+                {
+                    Console.Clear();
+                    Console.WriteLine("Current available books:");
+                    ViewAllBooks();
+                    Console.WriteLine("Page 1 of 4");
+                    Console.WriteLine("(Right Arrow Key ->) Page 2 | (Esc) to Exit");
+                    var PressedKey = Console.ReadKey(true);
+                    if (PressedKey.Key == ConsoleKey.Escape)
+                    {
+                        break;
+                    }
+                    else if (PressedKey.Key == ConsoleKey.RightArrow)
+                    {
+                        ReportLibStats(2);
+                    }
+                }
+                else if (PageNo == 2)
+                {
+                    Console.Clear();
+                    Console.WriteLine("Users Who Are Borrowing Books:");
+                    ViewBorrowingUsersStats();
+                    Console.WriteLine("Page 2 of 4");
+                    Console.WriteLine("Page 1 (<- Left Arrow Key) | (Right Arrow Key ->) Page 3 | (Esc) to Exit");
+                    var PressedKey = Console.ReadKey(true);
+                    if (PressedKey.Key == ConsoleKey.Escape)
+                    {
+                        break;
+                    }
+                    else if (PressedKey.Key == ConsoleKey.RightArrow)
+                    {
+                        ReportLibStats(3);
+                    }
+                    else if (PressedKey.Key == ConsoleKey.LeftArrow)
+                    {
+                        ReportLibStats(1);
+                    }
+                }
+                else if (PageNo == 3)
+                {
+                    Console.Clear();
+                    Console.WriteLine("Books Currently Borrowed:");
+                    ViewBorrowedBooksStats();
+                    Console.WriteLine("Page 3 of 4");
+                    Console.WriteLine("Page 2 (<- Left Arrow Key) | (Right Arrow Key ->) Page 4 | (Esc) to Exit");
+                    var PressedKey = Console.ReadKey(true);
+                    if (PressedKey.Key == ConsoleKey.Escape)
+                    {
+                        break;
+                    }
+                    else if (PressedKey.Key == ConsoleKey.RightArrow)
+                    {
+                        ReportLibStats(4);
+                    }
+                    else if (PressedKey.Key == ConsoleKey.LeftArrow)
+                    {
+                        ReportLibStats(2);
+                    }
+                }
+                else if (PageNo == 4)
+                {
+                    Console.Clear();
+                    MostCommonUserAndBook();
+                    Console.WriteLine("Page 4 of 4");
+                    Console.WriteLine("Page 3 (<- Left Arrow Key) | (Esc) to Exit");
+                    var PressedKey = Console.ReadKey(true);
+                    if (PressedKey.Key == ConsoleKey.Escape)
+                    {
+                        break;
+                    }
+                    else if (PressedKey.Key == ConsoleKey.LeftArrow)
+                    {
+                        ReportLibStats(3);
+                    }
+                }
+            }
+        }
+        static void MostCommonUserAndBook()
+        {
+            int TopUser = 0;
+            int TopBook = 0;
+            int TopUserID = 0;
+            string TopBookName = "";
+            for (int i = 0;i < RecommendationSource.Count;i++)
+            {
+                int BookOccur = 0;
+                int UserOccur = 0;
+                for (int j = 0; j < RecommendationSource.Count; j++)
+                {
+                    if (RecommendationSource[i].UserID == RecommendationSource[j].UserID)
+                    {
+                        UserOccur++;
+                    }
+                    if (RecommendationSource[i].BookName == RecommendationSource[j].BookName)
+                    {
+                        BookOccur++;
+                    }
+                }
+                if (UserOccur > TopUser)
+                {
+                    TopUser = UserOccur;
+                    TopUserID = RecommendationSource[i].UserID;
+                }
+                if (BookOccur > TopBook)
+                {
+                    TopBook = BookOccur;
+                    TopBookName = RecommendationSource[i].BookName;
+                }
+            }
+            if ((TopUser != 0) && (TopBook != 0))
+            {
+                Console.WriteLine($"\nMost Common User: User with ID {TopUserID}");
+                Console.WriteLine($"\nMost Common Book: {TopBookName}");
+            }
+        }
+        static void ViewBorrowedBooksStats()
+        {
+            StringBuilder sb = new StringBuilder();
+            List<(int ID, string Name)> TotalBorrowed = new List<(int ID, string Name)>();
+            for (int i = 0; i < Books.Count;i++)
+            {
+                bool FoundBook = false;
+                int BookSum = 0;
+                for (int j = 0; j < Borrows.Count;j++)
+                {
+                    if (Borrows[j].BookID == Books[i].ID)
+                    {
+                        FoundBook = true;
+                        BookSum += Borrows[j].BorrowQty;
+                    }
+                }
+                if (FoundBook)
+                {
+                    sb.AppendLine($"Book ID: {Books[i].ID} | Name: {Books[i].BName} | Amount Borrowed: {BookSum} | Amount Available: {Books[i].Qty}");
+                }
+            }
+            Console.WriteLine("Borrowed Books Statistics:");
+            Console.WriteLine(sb.ToString());
+        }
+        static void ViewBorrowingUsersStats()
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < Borrows.Count; i++)
+            {
+                sb.AppendLine($"User ID: {Borrows[i].UserID} | Book Borrowed: {Borrows[i].BookName} x {Borrows[i].BorrowQty}");
+            }
+            Console.WriteLine(sb.ToString());
         }
     }
 }
