@@ -28,7 +28,6 @@ namespace BasicLibrary
         //MAIN FUNCTION.
         static void Main(string[] args)
         {
-            Admins.Add(("AdminMaster@BusaidiLib.com", "admin")); //Saving Master admin info temporarily for testing.
             LoadAdminsFromFile();
             LoadUsersFromFile();
             LoadBooksFromFile();
