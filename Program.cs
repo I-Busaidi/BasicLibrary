@@ -8,7 +8,7 @@ namespace BasicLibrary
     internal class Program
     {
         // GLOBAL VARIABLES.
-        static int CurrentUser;
+        static int CurrentUser=-1;
         static List<(int UserID, string UserEmail, string UserPass)> Users = new List<(int UserID, string UserEmail, string UserPass)>();
         static List<(string AdminEmail, string AdminPass)> Admins = new List<(string AdminEmail, string AdminPass)>() ;
         static List<(string BName, string BAuthor, int ID, int Qty)> Books = new List<(string BName, string BAuthor, int ID, int Qty)>();
@@ -73,19 +73,20 @@ namespace BasicLibrary
             string AdminPass;
             bool AdminFlag = false;
             bool MasterAdminFlag = false;
-            Console.WriteLine("Enter Admin ID:");
-            while (string.IsNullOrEmpty(AdminID = Console.ReadLine()))
+            Console.WriteLine("!!TOP SECRET!!\n(Master Admin Email: admin@admin.com)");
+            Console.WriteLine("\nEnter Admin ID:");
+            while (string.IsNullOrEmpty(AdminID = Console.ReadLine().ToLower()))
             {
-                Console.WriteLine("Invalid input, please try again:");
+                Console.WriteLine("\nInvalid input, please try again:");
             }
-            Console.WriteLine("Enter Admin Password:");
-            while (string.IsNullOrEmpty(AdminPass = Console.ReadLine()))
+            Console.WriteLine("\nEnter Admin Password (Hint: admin):");
+            while (string.IsNullOrEmpty(AdminPass = Console.ReadLine().ToLower()))
             {
-                Console.WriteLine("Invalid input, please try again:");
+                Console.WriteLine("\nInvalid input, please try again:");
             }
             for (int i = 0; i < Admins.Count; i++)
             {
-                if ((Admins[i].AdminEmail == AdminID) && (Admins[i].AdminPass == AdminPass))
+                if ((Admins[i].AdminEmail.ToLower() == AdminID) && (Admins[i].AdminPass.ToLower() == AdminPass))
                 {
                     AdminFlag = true;
                 }
@@ -107,7 +108,7 @@ namespace BasicLibrary
             }
             else
             {
-                Console.WriteLine("Invalid Admin Email or Password, please try again.");
+                Console.WriteLine("\nInvalid Admin Email or Password, please try again.");
             }
         }
         static void MasterAdmin()
@@ -130,7 +131,7 @@ namespace BasicLibrary
                 int choice;
                 while (!int.TryParse(Console.ReadLine(), out choice))
                 {
-                    Console.WriteLine("Invalid input, please try again: ");
+                    Console.WriteLine("\nInvalid input, please try again: ");
                 }
 
                 switch (choice)
@@ -171,10 +172,10 @@ namespace BasicLibrary
                         break;
 
                     default:
-                        Console.WriteLine("Invalid choice, please try again.");
+                        Console.WriteLine("\nInvalid choice, please try again.");
                         break;
                 }
-                Console.WriteLine("Press any key to continue...");
+                Console.WriteLine("\nPress any key to continue...");
                 Console.ReadKey();
 
             } while (ExitFlag != true);
@@ -188,7 +189,7 @@ namespace BasicLibrary
                 int Choice;
                 while ((!int.TryParse(Console.ReadLine(), out Choice))||(Choice > 3)||(Choice < 0))
                 {
-                    Console.WriteLine("Invalid input, please try again:");
+                    Console.WriteLine("\nInvalid input, please try again:");
                 }
                 switch (Choice)
                 {
@@ -213,22 +214,22 @@ namespace BasicLibrary
             List<string> ExistingAdmins = new List<string>();
             for (int i = 0; i < Admins.Count; i++)
             {
-                ExistingAdmins.Add(Admins[i].AdminEmail);
+                ExistingAdmins.Add(Admins[i].AdminEmail.ToLower());
             }
-            Console.WriteLine("Enter new Admin Email:");
+            Console.WriteLine("\nEnter new Admin Email:");
             string NewAdminEmail;
-            while((string.IsNullOrEmpty(NewAdminEmail = Console.ReadLine())) || (ExistingAdmins.Contains(NewAdminEmail)))
+            while((string.IsNullOrEmpty(NewAdminEmail = Console.ReadLine().ToLower())) || (ExistingAdmins.Contains(NewAdminEmail.ToLower())))
             {
-                Console.WriteLine("Invalid Email, please try again:");
+                Console.WriteLine("\nInvalid Email, please try again:");
             }
-            Console.WriteLine($"Enter the password for {NewAdminEmail}:");
+            Console.WriteLine($"\nEnter the password for {NewAdminEmail}:");
             string NewAdminPass;
-            while (string.IsNullOrEmpty(NewAdminPass = Console.ReadLine()))
+            while (string.IsNullOrEmpty(NewAdminPass = Console.ReadLine().ToLower()))
             {
-                Console.WriteLine("Invalid Password, please try again:");
+                Console.WriteLine("\nInvalid Password, please try again:");
             }
             Admins.Add((NewAdminEmail, NewAdminPass));
-            Console.WriteLine($"Admin {NewAdminEmail} added successfully.");
+            Console.WriteLine($"\nAdmin {NewAdminEmail} added successfully.");
         }
         static void EditAdmin()
         {
@@ -265,29 +266,29 @@ namespace BasicLibrary
                         List<string> ExistingAdmins = new List<string>();
                         for (int i = 0; i < Admins.Count; i++)
                         {
-                            ExistingAdmins.Add(Admins[i].AdminEmail);
+                            ExistingAdmins.Add(Admins[i].AdminEmail.ToLower());
                         }
                         Console.WriteLine($"\nEnter the new Email for {Admins[ChosenAdmin - 1].AdminEmail}: ");
                         string NewEmail;
-                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine())) || (ExistingAdmins.Contains(NewEmail)))
+                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine().ToLower())) || (ExistingAdmins.Contains(NewEmail)))
                         {
-                            Console.WriteLine("Invalid input, please try again:");
+                            Console.WriteLine("\nInvalid input, please try again:");
                         }
                         string OldEmail = Admins[ChosenAdmin - 1].AdminEmail;
                         Admins[ChosenAdmin - 1] = (NewEmail, Admins[ChosenAdmin - 1].AdminPass);
-                        Console.WriteLine($"Admin \"{OldEmail}\" Email changed to: {NewEmail}.");
+                        Console.WriteLine($"\nAdmin \"{OldEmail}\" Email changed to: {NewEmail}.");
                         break;
 
                     case 2:
                         Console.WriteLine($"\nEnter the new Password for {Admins[ChosenAdmin - 1].AdminEmail}: ");
                         string NewPass;
-                        while (string.IsNullOrEmpty(NewPass = Console.ReadLine()))
+                        while (string.IsNullOrEmpty(NewPass = Console.ReadLine().ToLower()))
                         {
-                            Console.WriteLine("Invalid input, please try again:");
+                            Console.WriteLine("\nInvalid input, please try again:");
                         }
                         string OldPass = Admins[ChosenAdmin - 1].AdminPass;
                         Admins[ChosenAdmin - 1] = (Admins[ChosenAdmin - 1].AdminEmail, NewPass);
-                        Console.WriteLine($"\"{Admins[ChosenAdmin - 1].AdminEmail}\" Password changed from: {OldPass} to: {NewPass}.");
+                        Console.WriteLine($"\n\"{Admins[ChosenAdmin - 1].AdminEmail}\" Password changed from: {OldPass} to: {NewPass}.");
                         break;
 
                     case 3:
@@ -295,19 +296,19 @@ namespace BasicLibrary
                         {
                             string RemovedAdmin = Admins[ChosenAdmin - 1].AdminEmail;
                             Admins.RemoveAt(ChosenAdmin - 1);
-                            Console.WriteLine($"Admin \"{RemovedAdmin}\" has been removed from the Admins File.");
+                            Console.WriteLine($"\nAdmin \"{RemovedAdmin}\" has been removed from the Admins File.");
                         }
                         else
                         {
-                            Console.WriteLine("Cannot remove the last remaining admin.\nPlease add another admin account before deleting this account.");
+                            Console.WriteLine("\nCannot remove the last remaining admin.\nPlease add another admin account before deleting this account.");
                         }
                         break;
 
                     default:
-                        Console.WriteLine("Invalid input, please try again.");
+                        Console.WriteLine("\nInvalid input, please try again.");
                         break;
                 }
-                Console.WriteLine("Press any key to continue...");
+                Console.WriteLine("\nPress any key to continue...");
                 Console.ReadKey();
             } while (!ExitFlag);
         }
@@ -352,7 +353,7 @@ namespace BasicLibrary
                 int choice;
                 while (!int.TryParse(Console.ReadLine(), out choice))
                 {
-                    Console.WriteLine("Invalid input, please try again: ");
+                    Console.WriteLine("\nInvalid input, please try again: ");
                 }
 
                 switch (choice)
@@ -387,10 +388,10 @@ namespace BasicLibrary
                         break;
 
                     default:
-                        Console.WriteLine("Invalid choice, please try again.");
+                        Console.WriteLine("\nInvalid choice, please try again.");
                         break;
                 }
-                Console.WriteLine("Press any key to continue...");
+                Console.WriteLine("\nPress any key to continue...");
                 Console.ReadKey();
 
             } while (ExitFlag != true);
@@ -451,7 +452,7 @@ namespace BasicLibrary
                 int Choice;
                 while ((!int.TryParse(Console.ReadLine(), out Choice)) || (Choice > 3) || (Choice < 0))
                 {
-                    Console.WriteLine("Invalid input, please try again:");
+                    Console.WriteLine("\nInvalid input, please try again:");
                 }
                 switch (Choice)
                 {
@@ -468,7 +469,7 @@ namespace BasicLibrary
                         ExitFlag = true;
                         break;
                 }
-                Console.WriteLine("Press any key to continue...");
+                Console.WriteLine("\nPress any key to continue...");
                 Console.ReadKey();
                 Console.Clear();
             } while (!ExitFlag);
@@ -478,7 +479,7 @@ namespace BasicLibrary
             List<string> ExistingUsers = new List<string>();
             for (int i = 0; i < Users.Count; i++)
             {
-                ExistingUsers.Add(Users[i].UserEmail);
+                ExistingUsers.Add(Users[i].UserEmail.ToLower());
             }
             int NewUserID;
             if (Users.Count > 0)
@@ -489,20 +490,20 @@ namespace BasicLibrary
             {
                 NewUserID = 1;
             }
-            Console.WriteLine("Enter new User Email:");
+            Console.WriteLine("\nEnter new User Email:");
             string NewUserEmail;
-            while ((string.IsNullOrEmpty(NewUserEmail = Console.ReadLine())) || (ExistingUsers.Contains(NewUserEmail)))
+            while ((string.IsNullOrEmpty(NewUserEmail = Console.ReadLine().ToLower())) || (ExistingUsers.Contains(NewUserEmail)))
             {
-                Console.WriteLine("Invalid Email, please try again:");
+                Console.WriteLine("\nInvalid Email, please try again:");
             }
-            Console.WriteLine($"Enter the password for {NewUserEmail}:");
+            Console.WriteLine($"\nEnter the password for {NewUserEmail}:");
             string NewUserPass;
-            while (string.IsNullOrEmpty(NewUserPass = Console.ReadLine()))
+            while (string.IsNullOrEmpty(NewUserPass = Console.ReadLine().ToLower()))
             {
-                Console.WriteLine("Invalid Password, please try again:");
+                Console.WriteLine("\nInvalid Password, please try again:");
             }
             Users.Add((NewUserID, NewUserEmail, NewUserPass));
-            Console.WriteLine($"User {NewUserID} added successfully.");
+            Console.WriteLine($"\nUser {NewUserID} added successfully.");
         }
         static void EditUser()
         {
@@ -539,41 +540,41 @@ namespace BasicLibrary
                         List<string> ExistingUsers = new List<string>();
                         for (int i = 0; i < Users.Count; i++)
                         {
-                            ExistingUsers.Add(Users[i].UserEmail);
+                            ExistingUsers.Add(Users[i].UserEmail.ToLower());
                         }
                         Console.WriteLine($"\nEnter the new Email for user {Users[ChosenUser - 1].UserID}: ");
                         string NewEmail;
-                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine())) || (ExistingUsers.Contains(NewEmail)))
+                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine().ToLower())) || (ExistingUsers.Contains(NewEmail)))
                         {
-                            Console.WriteLine("Invalid input, please try again:");
+                            Console.WriteLine("\nInvalid input, please try again:");
                         }
                         Users[ChosenUser - 1] = (Users[ChosenUser-1].UserID, NewEmail, Users[ChosenUser - 1].UserPass);
-                        Console.WriteLine($"User \"{Users[ChosenUser - 1].UserID}\" Email changed to: {NewEmail}.");
+                        Console.WriteLine($"\nUser \"{Users[ChosenUser - 1].UserID}\" Email changed to: {NewEmail}.");
                         break;
 
                     case 2:
                         Console.WriteLine($"\nEnter the new Password for user {Users[ChosenUser - 1].UserID}: ");
                         string NewPass;
-                        while (string.IsNullOrEmpty(NewPass = Console.ReadLine()))
+                        while (string.IsNullOrEmpty(NewPass = Console.ReadLine().ToLower()))
                         {
-                            Console.WriteLine("Invalid input, please try again:");
+                            Console.WriteLine("\nInvalid input, please try again:");
                         }
                         string OldPass = Users[ChosenUser - 1].UserPass;
                         Users[ChosenUser - 1] = (Users[ChosenUser - 1].UserID, Users[ChosenUser - 1].UserEmail, NewPass);
-                        Console.WriteLine($"\"{Users[ChosenUser - 1].UserID}\" Password changed from: {OldPass} to: {NewPass}.");
+                        Console.WriteLine($"\n\"{Users[ChosenUser - 1].UserID}\" Password changed from: {OldPass} to: {NewPass}.");
                         break;
 
                     case 3:
                         int RemovedUser = Users[ChosenUser - 1].UserID;
                         Users.RemoveAt(ChosenUser - 1);
-                        Console.WriteLine($"User \"{RemovedUser}\" has been removed from the Users File.");
+                        Console.WriteLine($"\nUser \"{RemovedUser}\" has been removed from the Users File.");
                         break;
 
                     default:
-                        Console.WriteLine("Invalid input, please try again.");
+                        Console.WriteLine("\nInvalid input, please try again.");
                         break;
                 }
-                Console.WriteLine("Press any key to continue...");
+                Console.WriteLine("\nPress any key to continue...");
                 Console.ReadKey();
             } while (!ExitFlag);
         }
@@ -602,15 +603,15 @@ namespace BasicLibrary
 
             string UsrEmail;
             string UsrPass;
-            Console.WriteLine("Enter user Email:");
-            while (string.IsNullOrEmpty(UsrEmail = Console.ReadLine()))
+            Console.WriteLine("\nEnter user Email:");
+            while (string.IsNullOrEmpty(UsrEmail = Console.ReadLine().ToLower()))
             {
-                Console.WriteLine("Invalid input, please try again:");
+                Console.WriteLine("\nInvalid input, please try again:");
             }
-            Console.WriteLine("Enter user Password:");
-            while (string.IsNullOrEmpty(UsrPass = Console.ReadLine()))
+            Console.WriteLine("\nEnter user Password:");
+            while (string.IsNullOrEmpty(UsrPass = Console.ReadLine().ToLower()))
             {
-                Console.WriteLine("Invalid input, please try again:");
+                Console.WriteLine("\nInvalid input, please try again:");
             }
             for (int i = 0; i < Users.Count; i++)
             {
@@ -629,11 +630,11 @@ namespace BasicLibrary
             {
                 Console.Clear();
                 CurrentUser = -1;
-                Console.WriteLine("Welcome to Busaidi Library!\n\nEnter (1) to login | (2) to sign up | (0) to Exit");
+                Console.WriteLine("\nWelcome to Busaidi Library!\n\nEnter (1) to login | (2) to sign up | (0) to Exit");
                 int LoginSignUp;
                 while((!int.TryParse(Console.ReadLine(), out LoginSignUp))||(LoginSignUp > 2) ||(LoginSignUp < 0))
                 {
-                    Console.WriteLine("Invalid input, please try again:");
+                    Console.WriteLine("\nInvalid input, please try again:");
                 }
                 if (LoginSignUp == 1)
                 {
@@ -653,7 +654,7 @@ namespace BasicLibrary
             do
             {
                 Console.Clear();
-                Console.WriteLine("Welcome to the Lirary!");
+                Console.WriteLine("Welcome to the Library!");
                 Console.WriteLine("\nEnter the number of the service required:");
                 Console.WriteLine("\n1. Search book");
                 Console.WriteLine("\n2. Borrow book");
@@ -663,7 +664,7 @@ namespace BasicLibrary
                 int choice;
                 while (!int.TryParse(Console.ReadLine(), out choice))
                 {
-                    Console.WriteLine("Invalid input, please try again: ");
+                    Console.WriteLine("\nInvalid input, please try again: ");
                 }
                 Console.Clear();
                 switch (choice)
@@ -682,14 +683,15 @@ namespace BasicLibrary
 
                     case 0:
                         SaveBooksToFile();
+                        CurrentUser = -1;
                         ExitFlag = true;
                         break;
 
                     default:
-                        Console.WriteLine("Invalid choice, please try again...");
+                        Console.WriteLine("\nInvalid choice, please try again...");
                         break;
                 }
-                Console.WriteLine("Press any key to continue...");
+                Console.WriteLine("\nPress any key to continue...");
                 Console.ReadKey();
             } while (ExitFlag != true);
         }
@@ -745,20 +747,20 @@ namespace BasicLibrary
             List<string> ExistingBooks = new List<string>();
             for (int i = 0; i < Books.Count; i++)
             {
-                ExistingBooks.Add(Books[i].BName);
+                ExistingBooks.Add(Books[i].BName.ToLower());
             }
-            Console.WriteLine("Enter Book Name");
+            Console.WriteLine("\nEnter Book Name");
             string name;
-            while ((string.IsNullOrEmpty(name = Console.ReadLine())) || (ExistingBooks.Contains(name)))
+            while ((string.IsNullOrEmpty(name = Console.ReadLine())) || (ExistingBooks.Contains(name.ToLower())))
             {
-                Console.WriteLine("Invalid Input, please try again: ");
+                Console.WriteLine("\nInvalid Input, please try again: ");
             }
 
-            Console.WriteLine($"Enter Author Name of \"{name}\": ");
+            Console.WriteLine($"\nEnter Author Name of \"{name}\": ");
             string author;
             while (string.IsNullOrEmpty(author = Console.ReadLine()))
             {
-                Console.WriteLine("Invalid Input, please try again: ");
+                Console.WriteLine("\nInvalid Input, please try again: ");
             }
 
             int ID;
@@ -770,15 +772,14 @@ namespace BasicLibrary
             {
                 ID = 1;
             }
-            Console.WriteLine($"Enter available quantity of \"{name}\": ");
+            Console.WriteLine($"\nEnter available quantity of \"{name}\": ");
             int Qty;
             while ((!int.TryParse(Console.ReadLine(), out Qty)) || (Qty < 1))
             {
-                Console.WriteLine("Invalid input, please try again:");
+                Console.WriteLine("\nInvalid input, please try again:");
             }
             Books.Add(( name, author, ID,  Qty));
-            Console.WriteLine($"Book \"{name}\" Added Succefully");
-
+            Console.WriteLine($"\nBook \"{name}\" Added Succefully");
         }
         static void ViewAllBooks()
         {
@@ -789,20 +790,21 @@ namespace BasicLibrary
             for (int i = 0; i < Books.Count; i++)
             {             
                 BookNumber = i + 1;
-                sb.AppendLine($"{BookNumber}. Book: {Books[i].BName} | Author: {Books[i].BAuthor} | ID: {Books[i].ID} | Qty: {Books[i].Qty}");
+                sb.AppendLine($"{BookNumber}. Book: {Books[i].BName} | Author: {Books[i].BAuthor} | ID: {Books[i].ID} | Qty: {Books[i].Qty}\n");
             }
             Console.Clear();
-            Console.WriteLine("Current available books:");
+            Console.WriteLine("Current available books:\n");
             Console.WriteLine(sb.ToString());
             sb.Clear();
         }
         static void SearchForBook(bool AdmnOrUsr)
         {
+            ViewAllBooks();
             Console.WriteLine("Enter the book or author name to search");
             string name;
             while (string.IsNullOrEmpty(name = Console.ReadLine()))
             {
-                Console.WriteLine("Invalid Input, please try again: ");
+                Console.WriteLine("\nInvalid Input, please try again: ");
             }
             bool flag=false;
             bool AuthBooks = false;
@@ -813,15 +815,15 @@ namespace BasicLibrary
             sb.Clear();
             for (int i = 0; i< Books.Count;i++)
             {
-                if (Books[i].BName == name)
+                if (Books[i].BName.ToLower() == name.ToLower())
                 {
-                    Console.WriteLine($"Book details:" +
+                    Console.WriteLine($"\nBook details:" +
                         $"\nName: {Books[i].BName} | Author: {Books[i].BAuthor} | Qty: {Books[i].Qty}");
                     BookIndex = i;
                     flag = true;
                     break;
                 }
-                if (Books[i].BAuthor == name)
+                if (Books[i].BAuthor.ToLower() == name.ToLower())
                 {
                     sb.AppendLine($"{count}. Book Name: {Books[i].BName} | Quantity: {Books[i].Qty}");
                     count++;
@@ -832,12 +834,12 @@ namespace BasicLibrary
             }
             if (AuthBooks && AdmnOrUsr)
             {
-                Console.WriteLine("Choose a book to borrow:");
+                Console.WriteLine("\nChoose a book to borrow:");
                 Console.WriteLine(sb.ToString());
                 int BookChoice;
                 while((!int.TryParse(Console.ReadLine(), out BookChoice))||(BookChoice < 1) ||(BookChoice > BookIds.Count))
                 {
-                    Console.WriteLine("Invalid input, please try again:");
+                    Console.WriteLine("\nInvalid input, please try again:");
                 }
                 for (int i = 0; i<BookIds.Count;i++)
                 {
@@ -851,9 +853,9 @@ namespace BasicLibrary
 
             if (!flag && !AuthBooks)
             { 
-                Console.WriteLine("Book not found"); 
+                Console.WriteLine("\nBook not found"); 
             }
-            else if (!AdmnOrUsr && AuthBooks)
+            else if (!AdmnOrUsr && (AuthBooks || flag))
             {
                 Console.WriteLine(sb.ToString());
             }
@@ -861,19 +863,19 @@ namespace BasicLibrary
             {
                 if (Books[BookIndex].Qty <= 0)
                 {
-                    Console.WriteLine("Sorry, book is out of stock.");
+                    Console.WriteLine("\nSorry, book is out of stock.");
                 }
                 else
                 {
-                    Console.WriteLine("Borrow book? (1)Yes / (2)No:");
+                    Console.WriteLine("\nBorrow book? (1)Yes / (2)No:");
                     int BorrowConf;
                     while((!int.TryParse(Console.ReadLine(), out BorrowConf))||(BorrowConf>2) ||(BorrowConf<1))
                     {
-                        Console.WriteLine("Invalid input, please try again:");
+                        Console.WriteLine("\nInvalid input, please try again:");
                     }
                     if (BorrowConf != 1)
                     {
-                        Console.WriteLine("Returning to menu...");
+                        Console.WriteLine("\nReturning to menu...");
                     }
                     else
                     {
@@ -898,7 +900,7 @@ namespace BasicLibrary
                     int Choice;
                     while(!int.TryParse(Console.ReadLine(), out Choice))
                     {
-                        Console.WriteLine("Invalid input, please try again: ");
+                        Console.WriteLine("\nInvalid input, please try again: ");
                     }
                     Console.Clear();
                     switch (Choice)
@@ -908,35 +910,33 @@ namespace BasicLibrary
                             break;
                         case 2:
                             ViewAllBooks();
-                            Console.WriteLine("Enter the number from the list of book to borrow:");
+                            Console.WriteLine("\nEnter the number from the list of book to borrow:");
                             int BookChoice;
                             while((!int.TryParse(Console.ReadLine(), out BookChoice))||(BookChoice < 1) ||(BookChoice > Books.Count))
                             {
-                                Console.WriteLine("Invalid input, please try again:");
+                                Console.WriteLine("\nInvalid input, please try again:");
                             }
                             BorrowBook(BookChoice - 1);
                             break;
                         case 0:
                             SaveBooksToFile();
-                            Console.WriteLine("Returning to menu...");
+                            Console.WriteLine("\nReturning to menu...");
                             ExitBorrow = true;
                             break;
 
                         default:
-                            Console.WriteLine("Invalid input, please try again:");
+                            Console.WriteLine("\nInvalid input, please try again:");
                             break;
                     }
-                    Console.WriteLine("Press any key to continue...");
-                    Console.ReadKey();
                 } while (!ExitBorrow);
             }
             else
             {
-                Console.WriteLine("Enter the quantity to borrow:");
+                Console.WriteLine("\nEnter the quantity to borrow:");
                 int BorrowQty;
                 while ((!int.TryParse(Console.ReadLine(), out BorrowQty)) || (BorrowQty < 1) || (BorrowQty > Books[BookIndex].Qty))
                 {
-                    Console.WriteLine("Invalid input or exceeds limit, please try again:");
+                    Console.WriteLine("\nInvalid input or exceeds limit, please try again:");
                 }
 
                 bool BorrowedBefore = false;
@@ -962,7 +962,7 @@ namespace BasicLibrary
                 
                 RecommendationSource.Add((CurrentUser, Books[BookIndex].ID, Books[BookIndex].BName));
                 Console.Clear();
-                Console.WriteLine($"{BorrowQty} x {Books[BookIndex].BName} borrowed successfully!");
+                Console.WriteLine($"\n{BorrowQty} x {Books[BookIndex].BName} borrowed successfully!");
                 SaveBorrowedListToFile();
                 SaveBooksToFile();
                 SaveRecommendationSourceToFile(CurrentUser, Books[BookIndex].ID, Books[BookIndex].BName);
@@ -975,7 +975,7 @@ namespace BasicLibrary
             int BorrowedIndex = -1;
             List<int> IDs = new List<int>();
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Borrowed Books:");
+            sb.AppendLine("Borrowed Books:\n");
             for (int i = 0; i < Borrows.Count; i++)
             {
                 if (Borrows[i].UserID == CurrentUser)
@@ -990,14 +990,14 @@ namespace BasicLibrary
                 Console.WriteLine(sb.ToString());
                 int BookChoice;
                 Console.WriteLine("\n\n0. Exit");
-                Console.WriteLine("Enter the ID of book to return:");
+                Console.WriteLine("\nEnter the ID of book to return:");
                 while ((!int.TryParse(Console.ReadLine(), out BookChoice))||(BookChoice < 0) || (!IDs.Contains(BookChoice)))
                 {
-                    Console.WriteLine("Invalid input, please try again: ");
+                    Console.WriteLine("\nInvalid input, please try again: ");
                 }
                 if (BookChoice == 0)
                 {
-                    Console.WriteLine("Cancelling return process...");
+                    Console.WriteLine("\nCancelling return process...");
                 }
                 else
                 {
@@ -1009,15 +1009,15 @@ namespace BasicLibrary
                             break;
                         }
                     }
-                    Console.WriteLine("Enter the quantity to return:");
+                    Console.WriteLine("\nEnter the quantity to return:");
                     int ReturnQty;
                     while ((!int.TryParse(Console.ReadLine(), out ReturnQty)) || (ReturnQty < 0) || (ReturnQty > Borrows[BorrowedIndex].BorrowQty))
                     {
-                        Console.WriteLine("Invalid input or exceeds amount, please try again: ");
+                        Console.WriteLine("\nInvalid input or exceeds amount, please try again: ");
                     }
                     if (ReturnQty == 0)
                     {
-                        Console.WriteLine("Cancelling return process...");
+                        Console.WriteLine("\nCancelling return process...");
                     }
                     else
                     {
@@ -1034,7 +1034,7 @@ namespace BasicLibrary
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"Could not update borrows list...{ex}");
+                            Console.WriteLine($"\nCould not update borrows list...{ex}");
                         }
 
                         for (int i = 0; i < Books.Count; i++)
@@ -1046,14 +1046,14 @@ namespace BasicLibrary
                             }
                         }
 
-                        Console.WriteLine($"{ReturnQty} x {Books[BookChoice - 1].BName} returned successfully!");
+                        Console.WriteLine($"\n{ReturnQty} x {Books[BookChoice - 1].BName} returned successfully!");
                         SaveBooksToFile();
                     }
                 }
             }
             else
             {
-                Console.WriteLine("Current User Has No Borrowed Books...");
+                Console.WriteLine("\nCurrent User Has No Borrowed Books...");
             }
         }
         static void LoadBooksFromFile()
@@ -1074,12 +1074,11 @@ namespace BasicLibrary
                             }
                         }
                     }
-                    Console.WriteLine("Books loaded from file successfully.");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading from file: {ex.Message}");
+                Console.WriteLine($"\nError loading from file: {ex.Message}");
             }
         }
         static void SaveBooksToFile()
@@ -1134,17 +1133,17 @@ namespace BasicLibrary
                         List<string> ExistingBooks = new List<string>();
                         for (int i = 0; i < Books.Count; i++)
                         {
-                            ExistingBooks.Add(Books[i].BName);
+                            ExistingBooks.Add(Books[i].BName.ToLower());
                         }
                         Console.WriteLine($"\nEnter the new name for {Books[ChosenBook - 1].BName}: ");
                         string NewName;
-                        while((string.IsNullOrEmpty(NewName = Console.ReadLine())) || (ExistingBooks.Contains(NewName)))
+                        while((string.IsNullOrEmpty(NewName = Console.ReadLine())) || (ExistingBooks.Contains(NewName.ToLower())))
                         {
-                            Console.WriteLine("Invalid input, please try again:");
+                            Console.WriteLine("\nInvalid input, please try again:");
                         }
                         string OldBName = Books[ChosenBook - 1].BName;
                         Books[ChosenBook - 1] = (NewName, Books[ChosenBook - 1].BAuthor, Books[ChosenBook - 1].ID, Books[ChosenBook - 1].Qty);
-                        Console.WriteLine($"Book \"{OldBName}\" name changed to: {NewName}.");
+                        Console.WriteLine($"\nBook \"{OldBName}\" name changed to: {NewName}.");
                         break;
 
                     case 2:
@@ -1152,11 +1151,11 @@ namespace BasicLibrary
                         string NewAuth;
                         while (string.IsNullOrEmpty(NewAuth = Console.ReadLine()))
                         {
-                            Console.WriteLine("Invalid input, please try again:");
+                            Console.WriteLine("\nInvalid input, please try again:");
                         }
                         string OldAuth = Books[ChosenBook - 1].BAuthor;
                         Books[ChosenBook - 1] = (Books[ChosenBook - 1].BName, NewAuth, Books[ChosenBook - 1].ID, Books[ChosenBook - 1].Qty);
-                        Console.WriteLine($"\"{Books[ChosenBook - 1].BName}\" Author changed from: {OldAuth} to: {NewAuth}.");
+                        Console.WriteLine($"\n\"{Books[ChosenBook - 1].BName}\" Author changed from: {OldAuth} to: {NewAuth}.");
                         break;
 
                     case 3:
@@ -1164,23 +1163,23 @@ namespace BasicLibrary
                         int NewQty;
                         while ((!int.TryParse(Console.ReadLine(), out NewQty))||(NewQty < 1))
                         {
-                            Console.WriteLine("Invalid input, please try again:");
+                            Console.WriteLine("\nInvalid input, please try again:");
                         }
                         Books[ChosenBook - 1] = (Books[ChosenBook - 1].BName, Books[ChosenBook - 1].BAuthor, Books[ChosenBook - 1].ID, (Books[ChosenBook - 1].Qty + NewQty));
-                        Console.WriteLine($"{Books[ChosenBook - 1].BName} Quantity has been increased to {Books[ChosenBook - 1].Qty} successfully.");
+                        Console.WriteLine($"\n{Books[ChosenBook - 1].BName} Quantity has been increased to {Books[ChosenBook - 1].Qty} successfully.");
                         break;
 
                     case 4:
                         string RemovedBook = Books[ChosenBook - 1].BName;
                         Books.RemoveAt(ChosenBook - 1);
-                        Console.WriteLine($"Book \"{RemovedBook}\" has been removed from the library File.");
+                        Console.WriteLine($"\nBook \"{RemovedBook}\" has been removed from the library File.");
                         break;
 
                     default:
-                        Console.WriteLine("Invalid input, please try again.");
+                        Console.WriteLine("\nInvalid input, please try again.");
                         break;
                 }
-                Console.WriteLine("Press any key to continue...");
+                Console.WriteLine("\nPress any key to continue...");
                 Console.ReadKey();
             } while (!ExitFlag);
         }
@@ -1309,13 +1308,13 @@ namespace BasicLibrary
                         break;
                     }
                 }
-                Console.WriteLine($"People who borrowed \"{BorrowedBookName}\" also borrowed:");
+                Console.WriteLine($"\n\nPeople who borrowed \"{BorrowedBookName}\" also borrowed:\n");
                 Console.WriteLine(sb.ToString());
-                Console.WriteLine("Enter the number of the from the list if you want to borrow, or (0) to Exit:");
+                Console.WriteLine("\nEnter the number of the from the list if you want to borrow, or (0) to Exit:");
                 int Choice;
                 while ((!int.TryParse(Console.ReadLine(), out Choice))||(Choice > count) ||(Choice < 0))
                 {
-                    Console.WriteLine("Invalid input, please try again:");
+                    Console.WriteLine("\nInvalid input, please try again:");
                 }
                 if (Choice == 0)
                 {
@@ -1344,12 +1343,12 @@ namespace BasicLibrary
                 {
                     Console.Clear();
                     ViewAllBooks();
-                    Console.WriteLine("\nPage 1 of 4");
+                    Console.WriteLine("\n\nPage 1 of 4");
                     Console.WriteLine("(Right Arrow Key ->) Page 2 | (Esc) to Exit");
                     var PressedKey = Console.ReadKey(true);
                     if (PressedKey.Key == ConsoleKey.Escape)
                     {
-                        break;
+                        return;
                     }
                     else if (PressedKey.Key == ConsoleKey.RightArrow)
                     {
@@ -1359,14 +1358,14 @@ namespace BasicLibrary
                 else if (PageNo == 2)
                 {
                     Console.Clear();
-                    Console.WriteLine("Users Who Are Borrowing Books:");
+                    Console.WriteLine("Users Who Are Borrowing Books:\n");
                     ViewBorrowingUsersStats();
-                    Console.WriteLine("\nPage 2 of 4");
+                    Console.WriteLine("\n\nPage 2 of 4");
                     Console.WriteLine("Page 1 (<- Left Arrow Key) | (Right Arrow Key ->) Page 3 | (Esc) to Exit");
                     var PressedKey = Console.ReadKey(true);
                     if (PressedKey.Key == ConsoleKey.Escape)
                     {
-                        break;
+                        return;
                     }
                     else if (PressedKey.Key == ConsoleKey.RightArrow)
                     {
@@ -1380,14 +1379,14 @@ namespace BasicLibrary
                 else if (PageNo == 3)
                 {
                     Console.Clear();
-                    Console.WriteLine("Books Currently Borrowed:");
+                    Console.WriteLine("Books Currently Borrowed:\n");
                     ViewBorrowedBooksStats();
-                    Console.WriteLine("Page 3 of 4");
+                    Console.WriteLine("\n\nPage 3 of 4");
                     Console.WriteLine("Page 2 (<- Left Arrow Key) | (Right Arrow Key ->) Page 4 | (Esc) to Exit");
                     var PressedKey = Console.ReadKey(true);
                     if (PressedKey.Key == ConsoleKey.Escape)
                     {
-                        break;
+                        return;
                     }
                     else if (PressedKey.Key == ConsoleKey.RightArrow)
                     {
@@ -1403,12 +1402,12 @@ namespace BasicLibrary
                     Console.Clear();
                     Console.WriteLine("Most Common User / Book:\n");
                     MostCommonUserAndBook();
-                    Console.WriteLine("Page 4 of 4");
+                    Console.WriteLine("\n\nPage 4 of 4");
                     Console.WriteLine("Page 3 (<- Left Arrow Key) | (Esc) to Exit");
                     var PressedKey = Console.ReadKey(true);
                     if (PressedKey.Key == ConsoleKey.Escape)
                     {
-                        break;
+                        return;
                     }
                     else if (PressedKey.Key == ConsoleKey.LeftArrow)
                     {
@@ -1451,7 +1450,7 @@ namespace BasicLibrary
             }
             if ((TopUser != 0) && (TopBook != 0))
             {
-                Console.WriteLine($"\nMost Common User: User with ID {TopUserID}");
+                Console.WriteLine($"\n\nMost Common User: User with ID {TopUserID}");
                 Console.WriteLine($"\nMost Common Book: {TopBookName}");
             }
         }
@@ -1473,7 +1472,7 @@ namespace BasicLibrary
                 }
                 if (FoundBook)
                 {
-                    sb.AppendLine($"Book ID: {Books[i].ID} | Name: {Books[i].BName} | Amount Borrowed: {BookSum} | Amount Available: {Books[i].Qty}");
+                    sb.AppendLine($"\nBook ID: {Books[i].ID} | Name: {Books[i].BName} | Amount Borrowed: {BookSum} | Amount Available: {Books[i].Qty}");
                 }
             }
             Console.WriteLine(sb.ToString());
@@ -1483,7 +1482,7 @@ namespace BasicLibrary
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < Borrows.Count; i++)
             {
-                sb.AppendLine($"User ID: {Borrows[i].UserID} | Book Borrowed: {Borrows[i].BookName} x {Borrows[i].BorrowQty}");
+                sb.AppendLine($"\nUser ID: {Borrows[i].UserID} | Book Borrowed: {Borrows[i].BookName} x {Borrows[i].BorrowQty}");
             }
             Console.WriteLine(sb.ToString());
         }
