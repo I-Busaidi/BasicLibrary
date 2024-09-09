@@ -1308,30 +1308,38 @@ namespace BasicLibrary
                         break;
                     }
                 }
-                Console.WriteLine($"\n\nPeople who borrowed \"{BorrowedBookName}\" also borrowed:\n");
-                Console.WriteLine(sb.ToString());
-                Console.WriteLine("\nEnter the number of the from the list if you want to borrow, or (0) to Exit:");
-                int Choice;
-                while ((!int.TryParse(Console.ReadLine(), out Choice))||(Choice > count) ||(Choice < 0))
+                if (OtherBooksUsersBorrowed.Count > 0)
                 {
-                    Console.WriteLine("\nInvalid input, please try again:");
-                }
-                if (Choice == 0)
-                {
-                    return;
+                    Console.WriteLine($"\n\nPeople who borrowed \"{BorrowedBookName}\" also borrowed:\n");
+                    Console.WriteLine(sb.ToString());
+                    Console.WriteLine("\nEnter the number of the from the list if you want to borrow, or (0) to Exit:");
+                    int Choice;
+                    while ((!int.TryParse(Console.ReadLine(), out Choice)) || (Choice > count) || (Choice < 0))
+                    {
+                        Console.WriteLine("\nInvalid input, please try again:");
+                    }
+                    if (Choice == 0)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        int Index = -1;
+                        for (int i = 0; i < Books.Count; i++)
+                        {
+                            if (OtherBooksUsersBorrowed[Choice - 1].ID == Books[i].ID)
+                            {
+                                Index = i;
+                                break;
+                            }
+                        }
+                        BorrowBook(Index);
+                    }
                 }
                 else
                 {
-                    int Index = -1;
-                    for (int i = 0; i < Books.Count; i++)
-                    {
-                        if (OtherBooksUsersBorrowed[Choice - 1].ID == Books[i].ID)
-                        {
-                            Index = i;
-                            break;
-                        }
-                    }
-                    BorrowBook(Index);
+                    Console.WriteLine("Press any key to continue...");
+                    Console.ReadKey();
                 }
             }
         }
