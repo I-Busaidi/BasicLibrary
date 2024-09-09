@@ -7,7 +7,7 @@ namespace BasicLibrary
 {
     internal class Program
     {
-        //GLOBAL VARIABLES.
+        // GLOBAL VARIABLES.
         static int CurrentUser;
         static List<(int UserID, string UserEmail, string UserPass)> Users = new List<(int UserID, string UserEmail, string UserPass)>();
         static List<(string AdminEmail, string AdminPass)> Admins = new List<(string AdminEmail, string AdminPass)>() ;
@@ -16,7 +16,7 @@ namespace BasicLibrary
         static List<(int UserID, int BookID, string BookName)> RecommendationSource = new List<(int UserID, int BookID, string BookName)>() ;
 
 
-        //FILE PATHS.
+        // FILE PATHS.
         static string filePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryBooks.txt";
         static string adminsPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryAdmins.txt";
         static string UsersPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryUsers.txt";
@@ -25,14 +25,17 @@ namespace BasicLibrary
 
 
 
-        //MAIN FUNCTION.
+        // MAIN FUNCTION.
         static void Main(string[] args)
         {
+            //Loading the .txt files into the lists of tuples.
             LoadAdminsFromFile();
             LoadUsersFromFile();
             LoadBooksFromFile();
             LoadBorrowedListFromFile();
             LoadRecommendationSourceFromFile();
+
+
             int AccessLevel;
             bool StopApp = false;
             do
@@ -63,7 +66,7 @@ namespace BasicLibrary
 
 
 
-        //ADMINS RELATED FUNCTIONS.
+        // ADMINS RELATED FUNCTIONS.
         static void AuthorityCheck()
         {
             string AdminID;
@@ -403,7 +406,6 @@ namespace BasicLibrary
                         writer.WriteLine($"{admin.AdminEmail}|{admin.AdminPass}");
                     }
                 }
-                Console.WriteLine("Admins info saved to file successfully.");
             }
             catch (Exception ex)
             {
@@ -439,7 +441,7 @@ namespace BasicLibrary
 
 
 
-        //USERS RELATED FUNCTIONS.
+        // USERS RELATED FUNCTIONS.
         static void ManageUsers()
         {
             bool ExitFlag = false;
@@ -702,7 +704,6 @@ namespace BasicLibrary
                         writer.WriteLine($"{user.UserID}|{user.UserEmail}|{user.UserPass}");
                     }
                 }
-                Console.WriteLine("Users info saved to file successfully.");
             }
             catch (Exception ex)
             {
@@ -738,7 +739,7 @@ namespace BasicLibrary
 
 
 
-        //BOOKS RELATED FUNCTIONS.
+        // BOOKS RELATED FUNCTIONS.
         static void AddnNewBook()
         {
             List<string> ExistingBooks = new List<string>();
@@ -790,6 +791,8 @@ namespace BasicLibrary
                 BookNumber = i + 1;
                 sb.AppendLine($"{BookNumber}. Book: {Books[i].BName} | Author: {Books[i].BAuthor} | ID: {Books[i].ID} | Qty: {Books[i].Qty}");
             }
+            Console.Clear();
+            Console.WriteLine("Current available books:");
             Console.WriteLine(sb.ToString());
             sb.Clear();
         }
@@ -962,7 +965,7 @@ namespace BasicLibrary
                 Console.WriteLine($"{BorrowQty} x {Books[BookIndex].BName} borrowed successfully!");
                 SaveBorrowedListToFile();
                 SaveBooksToFile();
-                SaveRecommendationSourceToFile();
+                SaveRecommendationSourceToFile(CurrentUser, Books[BookIndex].ID, Books[BookIndex].BName);
                 RecommendationBooks(Books[BookIndex].ID, Books[BookIndex].BName, CurrentUser);
             }
         }
@@ -1090,7 +1093,6 @@ namespace BasicLibrary
                         writer.WriteLine($"{book.BName}|{book.BAuthor}|{book.ID}|{book.Qty}");
                     }
                 }
-                Console.WriteLine("Books saved to file successfully.");
             }
             catch (Exception ex)
             {
@@ -1185,7 +1187,7 @@ namespace BasicLibrary
 
 
 
-        //UTILITY FUNCTIONS.
+        // UTILITY / REPORTS FUNCTIONS.
         static void SaveBorrowedListToFile()
         {
             try
@@ -1197,7 +1199,6 @@ namespace BasicLibrary
                         writer.WriteLine($"{Borrow.UserID}|{Borrow.BookID}|{Borrow.BookName}|{Borrow.BorrowQty}");
                     }
                 }
-                Console.WriteLine("Borrowing info saved to file successfully.");
             }
             catch (Exception ex)
             {
@@ -1230,16 +1231,13 @@ namespace BasicLibrary
                 Console.WriteLine($"Error loading from file: {ex.Message}");
             }
         }
-        static void SaveRecommendationSourceToFile()
+        static void SaveRecommendationSourceToFile(int UID, int BID, string BName)
         {
             try
             {
                 using (StreamWriter writer = new StreamWriter(RecommendationSourcePath, true))
                 {
-                    foreach (var Source in RecommendationSource)
-                    {
-                        writer.WriteLine($"{Source.UserID}|{Source.BookID}|{Source.BookName}");
-                    }
+                    writer.WriteLine($"{UID}|{BID}|{BName}");
                 }
             }
             catch (Exception ex)
@@ -1294,7 +1292,7 @@ namespace BasicLibrary
                 {
                     for(int j = 0; j < RecommendationSource.Count; j++)
                     {
-                        if ((RecommendationSource[j].UserID == UsersWhoBorrowedBook[i]) && (RecommendationSource[j].BookID != BorrowedBookID))
+                        if ((RecommendationSource[j].UserID == UsersWhoBorrowedBook[i]) && (RecommendationSource[j].BookID != BorrowedBookID) && (!OtherBooksUsersBorrowed.Contains((RecommendationSource[j].BookID, RecommendationSource[j].BookName))))
                         {
                             OtherBooksUsersBorrowed.Add((RecommendationSource[j].BookID, RecommendationSource[j].BookName));
                         }
@@ -1345,9 +1343,8 @@ namespace BasicLibrary
                 if (PageNo == 1)
                 {
                     Console.Clear();
-                    Console.WriteLine("Current available books:");
                     ViewAllBooks();
-                    Console.WriteLine("Page 1 of 4");
+                    Console.WriteLine("\nPage 1 of 4");
                     Console.WriteLine("(Right Arrow Key ->) Page 2 | (Esc) to Exit");
                     var PressedKey = Console.ReadKey(true);
                     if (PressedKey.Key == ConsoleKey.Escape)
@@ -1364,7 +1361,7 @@ namespace BasicLibrary
                     Console.Clear();
                     Console.WriteLine("Users Who Are Borrowing Books:");
                     ViewBorrowingUsersStats();
-                    Console.WriteLine("Page 2 of 4");
+                    Console.WriteLine("\nPage 2 of 4");
                     Console.WriteLine("Page 1 (<- Left Arrow Key) | (Right Arrow Key ->) Page 3 | (Esc) to Exit");
                     var PressedKey = Console.ReadKey(true);
                     if (PressedKey.Key == ConsoleKey.Escape)
@@ -1404,6 +1401,7 @@ namespace BasicLibrary
                 else if (PageNo == 4)
                 {
                     Console.Clear();
+                    Console.WriteLine("Most Common User / Book:\n");
                     MostCommonUserAndBook();
                     Console.WriteLine("Page 4 of 4");
                     Console.WriteLine("Page 3 (<- Left Arrow Key) | (Esc) to Exit");
@@ -1431,11 +1429,11 @@ namespace BasicLibrary
                 int UserOccur = 0;
                 for (int j = 0; j < RecommendationSource.Count; j++)
                 {
-                    if (RecommendationSource[i].UserID == RecommendationSource[j].UserID)
+                    if ((RecommendationSource[i].UserID == RecommendationSource[j].UserID) && (i != j))
                     {
                         UserOccur++;
                     }
-                    if (RecommendationSource[i].BookName == RecommendationSource[j].BookName)
+                    if ((RecommendationSource[i].BookName == RecommendationSource[j].BookName) && (i != j))
                     {
                         BookOccur++;
                     }
@@ -1472,13 +1470,12 @@ namespace BasicLibrary
                         FoundBook = true;
                         BookSum += Borrows[j].BorrowQty;
                     }
-                    if (FoundBook)
-                    {
-                        sb.AppendLine($"Book ID: {Books[i].ID} | Name: {Books[i].BName} | Amount Borrowed: {BookSum} | Amount Available: {Books[i].Qty}");
-                    }
+                }
+                if (FoundBook)
+                {
+                    sb.AppendLine($"Book ID: {Books[i].ID} | Name: {Books[i].BName} | Amount Borrowed: {BookSum} | Amount Available: {Books[i].Qty}");
                 }
             }
-            Console.WriteLine("Borrowed Books Statistics:");
             Console.WriteLine(sb.ToString());
         }
         static void ViewBorrowingUsersStats()
