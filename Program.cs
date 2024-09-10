@@ -9,8 +9,8 @@ namespace BasicLibrary
     {
         // GLOBAL VARIABLES.
         static int CurrentUser=-1; // saves the id of current user
-        static List<(int UserID, string UserEmail, string UserPass, string UserName)> Users = new List<(int UserID, string UserEmail, string UserPass ,string UserName)>(); // Users list
-        static List<(string AdminEmail, string AdminPass)> Admins = new List<(string AdminEmail, string AdminPass)>() ; // Admins list
+        static List<(int UserID, string UserName, string UserEmail, string UserPass)> Users = new List<(int UserID, string UserName, string UserEmail, string UserPass)>(); // Users list
+        static List<(int AdminID, string AdminName, string AdminEmail, string AdminPass)> Admins = new List<(int AdminID, string AdminName, string AdminEmail, string AdminPass)>() ; // Admins list
         static List<(string BName, string BAuthor, int ID, int Qty)> Books = new List<(string BName, string BAuthor, int ID, int Qty)>(); // Books list
         static List<(int UserID, int BookID, string BookName, int BorrowQty)> Borrows = new List<(int UserID, int BookID, string BookName, int BorrowQty)>(); // Current borrows list
         static List<(int UserID, int BookID, string BookName)> RecommendationSource = new List<(int UserID, int BookID, string BookName)>() ; // all borrows list
@@ -36,7 +36,7 @@ namespace BasicLibrary
             LoadRecommendationSourceFromFile();
             if(Admins.Count < 1)
             {
-                Admins.Add(("admin", "admin")); //temporary admin id and pass in case there is no admin registered.
+                Admins.Add((1,"admin","admin", "admin")); //temporary admin id and pass in case there is no admin registered.
             }
             int AccessLevel;
             bool StopApp = false;
@@ -218,6 +218,23 @@ namespace BasicLibrary
             {
                 ExistingAdmins.Add(Admins[i].AdminEmail.ToLower());
             } // Adding current admins Ids to a temporary list to prevent dublicate admin Ids
+
+            int AdminID;
+            if (Admins.Count < 1)
+            {
+                AdminID = 1;
+            }
+            else
+            {
+                AdminID = Admins[Admins.Count - 1].AdminID + 1;
+            }
+
+            Console.WriteLine("\nEnter new Admin Name:");
+            string NewAdminName;
+            while ((string.IsNullOrEmpty(NewAdminName = Console.ReadLine().ToLower())))
+            {
+                Console.WriteLine("\nInvalid name, please try again:");
+            }
             Console.WriteLine("\nEnter new Admin Email:");
             string NewAdminEmail;
             while((string.IsNullOrEmpty(NewAdminEmail = Console.ReadLine().ToLower())) || (ExistingAdmins.Contains(NewAdminEmail.ToLower())))
@@ -230,7 +247,8 @@ namespace BasicLibrary
             {
                 Console.WriteLine("\nInvalid Password, please try again:");
             }
-            Admins.Add((NewAdminEmail, NewAdminPass));
+
+            Admins.Add((AdminID, NewAdminName, NewAdminEmail, NewAdminPass));
             Console.WriteLine($"\nAdmin {NewAdminEmail} added successfully.");
         }
         static void EditAdmin() // used in ManageAdmins() to edit / remove admins
@@ -251,7 +269,7 @@ namespace BasicLibrary
                 {
                     return;
                 }
-                Console.WriteLine("\nChoose an editing option:\n1. Edit Admin Email.\n2. Edit Admin Password.\n3. Remove Admin.\n\n0. Exit.");
+                Console.WriteLine("\nChoose an editing option:\n1. Edit Admin Name.\n2. Edit Admin Email.\n3. Edit Admin Password.\n4. Remove Admin.\n\n0. Exit.");
                 int EditChoice;
                 while ((!int.TryParse(Console.ReadLine(), out EditChoice)) || (EditChoice > 3) || (EditChoice < 0))
                 {
@@ -265,6 +283,18 @@ namespace BasicLibrary
                         break;
 
                     case 1:
+                        Console.WriteLine($"\nEnter the new Name for {Admins[ChosenAdmin - 1].AdminEmail}: ");
+                        string NewName;
+                        while ((string.IsNullOrEmpty(NewName = Console.ReadLine())))
+                        {
+                            Console.WriteLine("\nInvalid input, please try again:");
+                        }
+                        string OldName = Admins[ChosenAdmin - 1].AdminEmail;
+                        Admins[ChosenAdmin - 1] = (Admins[ChosenAdmin - 1].AdminID, NewName, Admins[ChosenAdmin - 1].AdminEmail, Admins[ChosenAdmin - 1].AdminPass);
+                        Console.WriteLine($"\nAdmin \"{OldName}\" Name changed to: \"{NewName}\".");
+                        break;
+
+                    case 2:
                         List<string> ExistingAdmins = new List<string>();
                         for (int i = 0; i < Admins.Count; i++)
                         {
@@ -277,11 +307,11 @@ namespace BasicLibrary
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
                         string OldEmail = Admins[ChosenAdmin - 1].AdminEmail;
-                        Admins[ChosenAdmin - 1] = (NewEmail, Admins[ChosenAdmin - 1].AdminPass);
+                        Admins[ChosenAdmin - 1] = (Admins[ChosenAdmin - 1].AdminID, Admins[ChosenAdmin - 1].AdminName, NewEmail, Admins[ChosenAdmin - 1].AdminPass);
                         Console.WriteLine($"\nAdmin \"{OldEmail}\" Email changed to: {NewEmail}.");
                         break;
 
-                    case 2:
+                    case 3:
                         Console.WriteLine($"\nEnter the new Password for {Admins[ChosenAdmin - 1].AdminEmail}: ");
                         string NewPass;
                         while (string.IsNullOrEmpty(NewPass = Console.ReadLine().ToLower()))
@@ -289,11 +319,11 @@ namespace BasicLibrary
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
                         string OldPass = Admins[ChosenAdmin - 1].AdminPass;
-                        Admins[ChosenAdmin - 1] = (Admins[ChosenAdmin - 1].AdminEmail, NewPass);
+                        Admins[ChosenAdmin - 1] = (Admins[ChosenAdmin - 1].AdminID, Admins[ChosenAdmin - 1].AdminName, Admins[ChosenAdmin - 1].AdminEmail, NewPass);
                         Console.WriteLine($"\n\"{Admins[ChosenAdmin - 1].AdminEmail}\" Password changed from: {OldPass} to: {NewPass}.");
                         break;
 
-                    case 3:
+                    case 4:
                         if (Admins.Count > 1)
                         {
                             string RemovedAdmin = Admins[ChosenAdmin - 1].AdminEmail;
@@ -323,13 +353,13 @@ namespace BasicLibrary
             for (int i = 0; i < Admins.Count; i++)
             {
                 AdmnNumber = i + 1;
-                sb.Append("Admin ").Append(AdmnNumber).Append(" Email: ").Append(Admins[i].AdminEmail);
+                sb.Append("Admin ").Append(AdmnNumber).Append(" Email: ").Append(Admins[i].AdminEmail).Append(" Name: ").Append(Admins[i].AdminName);
                 if(i == 0)
                 {
                     sb.Append(" *ADMIN MASTER*");
                 }
                 sb.AppendLine();
-                sb.Append(" Password: ").Append(Admins[i].AdminPass);
+                sb.Append(" Password: ").Append(Admins[i].AdminPass).Append(" ID: ").Append(Admins[i].AdminID);
                 sb.AppendLine().AppendLine();
                 Console.WriteLine(sb.ToString());
                 sb.Clear();
@@ -406,7 +436,7 @@ namespace BasicLibrary
                 {
                     foreach (var admin in Admins)
                     {
-                        writer.WriteLine($"{admin.AdminEmail}|{admin.AdminPass}");
+                        writer.WriteLine($"{admin.AdminID}|{admin.AdminName}|{admin.AdminEmail}|{admin.AdminPass}");
                     }
                 }
             }
@@ -427,9 +457,9 @@ namespace BasicLibrary
                         while ((line = reader.ReadLine()) != null)
                         {
                             var parts = line.Split('|');
-                            if (parts.Length == 2)
+                            if (parts.Length == 4)
                             {
-                                Admins.Add((parts[0], parts[1]));
+                                Admins.Add((int.Parse(parts[0]), parts[1], parts[2], parts[3]));
                             }
                         }
                     }
@@ -510,7 +540,7 @@ namespace BasicLibrary
             {
                 Console.WriteLine("\nInvalid Password, please try again:");
             }
-            Users.Add((NewUserID, NewUserEmail, NewUserPass, NewUserName));
+            Users.Add((NewUserID, NewUserName, NewUserEmail, NewUserPass));
             Console.WriteLine($"\nUser {NewUserID} added successfully.");
         }
         static void EditUser() // edit user email and/or password or delete user
@@ -552,7 +582,7 @@ namespace BasicLibrary
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
                         string OldName = Users[ChosenUser - 1].UserName;
-                        Users[ChosenUser - 1] = (Users[ChosenUser - 1].UserID, Users[ChosenUser - 1].UserEmail, Users[ChosenUser - 1].UserPass, NewName);
+                        Users[ChosenUser - 1] = (Users[ChosenUser - 1].UserID, NewName, Users[ChosenUser - 1].UserEmail, Users[ChosenUser - 1].UserPass);
                         Console.WriteLine($"\n\"{Users[ChosenUser - 1].UserID}\" Password changed from: {OldName} to: {NewName}.");
                         break;
 
@@ -568,7 +598,7 @@ namespace BasicLibrary
                         {
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
-                        Users[ChosenUser - 1] = (Users[ChosenUser-1].UserID, NewEmail, Users[ChosenUser - 1].UserPass, Users[ChosenUser - 1].UserName);
+                        Users[ChosenUser - 1] = (Users[ChosenUser - 1].UserID, Users[ChosenUser - 1].UserName, NewEmail, Users[ChosenUser - 1].UserPass);
                         Console.WriteLine($"\nUser \"{Users[ChosenUser - 1].UserID}\" Email changed to: {NewEmail}.");
                         break;
 
@@ -580,7 +610,7 @@ namespace BasicLibrary
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
                         string OldPass = Users[ChosenUser - 1].UserPass;
-                        Users[ChosenUser - 1] = (Users[ChosenUser - 1].UserID, Users[ChosenUser - 1].UserEmail, NewPass, Users[ChosenUser - 1].UserName);
+                        Users[ChosenUser - 1] = (Users[ChosenUser - 1].UserID, Users[ChosenUser - 1].UserName, Users[ChosenUser - 1].UserEmail, NewPass);
                         Console.WriteLine($"\n\"{Users[ChosenUser - 1].UserID}\" Password changed from: {OldPass} to: {NewPass}.");
                         break;
 
@@ -612,6 +642,7 @@ namespace BasicLibrary
                 sb.Append(" Password: ").Append(Users[i].UserPass);
                 sb.AppendLine();
                 sb.Append(" ID: ").Append(Users[i].UserID);
+                sb.Append(" Name: ").Append(Users[i].UserName);
                 sb.AppendLine().AppendLine();
                 Console.WriteLine(sb.ToString());
                 sb.Clear();
@@ -723,7 +754,7 @@ namespace BasicLibrary
                 {
                     foreach (var user in Users)
                     {
-                        writer.WriteLine($"{user.UserID}|{user.UserEmail}|{user.UserPass}|{user.UserName}");
+                        writer.WriteLine($"{user.UserID}|{user.UserName}|{user.UserEmail}|{user.UserPass}");
                     }
                 }
             }
