@@ -8,20 +8,20 @@ namespace BasicLibrary
     internal class Program
     {
         // GLOBAL VARIABLES.
-        static int CurrentUser=-1;
-        static List<(int UserID, string UserEmail, string UserPass)> Users = new List<(int UserID, string UserEmail, string UserPass)>();
-        static List<(string AdminEmail, string AdminPass)> Admins = new List<(string AdminEmail, string AdminPass)>() ;
-        static List<(string BName, string BAuthor, int ID, int Qty)> Books = new List<(string BName, string BAuthor, int ID, int Qty)>();
-        static List<(int UserID, int BookID, string BookName, int BorrowQty)> Borrows = new List<(int UserID, int BookID, string BookName, int BorrowQty)>();
-        static List<(int UserID, int BookID, string BookName)> RecommendationSource = new List<(int UserID, int BookID, string BookName)>() ;
+        static int CurrentUser=-1; // saves the id of current user
+        static List<(int UserID, string UserEmail, string UserPass)> Users = new List<(int UserID, string UserEmail, string UserPass)>(); // Users list
+        static List<(string AdminEmail, string AdminPass)> Admins = new List<(string AdminEmail, string AdminPass)>() ; // Admins list
+        static List<(string BName, string BAuthor, int ID, int Qty)> Books = new List<(string BName, string BAuthor, int ID, int Qty)>(); // Books list
+        static List<(int UserID, int BookID, string BookName, int BorrowQty)> Borrows = new List<(int UserID, int BookID, string BookName, int BorrowQty)>(); // Current borrows list
+        static List<(int UserID, int BookID, string BookName)> RecommendationSource = new List<(int UserID, int BookID, string BookName)>() ; // all borrows list
 
 
         // FILE PATHS.
-        static string filePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryBooks.txt";
-        static string adminsPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryAdmins.txt";
-        static string UsersPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryUsers.txt";
-        static string BorrowListPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\BorrowList.txt";
-        static string RecommendationSourcePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\RecommendationSourceList.txt";
+        static string filePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryBooks.txt"; // Library books are saved here.
+        static string adminsPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryAdmins.txt"; // Admins are saved here.
+        static string UsersPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryUsers.txt"; // Users are saved here
+        static string BorrowListPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\BorrowList.txt"; // Users currently borrowing books are saved here.
+        static string RecommendationSourcePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\RecommendationSourceList.txt"; // The history of all borrowings is saved here.
 
 
 
@@ -34,8 +34,10 @@ namespace BasicLibrary
             LoadBooksFromFile();
             LoadBorrowedListFromFile();
             LoadRecommendationSourceFromFile();
-
-
+            if(Admins.Count < 1)
+            {
+                Admins.Add(("admin", "admin")); //temporary admin id and pass in case there is no admin registered.
+            }
             int AccessLevel;
             bool StopApp = false;
             do
@@ -67,13 +69,13 @@ namespace BasicLibrary
 
 
         // ADMINS RELATED FUNCTIONS.
-        static void AuthorityCheck()
+        static void AuthorityCheck() // Function to check access level of admin (admin / Master admin)
         {
             string AdminID;
             string AdminPass;
             bool AdminFlag = false;
             bool MasterAdminFlag = false;
-            Console.WriteLine("!!TOP SECRET!!\n(Master Admin Email: admin@admin.com)");
+            Console.WriteLine($"!!TOP SECRET!!\n(Master Admin Email: {Admins[0].AdminEmail})");
             Console.WriteLine("\nEnter Admin ID:");
             while (string.IsNullOrEmpty(AdminID = Console.ReadLine().ToLower()))
             {
@@ -86,11 +88,11 @@ namespace BasicLibrary
             }
             for (int i = 0; i < Admins.Count; i++)
             {
-                if ((Admins[i].AdminEmail.ToLower() == AdminID) && (Admins[i].AdminPass.ToLower() == AdminPass))
+                if ((Admins[i].AdminEmail.ToLower() == AdminID) && (Admins[i].AdminPass.ToLower() == AdminPass)) //check if admin exist
                 {
                     AdminFlag = true;
                 }
-                if (AdminFlag)
+                if (AdminFlag) // if admin id and pass are correct, check if it is Master admin (first admin)
                 {
                     if (i == 0)
                     {
@@ -111,7 +113,7 @@ namespace BasicLibrary
                 Console.WriteLine("\nInvalid Admin Email or Password, please try again.");
             }
         }
-        static void MasterAdmin()
+        static void MasterAdmin() // Master admin menu
         {
             bool ExitFlag = false;
             do
@@ -180,7 +182,7 @@ namespace BasicLibrary
 
             } while (ExitFlag != true);
         }
-        static void ManageAdmins()
+        static void ManageAdmins() // Add admins OR edit admins credentials / remove admin
         {
             bool ExitFlag = false;
             do
@@ -209,13 +211,13 @@ namespace BasicLibrary
                 Console.Clear();
             } while (!ExitFlag);
         }
-        static void AddNewAdmin()
+        static void AddNewAdmin() // used in ManageAdmins() to add admins
         {
             List<string> ExistingAdmins = new List<string>();
             for (int i = 0; i < Admins.Count; i++)
             {
                 ExistingAdmins.Add(Admins[i].AdminEmail.ToLower());
-            }
+            } // Adding current admins Ids to a temporary list to prevent dublicate admin Ids
             Console.WriteLine("\nEnter new Admin Email:");
             string NewAdminEmail;
             while((string.IsNullOrEmpty(NewAdminEmail = Console.ReadLine().ToLower())) || (ExistingAdmins.Contains(NewAdminEmail.ToLower())))
@@ -231,7 +233,7 @@ namespace BasicLibrary
             Admins.Add((NewAdminEmail, NewAdminPass));
             Console.WriteLine($"\nAdmin {NewAdminEmail} added successfully.");
         }
-        static void EditAdmin()
+        static void EditAdmin() // used in ManageAdmins() to edit / remove admins
         {
             bool ExitFlag = false;
             do
@@ -443,7 +445,7 @@ namespace BasicLibrary
 
 
         // USERS RELATED FUNCTIONS.
-        static void ManageUsers()
+        static void ManageUsers() // used by admins to edit / add / remove users
         {
             bool ExitFlag = false;
             do
@@ -505,7 +507,7 @@ namespace BasicLibrary
             Users.Add((NewUserID, NewUserEmail, NewUserPass));
             Console.WriteLine($"\nUser {NewUserID} added successfully.");
         }
-        static void EditUser()
+        static void EditUser() // edit user email and/or password or delete user
         {
             bool ExitFlag = false;
             do
@@ -598,7 +600,7 @@ namespace BasicLibrary
 
             }
         }
-        static bool UserLogin()
+        static bool UserLogin() // returns true or false to be used in the login menu to determine the next action
         {
 
             string UsrEmail;
@@ -797,7 +799,7 @@ namespace BasicLibrary
             Console.WriteLine(sb.ToString());
             sb.Clear();
         }
-        static void SearchForBook(bool AdmnOrUsr)
+        static void SearchForBook(bool AdmnOrUsr) // function behaves differently depending on the access level
         {
             ViewAllBooks();
             Console.WriteLine("Enter the book or author name to search");
@@ -815,7 +817,7 @@ namespace BasicLibrary
             sb.Clear();
             for (int i = 0; i< Books.Count;i++)
             {
-                if (Books[i].BName.ToLower() == name.ToLower())
+                if (Books[i].BName.ToLower() == name.ToLower()) // prints book if the searched name is a book name
                 {
                     Console.WriteLine($"\nBook details:" +
                         $"\nName: {Books[i].BName} | Author: {Books[i].BAuthor} | Qty: {Books[i].Qty}");
@@ -823,7 +825,7 @@ namespace BasicLibrary
                     flag = true;
                     break;
                 }
-                if (Books[i].BAuthor.ToLower() == name.ToLower())
+                if (Books[i].BAuthor.ToLower() == name.ToLower()) // prints a list of books made by the author if author name was searched.
                 {
                     sb.AppendLine($"{count}. Book Name: {Books[i].BName} | Quantity: {Books[i].Qty}");
                     count++;
@@ -832,7 +834,7 @@ namespace BasicLibrary
                 }
 
             }
-            if (AuthBooks && AdmnOrUsr)
+            if (AuthBooks && AdmnOrUsr) // if the person searching is a user
             {
                 Console.WriteLine("\nChoose a book to borrow:");
                 Console.WriteLine(sb.ToString());
@@ -851,11 +853,11 @@ namespace BasicLibrary
                 }
             }
 
-            if (!flag && !AuthBooks)
+            if (!flag && !AuthBooks) // if book is not found
             { 
                 Console.WriteLine("\nBook not found"); 
             }
-            else if (!AdmnOrUsr && (AuthBooks || flag))
+            else if (!AdmnOrUsr && (AuthBooks || flag)) // if the person searching is an admin only print book(s) info and stop
             {
                 Console.WriteLine(sb.ToString());
             }
@@ -884,7 +886,7 @@ namespace BasicLibrary
                 }
             }
         }
-        static void BorrowBook(int BookIndex = -1)
+        static void BorrowBook(int BookIndex = -1) // parameter is used to determine whether the function is used with a book index already decided or not
         {
             if (BookIndex == -1)
             {
@@ -934,7 +936,7 @@ namespace BasicLibrary
             {
                 Console.WriteLine("\nEnter the quantity to borrow:");
                 int BorrowQty;
-                while ((!int.TryParse(Console.ReadLine(), out BorrowQty)) || (BorrowQty < 1) || (BorrowQty > Books[BookIndex].Qty))
+                while ((!int.TryParse(Console.ReadLine(), out BorrowQty)) || (BorrowQty < 1) || (BorrowQty > Books[BookIndex].Qty) || (BorrowQty > 5))
                 {
                     Console.WriteLine("\nInvalid input or exceeds limit, please try again:");
                 }
@@ -969,7 +971,7 @@ namespace BasicLibrary
                 RecommendationBooks(Books[BookIndex].ID, Books[BookIndex].BName, CurrentUser);
             }
         }
-        static void ReturnBook()
+        static void ReturnBook() // shows borrowing users their current books to be returned, and allows them to return
         {
             bool UserBorrowed = false;
             int BorrowedIndex = -1;
@@ -1098,7 +1100,7 @@ namespace BasicLibrary
                 Console.WriteLine($"Error saving to file: {ex.Message}");
             }
         }
-        static void EditBook()
+        static void EditBook() // used by admins to edit book info / add quantity / delete book
         {
             bool ExitFlag = false;
             do
@@ -1269,7 +1271,7 @@ namespace BasicLibrary
                 Console.WriteLine($"Error loading from file: {ex.Message}");
             }
         }
-        static void RecommendationBooks(int BorrowedBookID, string BorrowedBookName ,int UserID)
+        static void RecommendationBooks(int BorrowedBookID, string BorrowedBookName ,int UserID) // used to recommend other books after borrowing based on people who borrowed the same book
         {
             StringBuilder sb = new StringBuilder();
             bool FoundBorrowedBook = false;
@@ -1277,7 +1279,7 @@ namespace BasicLibrary
             List<(int ID, string name)> OtherBooksUsersBorrowed = new List<(int ID, string name)>();
             
             
-            for (int i = 0; i < RecommendationSource.Count; i++)
+            for (int i = 0; i < RecommendationSource.Count; i++) // add users' Ids of other people who borrowed the same book.
             {
                 if ((RecommendationSource[i].BookID == BorrowedBookID) && (RecommendationSource[i].UserID != UserID))
                 {
@@ -1287,7 +1289,7 @@ namespace BasicLibrary
             }
             if (FoundBorrowedBook)
             {
-                for (int i = 0; i < UsersWhoBorrowedBook.Count; i++)
+                for (int i = 0; i < UsersWhoBorrowedBook.Count; i++) // add the other books borrowed by the people who borrowed the same book to a list
                 {
                     for(int j = 0; j < RecommendationSource.Count; j++)
                     {
@@ -1308,7 +1310,7 @@ namespace BasicLibrary
                         break;
                     }
                 }
-                if (OtherBooksUsersBorrowed.Count > 0)
+                if (OtherBooksUsersBorrowed.Count > 0) // print recommendation if the list is not empty
                 {
                     Console.WriteLine($"\n\nPeople who borrowed \"{BorrowedBookName}\" also borrowed:\n");
                     Console.WriteLine(sb.ToString());
@@ -1343,7 +1345,7 @@ namespace BasicLibrary
                 }
             }
         }
-        static void ReportLibStats(int PageNo = 1)
+        static void ReportLibStats(int PageNo = 1) // shows the different stats of the Library / users
         {
             while (true)
             {
@@ -1424,7 +1426,7 @@ namespace BasicLibrary
                 }
             }
         }
-        static void MostCommonUserAndBook()
+        static void MostCommonUserAndBook() // prints the most borrowed book / the most frequent user
         {
             int TopUser = 0;
             int TopBook = 0;
