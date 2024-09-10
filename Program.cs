@@ -12,8 +12,7 @@ namespace BasicLibrary
         static List<(int UserID, string UserName, string UserEmail, string UserPass)> Users = new List<(int UserID, string UserName, string UserEmail, string UserPass)>(); // Users list
         static List<(int AdminID, string AdminName, string AdminEmail, string AdminPass)> Admins = new List<(int AdminID, string AdminName, string AdminEmail, string AdminPass)>() ; // Admins list
         static List<(int BookID, string BookName, string AuthName, int Cpy, int BorrowedCpy, double BookPrice, string Category, int BorrowPeriod)> Books = new List<(int BookID, string BookName, string AuthName, int Cpy, int BorrowedCpy, double BookPrice, string Category, int BorrowPeriod)>(); // Books list
-        static List<(int UserID, int BookID, string BookName, int BorrowQty)> Borrows = new List<(int UserID, int BookID, string BookName, int BorrowQty)>(); // Current borrows list
-        static List<(int UserID, int BookID, string BookName)> RecommendationSource = new List<(int UserID, int BookID, string BookName)>() ; // all borrows list
+        static List<(int UserID, int BookID, string BorrowDate, string ReturnDate, string DueDate, float BRating, bool IsReturned)> Borrows = new List<(int UserID, int BookID, string BorrowDate, string ReturnDate, string DueDate, float BRating, bool IsReturned)>(); // Current borrows list
         static List<(int CatID, string CatName, int CatBookCount)> Categories = new List<(int CatID, string CatName, int CatBookCount)> ();
 
 
@@ -22,7 +21,7 @@ namespace BasicLibrary
         static string adminsPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryAdmins.txt"; // Admins are saved here.
         static string UsersPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryUsers.txt"; // Users are saved here
         static string BorrowListPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\BorrowList.txt"; // Users currently borrowing books are saved here.
-        static string RecommendationSourcePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\RecommendationSourceList.txt"; // The history of all borrowings is saved here.
+        static string CategoriesPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\CategoryList.txt"; // The history of all borrowings is saved here.
 
 
 
@@ -34,7 +33,6 @@ namespace BasicLibrary
             LoadUsersFromFile();
             LoadBooksFromFile();
             LoadBorrowedListFromFile();
-            LoadRecommendationSourceFromFile();
             if(Admins.Count < 1)
             {
                 Admins.Add((1,"admin","admin", "admin")); //temporary admin id and pass in case there is no admin registered.
@@ -1015,41 +1013,29 @@ namespace BasicLibrary
             }
             else
             {
-                Console.WriteLine("\nEnter the quantity to borrow:");
-                int BorrowQty;
-                while ((!int.TryParse(Console.ReadLine(), out BorrowQty)) || (BorrowQty < 1) || (BorrowQty > Books[BookIndex].Cpy) || (BorrowQty > 5))
-                {
-                    Console.WriteLine("\nInvalid input or exceeds limit, please try again:");
-                }
-
-                bool BorrowedBefore = false;
-                int BorrowedBeforeIndex = -1;
-                Books[BookIndex] = (Books[BookIndex].BookID, Books[BookIndex].BookName, Books[BookIndex].AuthName, Books[BookIndex].Cpy, (Books[BookIndex].BorrowedCpy + 1), Books[BookIndex].BookPrice, Books[BookIndex].Category, Books[BookIndex].BorrowPeriod);
+                bool AlreadyBorrowed = false;
                 for (int i = 0; i < Borrows.Count; i++)
                 {
-                    if (Borrows[i].UserID == CurrentUser && Borrows[i].BookID == Books[BookIndex].Cpy)
+                    if ((Borrows[i].UserID == CurrentUser) && (Borrows[i].BookID == Books[BookIndex].BookID) && (Borrows[i].IsReturned == true))
                     {
-                        BorrowedBefore = true;
-                        BorrowedBeforeIndex = i;
+                        AlreadyBorrowed = true;
                         break;
                     }
                 }
-                if (BorrowedBefore)
+                if (AlreadyBorrowed)
                 {
-                    Borrows[BorrowedBeforeIndex] = (Borrows[BorrowedBeforeIndex].UserID, Borrows[BorrowedBeforeIndex].BookID, Borrows[BorrowedBeforeIndex].BookName, (Borrows[BorrowedBeforeIndex].BorrowQty + BorrowQty));
+                    Console.WriteLine("You have already borrowed this book before...");
                 }
                 else
                 {
-                    Borrows.Add((CurrentUser, Books[BookIndex].BookID, Books[BookIndex].BookName, BorrowQty));
+                    Borrows.Add((CurrentUser, Books[BookIndex].BookID, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), DateTime.Today.AddDays(Books[BookIndex].BorrowPeriod).ToString("yyyy-MM-dd HH:mm:ss"), "Not Returned", 0, false));
+                    Books[BookIndex] = (Books[BookIndex].BookID, Books[BookIndex].BookName, Books[BookIndex].AuthName, Books[BookIndex].Cpy, (Books[BookIndex].BorrowedCpy + 1), Books[BookIndex].BookPrice, Books[BookIndex].Category, Books[BookIndex].BorrowPeriod);
+                    Console.Clear();
+                    Console.WriteLine($"\n{Books[BookIndex].BookName} borrowed successfully!");
+                    SaveBorrowedListToFile();
+                    SaveBooksToFile();
+                    RecommendationBooks(Books[BookIndex].BookID, Books[BookIndex].BookName, CurrentUser);
                 }
-                
-                RecommendationSource.Add((CurrentUser, Books[BookIndex].BookID, Books[BookIndex].BookName));
-                Console.Clear();
-                Console.WriteLine($"\n{BorrowQty} x {Books[BookIndex].BookName} borrowed successfully!");
-                SaveBorrowedListToFile();
-                SaveBooksToFile();
-                SaveRecommendationSourceToFile(CurrentUser, Books[BookIndex].BookID, Books[BookIndex].BookName);
-                RecommendationBooks(Books[BookIndex].BookID, Books[BookIndex].BookName, CurrentUser);
             }
         }
         static void ReturnBook() // shows borrowing users their current books to be returned, and allows them to return
@@ -1061,16 +1047,17 @@ namespace BasicLibrary
             sb.AppendLine("Borrowed Books:\n");
             for (int i = 0; i < Borrows.Count; i++)
             {
-                if (Borrows[i].UserID == CurrentUser)
+                if ((Borrows[i].UserID == CurrentUser) && (Borrows[i].IsReturned == false))
                 {
                     IDs.Add(Borrows[i].BookID);
                     UserBorrowed = true;
-                    sb.AppendLine($"ID: {Borrows[i].BookID} | Name: {Borrows[i].BookName} | Qty: {Borrows[i].BorrowQty}");
+                    sb.AppendLine($"ID: {Borrows[i].BookID} | Borrowed On: {Borrows[i].BorrowDate} | Due Date: {Borrows[i].DueDate}");
                 }
             }
             if (UserBorrowed)
             {
                 Console.WriteLine(sb.ToString());
+                IDs.Add(0);
                 int BookChoice;
                 Console.WriteLine("\n\n0. Exit");
                 Console.WriteLine("\nEnter the ID of book to return:");
@@ -1086,50 +1073,49 @@ namespace BasicLibrary
                 {
                     for (int i = 0; i < Borrows.Count; i++)
                     {
-                        if ((Borrows[i].UserID == CurrentUser) && (Borrows[i].BookID == BookChoice))
+                        if ((Borrows[i].UserID == CurrentUser) && (Borrows[i].BookID == BookChoice) && (Borrows[i].IsReturned == false))
                         {
                             BorrowedIndex = i;
                             break;
                         }
                     }
-                    Console.WriteLine("\nEnter the quantity to return:");
-                    int ReturnQty;
-                    while ((!int.TryParse(Console.ReadLine(), out ReturnQty)) || (ReturnQty < 0) || (ReturnQty > Borrows[BorrowedIndex].BorrowQty))
+                    Console.WriteLine("\nConfirm Book Return? (1) Yes / (2) No");
+                    int ReturnConf;
+                    while ((!int.TryParse(Console.ReadLine(), out ReturnConf)) || (ReturnConf < 1) || (ReturnConf > 2))
                     {
-                        Console.WriteLine("\nInvalid input or exceeds amount, please try again: ");
+                        Console.WriteLine("\nInvalid input, please try again: ");
                     }
-                    if (ReturnQty == 0)
+                    if (ReturnConf == 2)
                     {
                         Console.WriteLine("\nCancelling return process...");
                     }
                     else
                     {
+                        int ReturnedIndex = -1;
+                        for (int i = 0; i < Books.Count; i++)
+                        {
+                            if (Books[i].BookID == BookChoice)
+                            {
+                                ReturnedIndex = i;
+                                Books[i] = (Books[i].BookID, Books[i].BookName, Books[i].AuthName, Books[i].Cpy, (Books[i].BorrowedCpy - 1), Books[i].BookPrice, Books[i].Category, Books[i].BorrowPeriod);
+                                break;
+                            }
+                        }
+                        Console.WriteLine($"Thank you for returning \"{Books[ReturnedIndex].BookName}\"!\n Please rate the book out of 5: ");
+                        float BRating;
+                        while((!float.TryParse(Console.ReadLine(), out BRating))||(BRating < 0) ||(BRating > 5))
+                        {
+                            Console.WriteLine("Invalid rating, please try again:");
+                        }
                         try
                         {
-                            if (Borrows[BorrowedIndex].BorrowQty == ReturnQty)
-                            {
-                                Borrows.RemoveAt(BorrowedIndex);
-                            }
-                            else
-                            {
-                                Borrows[BorrowedIndex] = (Borrows[BorrowedIndex].UserID, Borrows[BorrowedIndex].BookID, Borrows[BorrowedIndex].BookName, (Borrows[BorrowedIndex].BorrowQty - ReturnQty));
-                            }
+                            Borrows[BorrowedIndex] = (Borrows[BorrowedIndex].UserID, Borrows[BorrowedIndex].BookID, Borrows[BorrowedIndex].BorrowDate, Borrows[BorrowedIndex].DueDate, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), BRating, true);
                         }
                         catch (Exception ex)
                         {
                             Console.WriteLine($"\nCould not update borrows list...{ex}");
                         }
-
-                        for (int i = 0; i < Books.Count; i++)
-                        {
-                            if (Books[i].BookID == BookChoice)
-                            {
-                                Books[i] = (Books[i].BookID, Books[i].BookName, Books[i].AuthName, Books[i].Cpy, (Books[i].BorrowedCpy - 1), Books[i].BookPrice, Books[i].Category, Books[i].BorrowPeriod);
-                                break;
-                            }
-                        }
-
-                        Console.WriteLine($"\n{Books[BookChoice - 1].BookName} returned successfully!");
+                        Console.WriteLine($"\n{Books[ReturnedIndex].BookName} returned successfully!");
                         SaveBooksToFile();
                     }
                 }
@@ -1236,20 +1222,20 @@ namespace BasicLibrary
                         {
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
-                        string OldAuth = Books[ChosenBook - 1].BAuthor;
-                        Books[ChosenBook - 1] = (Books[ChosenBook - 1].BookName, NewAuth, Books[ChosenBook - 1].ID, Books[ChosenBook - 1].Qty);
+                        string OldAuth = Books[ChosenBook - 1].AuthName;
+                        Books[ChosenBook - 1] = (Books[ChosenBook - 1].BookID, Books[ChosenBook - 1].BookName, NewAuth, Books[ChosenBook - 1].Cpy, Books[ChosenBook - 1].BorrowedCpy, Books[ChosenBook - 1].BookPrice, Books[ChosenBook - 1].Category, Books[ChosenBook - 1].BorrowPeriod);
                         Console.WriteLine($"\n\"{Books[ChosenBook - 1].BookName}\" Author changed from: {OldAuth} to: {NewAuth}.");
                         break;
 
                     case 3:
-                        Console.WriteLine($"\nEnter the additional quantity for {Books[ChosenBook - 1].BookName}: ");
+                        Console.WriteLine($"\nEnter the additional copies for {Books[ChosenBook - 1].BookName}: ");
                         int NewQty;
                         while ((!int.TryParse(Console.ReadLine(), out NewQty))||(NewQty < 1))
                         {
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
-                        Books[ChosenBook - 1] = (Books[ChosenBook - 1].BookName, Books[ChosenBook - 1].BAuthor, Books[ChosenBook - 1].ID, (Books[ChosenBook - 1].Qty + NewQty));
-                        Console.WriteLine($"\n{Books[ChosenBook - 1].BookName} Quantity has been increased to {Books[ChosenBook - 1].Qty} successfully.");
+                        Books[ChosenBook - 1] = (Books[ChosenBook - 1].BookID, Books[ChosenBook - 1].BookName, Books[ChosenBook - 1].AuthName, (Books[ChosenBook - 1].Cpy + NewQty), Books[ChosenBook - 1].BorrowedCpy, Books[ChosenBook - 1].BookPrice, Books[ChosenBook - 1].Category, Books[ChosenBook - 1].BorrowPeriod);
+                        Console.WriteLine($"\n{Books[ChosenBook - 1].BookName} Quantity has been increased to {Books[ChosenBook - 1].Cpy} successfully.");
                         break;
 
                     case 4:
@@ -1278,7 +1264,7 @@ namespace BasicLibrary
                 {
                     foreach (var Borrow in Borrows)
                     {
-                        writer.WriteLine($"{Borrow.UserID}|{Borrow.BookID}|{Borrow.BookName}|{Borrow.BorrowQty}");
+                        writer.WriteLine($"{Borrow.UserID}|{Borrow.BookID}|{Borrow.BorrowDate}|{Borrow.DueDate}|{Borrow.ReturnDate}|{Borrow.BRating}|{Borrow.IsReturned}");
                     }
                 }
             }
@@ -1299,52 +1285,13 @@ namespace BasicLibrary
                         while ((line = reader.ReadLine()) != null)
                         {
                             var parts = line.Split('|');
-                            if (parts.Length == 4)
+                            if (parts.Length == 7)
                             {
-                                Borrows.Add((int.Parse(parts[0]), int.Parse(parts[1]), parts[2], int.Parse(parts[3])));
+                                Borrows.Add((int.Parse(parts[0]), int.Parse(parts[1]), parts[2], parts[3], parts[4], int.Parse(parts[5]), bool.Parse(parts[6])));
                             }
                         }
                     }
                     Console.WriteLine("Borrowing info loaded from file successfully.");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error loading from file: {ex.Message}");
-            }
-        }
-        static void SaveRecommendationSourceToFile(int UID, int BID, string BName)
-        {
-            try
-            {
-                using (StreamWriter writer = new StreamWriter(RecommendationSourcePath, true))
-                {
-                    writer.WriteLine($"{UID}|{BID}|{BName}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error saving to file: {ex.Message}");
-            }
-        }
-        static void LoadRecommendationSourceFromFile()
-        {
-            try
-            {
-                if (File.Exists(RecommendationSourcePath))
-                {
-                    using (StreamReader reader = new StreamReader(RecommendationSourcePath))
-                    {
-                        string line;
-                        while ((line = reader.ReadLine()) != null)
-                        {
-                            var parts = line.Split('|');
-                            if (parts.Length == 3)
-                            {
-                                RecommendationSource.Add((int.Parse(parts[0]), int.Parse(parts[1]), parts[2]));
-                            }
-                        }
-                    }
                 }
             }
             catch (Exception ex)
@@ -1357,14 +1304,14 @@ namespace BasicLibrary
             StringBuilder sb = new StringBuilder();
             bool FoundBorrowedBook = false;
             List<int> UsersWhoBorrowedBook = new List<int>();
-            List<(int ID, string name)> OtherBooksUsersBorrowed = new List<(int ID, string name)>();
+            List<int> OtherBooksUsersBorrowed = new List<int>();
             
             
-            for (int i = 0; i < RecommendationSource.Count; i++) // add users' Ids of other people who borrowed the same book.
+            for (int i = 0; i < Borrows.Count; i++) // add users' Ids of other people who borrowed the same book.
             {
-                if ((RecommendationSource[i].BookID == BorrowedBookID) && (RecommendationSource[i].UserID != UserID))
+                if ((Borrows[i].BookID == BorrowedBookID) && (Borrows[i].UserID != UserID))
                 {
-                    UsersWhoBorrowedBook.Add(RecommendationSource[i].UserID);
+                    UsersWhoBorrowedBook.Add(Borrows[i].UserID);
                     FoundBorrowedBook = true;
                 }
             }
@@ -1372,11 +1319,11 @@ namespace BasicLibrary
             {
                 for (int i = 0; i < UsersWhoBorrowedBook.Count; i++) // add the other books borrowed by the people who borrowed the same book to a list
                 {
-                    for(int j = 0; j < RecommendationSource.Count; j++)
+                    for(int j = 0; j < Borrows.Count; j++)
                     {
-                        if ((RecommendationSource[j].UserID == UsersWhoBorrowedBook[i]) && (RecommendationSource[j].BookID != BorrowedBookID) && (!OtherBooksUsersBorrowed.Contains((RecommendationSource[j].BookID, RecommendationSource[j].BookName))))
+                        if ((Borrows[j].UserID == UsersWhoBorrowedBook[i]) && (Borrows[j].BookID != BorrowedBookID) && (!OtherBooksUsersBorrowed.Contains(Borrows[j].BookID)))
                         {
-                            OtherBooksUsersBorrowed.Add((RecommendationSource[j].BookID, RecommendationSource[j].BookName));
+                            OtherBooksUsersBorrowed.Add(Borrows[j].BookID);
                         }
                     }
                 }
@@ -1384,11 +1331,17 @@ namespace BasicLibrary
                 sb.Clear();
                 for (int i = 0; i < OtherBooksUsersBorrowed.Count; i++)
                 {
-                    sb.AppendLine(count+". Book Name: "+OtherBooksUsersBorrowed[i].name + " | ID:"+ OtherBooksUsersBorrowed[i].ID);
-                    count++;
-                    if(count == 5)
+                    for (int j = 0; j < Books.Count; j++)
                     {
-                        break;
+                        if (OtherBooksUsersBorrowed[i] == Books[i].BookID)
+                        {
+                            sb.AppendLine(count + ". Book Name: " + Books[i].BookName + " | ID: " + OtherBooksUsersBorrowed[i] + " | Copies Available: " + (Books[i].Cpy - Books[i].BorrowedCpy));
+                            count++;
+                            if (count == 5)
+                            {
+                                break;
+                            }
+                        }
                     }
                 }
                 if (OtherBooksUsersBorrowed.Count > 0) // print recommendation if the list is not empty
@@ -1410,7 +1363,7 @@ namespace BasicLibrary
                         int Index = -1;
                         for (int i = 0; i < Books.Count; i++)
                         {
-                            if (OtherBooksUsersBorrowed[Choice - 1].ID == Books[i].ID)
+                            if (OtherBooksUsersBorrowed[Choice - 1] == Books[i].BookID)
                             {
                                 Index = i;
                                 break;
@@ -1509,18 +1462,18 @@ namespace BasicLibrary
             int TopUser = 0;
             int TopBook = 0;
             int TopUserID = 0;
-            string TopBookName = "";
-            for (int i = 0;i < RecommendationSource.Count;i++)
+            int TopBookID = 0;
+            for (int i = 0;i < Borrows.Count;i++)
             {
                 int BookOccur = 0;
                 int UserOccur = 0;
-                for (int j = 0; j < RecommendationSource.Count; j++)
+                for (int j = 0; j < Borrows.Count; j++)
                 {
-                    if ((RecommendationSource[i].UserID == RecommendationSource[j].UserID) && (i != j))
+                    if ((Borrows[i].UserID == Borrows[j].UserID) && (i != j))
                     {
                         UserOccur++;
                     }
-                    if ((RecommendationSource[i].BookName == RecommendationSource[j].BookName) && (i != j))
+                    if ((Borrows[i].BookID == Borrows[j].BookID) && (i != j))
                     {
                         BookOccur++;
                     }
@@ -1528,39 +1481,49 @@ namespace BasicLibrary
                 if (UserOccur > TopUser)
                 {
                     TopUser = UserOccur;
-                    TopUserID = RecommendationSource[i].UserID;
+                    TopUserID = Borrows[i].UserID;
                 }
                 if (BookOccur > TopBook)
                 {
                     TopBook = BookOccur;
-                    TopBookName = RecommendationSource[i].BookName;
+                    TopBookID = Borrows[i].BookID;
                 }
             }
             if ((TopUser != 0) && (TopBook != 0))
             {
-                Console.WriteLine($"\n\nMost Common User: User with ID {TopUserID}");
-                Console.WriteLine($"\nMost Common Book: {TopBookName}");
+                int UserIndex = -1;
+                int BookIndex = -1;
+                for (int i = 0; i < Books.Count;i++)
+                {
+                    if (TopBookID == Books[i].BookID)
+                    {
+                        BookIndex = i;
+                        break;
+                    }
+                }
+
+                for (int i = 0; i < Users.Count;i++)
+                {
+                    if (TopUserID == Users[i].UserID)
+                    {
+                        UserIndex = i;
+                        break;
+                    }
+                }
+
+                Console.WriteLine($"\n\nMost Common User: ID: {TopUserID} | Name: {Users[UserIndex].UserName} | Email: {Users[UserIndex].UserEmail}");
+                Console.WriteLine($"\n\nMost Common Book: ID: {TopBookID} | Name: {Books[BookIndex].BookName} | Author: {Books[BookIndex].AuthName} | Category: {Books[BookIndex].Category}");
             }
         }
         static void ViewBorrowedBooksStats()
         {
             StringBuilder sb = new StringBuilder();
-            List<(int ID, string Name)> TotalBorrowed = new List<(int ID, string Name)>();
+            bool BorrowedBooks = false;
             for (int i = 0; i < Books.Count;i++)
             {
-                bool FoundBook = false;
-                int BookSum = 0;
-                for (int j = 0; j < Borrows.Count;j++)
+                if (Books[i].BorrowedCpy > 0)
                 {
-                    if (Borrows[j].BookID == Books[i].ID)
-                    {
-                        FoundBook = true;
-                        BookSum += Borrows[j].BorrowQty;
-                    }
-                }
-                if (FoundBook)
-                {
-                    sb.AppendLine($"\nBook ID: {Books[i].ID} | Name: {Books[i].BName} | Amount Borrowed: {BookSum} | Amount Available: {Books[i].Qty}");
+                    sb.AppendLine($"ID: {Books[i].BookID} | Name: {Books[i].BookName} | Total Copies: {Books[i].Cpy} | Copies Borrowed: {Books[i].BorrowedCpy} | Available Copies: {Books[i].Cpy - Books[i].BorrowedCpy}");
                 }
             }
             Console.WriteLine(sb.ToString());
@@ -1570,7 +1533,10 @@ namespace BasicLibrary
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < Borrows.Count; i++)
             {
-                sb.AppendLine($"\nUser ID: {Borrows[i].UserID} | Book Borrowed: {Borrows[i].BookName} x {Borrows[i].BorrowQty}");
+                if (!Borrows[i].IsReturned)
+                {
+                    sb.AppendLine($"\nUser ID: {Borrows[i].UserID} | Book ID: {Borrows[i].BookID} | Borrowed on: {Borrows[i].BorrowDate} | Due Date: {Borrows[i].DueDate} | Days Left: {DateTime.Parse(Borrows[i].BorrowDate) - DateTime.Parse(Borrows[i].DueDate)}");
+                }
             }
             Console.WriteLine(sb.ToString());
         }
