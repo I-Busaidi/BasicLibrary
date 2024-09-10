@@ -9,7 +9,7 @@ namespace BasicLibrary
     {
         // GLOBAL VARIABLES.
         static int CurrentUser=-1; // saves the id of current user
-        static List<(int UserID, string UserEmail, string UserPass)> Users = new List<(int UserID, string UserEmail, string UserPass)>(); // Users list
+        static List<(int UserID, string UserEmail, string UserPass, string UserName)> Users = new List<(int UserID, string UserEmail, string UserPass ,string UserName)>(); // Users list
         static List<(string AdminEmail, string AdminPass)> Admins = new List<(string AdminEmail, string AdminPass)>() ; // Admins list
         static List<(string BName, string BAuthor, int ID, int Qty)> Books = new List<(string BName, string BAuthor, int ID, int Qty)>(); // Books list
         static List<(int UserID, int BookID, string BookName, int BorrowQty)> Borrows = new List<(int UserID, int BookID, string BookName, int BorrowQty)>(); // Current borrows list
@@ -75,7 +75,7 @@ namespace BasicLibrary
             string AdminPass;
             bool AdminFlag = false;
             bool MasterAdminFlag = false;
-            Console.WriteLine($"!!TOP SECRET!!\n(Master Admin Email: {Admins[0].AdminEmail})");
+            Console.WriteLine($"!!TOP SECRET!! DO NOT SHARE\n(Master Admin Email: {Admins[0].AdminEmail})");
             Console.WriteLine("\nEnter Admin ID:");
             while (string.IsNullOrEmpty(AdminID = Console.ReadLine().ToLower()))
             {
@@ -492,6 +492,12 @@ namespace BasicLibrary
             {
                 NewUserID = 1;
             }
+            Console.WriteLine("\nEnter new User Name:");
+            string NewUserName;
+            while ((string.IsNullOrEmpty(NewUserName = Console.ReadLine().ToLower())))
+            {
+                Console.WriteLine("\nInvalid Name, please try again:");
+            }
             Console.WriteLine("\nEnter new User Email:");
             string NewUserEmail;
             while ((string.IsNullOrEmpty(NewUserEmail = Console.ReadLine().ToLower())) || (ExistingUsers.Contains(NewUserEmail)))
@@ -504,7 +510,7 @@ namespace BasicLibrary
             {
                 Console.WriteLine("\nInvalid Password, please try again:");
             }
-            Users.Add((NewUserID, NewUserEmail, NewUserPass));
+            Users.Add((NewUserID, NewUserEmail, NewUserPass, NewUserName));
             Console.WriteLine($"\nUser {NewUserID} added successfully.");
         }
         static void EditUser() // edit user email and/or password or delete user
@@ -525,9 +531,9 @@ namespace BasicLibrary
                 {
                     return;
                 }
-                Console.WriteLine("\nChoose an editing option:\n1. Edit User Email.\n2. Edit User Password.\n3. Remove User.\n\n0. Exit.");
+                Console.WriteLine("\nChoose an editing option:\n1. Edit User Name.\n2. Edit User Email.\n3. Edit User Password.\n4. Remove User.\n\n0. Exit.");
                 int EditChoice;
-                while ((!int.TryParse(Console.ReadLine(), out EditChoice)) || (EditChoice > 3) || (EditChoice < 0))
+                while ((!int.TryParse(Console.ReadLine(), out EditChoice)) || (EditChoice > 4) || (EditChoice < 0))
                 {
                     Console.WriteLine("\nInvalid option, please try again.");
                 }
@@ -539,6 +545,18 @@ namespace BasicLibrary
                         break;
 
                     case 1:
+                        Console.WriteLine($"\nEnter the new Name for user {Users[ChosenUser - 1].UserEmail}: ");
+                        string NewName;
+                        while (string.IsNullOrEmpty(NewName = Console.ReadLine()))
+                        {
+                            Console.WriteLine("\nInvalid input, please try again:");
+                        }
+                        string OldName = Users[ChosenUser - 1].UserName;
+                        Users[ChosenUser - 1] = (Users[ChosenUser - 1].UserID, Users[ChosenUser - 1].UserEmail, Users[ChosenUser - 1].UserPass, NewName);
+                        Console.WriteLine($"\n\"{Users[ChosenUser - 1].UserID}\" Password changed from: {OldName} to: {NewName}.");
+                        break;
+
+                    case 2:
                         List<string> ExistingUsers = new List<string>();
                         for (int i = 0; i < Users.Count; i++)
                         {
@@ -550,11 +568,11 @@ namespace BasicLibrary
                         {
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
-                        Users[ChosenUser - 1] = (Users[ChosenUser-1].UserID, NewEmail, Users[ChosenUser - 1].UserPass);
+                        Users[ChosenUser - 1] = (Users[ChosenUser-1].UserID, NewEmail, Users[ChosenUser - 1].UserPass, Users[ChosenUser - 1].UserName);
                         Console.WriteLine($"\nUser \"{Users[ChosenUser - 1].UserID}\" Email changed to: {NewEmail}.");
                         break;
 
-                    case 2:
+                    case 3:
                         Console.WriteLine($"\nEnter the new Password for user {Users[ChosenUser - 1].UserID}: ");
                         string NewPass;
                         while (string.IsNullOrEmpty(NewPass = Console.ReadLine().ToLower()))
@@ -562,11 +580,11 @@ namespace BasicLibrary
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
                         string OldPass = Users[ChosenUser - 1].UserPass;
-                        Users[ChosenUser - 1] = (Users[ChosenUser - 1].UserID, Users[ChosenUser - 1].UserEmail, NewPass);
+                        Users[ChosenUser - 1] = (Users[ChosenUser - 1].UserID, Users[ChosenUser - 1].UserEmail, NewPass, Users[ChosenUser - 1].UserName);
                         Console.WriteLine($"\n\"{Users[ChosenUser - 1].UserID}\" Password changed from: {OldPass} to: {NewPass}.");
                         break;
 
-                    case 3:
+                    case 4:
                         int RemovedUser = Users[ChosenUser - 1].UserID;
                         Users.RemoveAt(ChosenUser - 1);
                         Console.WriteLine($"\nUser \"{RemovedUser}\" has been removed from the Users File.");
@@ -705,7 +723,7 @@ namespace BasicLibrary
                 {
                     foreach (var user in Users)
                     {
-                        writer.WriteLine($"{user.UserID}|{user.UserEmail}|{user.UserPass}");
+                        writer.WriteLine($"{user.UserID}|{user.UserEmail}|{user.UserPass}|{user.UserName}");
                     }
                 }
             }
@@ -726,9 +744,9 @@ namespace BasicLibrary
                         while ((line = reader.ReadLine()) != null)
                         {
                             var parts = line.Split('|');
-                            if (parts.Length == 3)
+                            if (parts.Length == 4)
                             {
-                                Users.Add((int.Parse(parts[0]), parts[1], parts[2]));
+                                Users.Add((int.Parse(parts[0]), parts[1], parts[2], parts[3]));
                             }
                         }
                     }
@@ -1347,8 +1365,6 @@ namespace BasicLibrary
         }
         static void ReportLibStats(int PageNo = 1) // shows the different stats of the Library / users
         {
-            while (true)
-            {
                 if (PageNo == 1)
                 {
                     Console.Clear();
@@ -1424,7 +1440,6 @@ namespace BasicLibrary
                         ReportLibStats(3);
                     }
                 }
-            }
         }
         static void MostCommonUserAndBook() // prints the most borrowed book / the most frequent user
         {
