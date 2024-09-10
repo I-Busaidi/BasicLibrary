@@ -13,7 +13,7 @@ namespace BasicLibrary
         static List<(int AdminID, string AdminName, string AdminEmail, string AdminPass)> Admins = new List<(int AdminID, string AdminName, string AdminEmail, string AdminPass)>() ; // Admins list
         static List<(int BookID, string BookName, string AuthName, int Cpy, int BorrowedCpy, double BookPrice, string Category, int BorrowPeriod)> Books = new List<(int BookID, string BookName, string AuthName, int Cpy, int BorrowedCpy, double BookPrice, string Category, int BorrowPeriod)>(); // Books list
         static List<(int UserID, int BookID, string BorrowDate, string ReturnDate, string DueDate, float BRating, bool IsReturned)> Borrows = new List<(int UserID, int BookID, string BorrowDate, string ReturnDate, string DueDate, float BRating, bool IsReturned)>(); // Current borrows list
-        static List<(int CatID, string CatName, int CatBookCount)> Categories = new List<(int CatID, string CatName, int CatBookCount)> ();
+        static List<(int CatID, string CatName, int CatBookCount)> Categories = new List<(int CatID, string CatName, int CatBookCount)> (); // Categories List.
 
 
         // FILE PATHS.
@@ -1016,7 +1016,7 @@ namespace BasicLibrary
                 bool AlreadyBorrowed = false;
                 for (int i = 0; i < Borrows.Count; i++)
                 {
-                    if ((Borrows[i].UserID == CurrentUser) && (Borrows[i].BookID == Books[BookIndex].BookID) && (Borrows[i].IsReturned == true))
+                    if ((Borrows[i].UserID == CurrentUser) && (Borrows[i].BookID == Books[BookIndex].BookID) && (Borrows[i].IsReturned == false))
                     {
                         AlreadyBorrowed = true;
                         break;
@@ -1251,6 +1251,107 @@ namespace BasicLibrary
                 Console.WriteLine("\nPress any key to continue...");
                 Console.ReadKey();
             } while (!ExitFlag);
+        }
+        static void ViewCategories()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            int CatNumber = 0;
+
+            for (int i = 0; i < Categories.Count; i++)
+            {
+                CatNumber = i + 1;
+                sb.AppendLine($"{CatNumber}. Category ID: {Categories[i].CatID} | Category Name: {Categories[i].CatName} | Books in {Categories[i].CatName}: {Categories[i].CatBookCount}");
+            }
+            Console.Clear();
+            Console.WriteLine("Current available Categories:\n");
+            Console.WriteLine(sb.ToString());
+            sb.Clear();
+        }
+        static void ManageCategories()
+        {
+
+        }
+        static void AddCategory()
+        {
+            bool CatNotExist = false;
+            bool CatValid = true;
+            string NewCatName;
+            while (!CatNotExist)
+            {
+                Console.Clear();
+                Console.WriteLine("Enter the New Category Name: ");
+                NewCatName = Console.ReadLine();
+                if (string.IsNullOrEmpty(NewCatName))
+                {
+                    Console.WriteLine("Invalid Input, please try again:");
+                    CatNotExist = false;
+                }
+                else
+                {
+                    for (int i = 0;i < Categories.Count;i++)
+                    {
+                        if (Categories[i].CatName == NewCatName)
+                        {
+                            Console.WriteLine("Name Already Exists...");
+                            CatNotExist = false;
+                            CatValid = false;
+                            break;
+                        }
+                    }
+                    if (CatValid)
+                    {
+                        CatNotExist = true;
+                    }
+                }
+            }
+        }
+        static void EditCategory()
+        {
+
+        }
+        static void SaveCategoriesToFile()
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(CategoriesPath))
+                {
+                    foreach (var Cat in Categories)
+                    {
+                        writer.WriteLine($"{Cat.CatID}|{Cat.CatName}|{Cat.CatBookCount}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving to file: {ex.Message}");
+            }
+        }
+        static void LoadCategoryFromFile()
+        {
+            try
+            {
+                if (File.Exists(CategoriesPath))
+                {
+                    using (StreamReader reader = new StreamReader(CategoriesPath))
+                    {
+                        string line;
+                        while ((line = reader.ReadLine()) != null)
+                        {
+                            var parts = line.Split('|');
+                            if (parts.Length == 3)
+                            {
+                                Categories.Add((int.Parse(parts[0]), parts[1], int.Parse(parts[2])));
+                            }
+                        }
+                    }
+                    Console.WriteLine("Category info loaded from file successfully.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading from file: {ex.Message}");
+            }
         }
 
 
