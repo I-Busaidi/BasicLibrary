@@ -11,9 +11,10 @@ namespace BasicLibrary
         static int CurrentUser=-1; // saves the id of current user
         static List<(int UserID, string UserName, string UserEmail, string UserPass)> Users = new List<(int UserID, string UserName, string UserEmail, string UserPass)>(); // Users list
         static List<(int AdminID, string AdminName, string AdminEmail, string AdminPass)> Admins = new List<(int AdminID, string AdminName, string AdminEmail, string AdminPass)>() ; // Admins list
-        static List<(string BName, string BAuthor, int ID, int Qty)> Books = new List<(string BName, string BAuthor, int ID, int Qty)>(); // Books list
+        static List<(int BookID, string BookName, string AuthName, int Cpy, int BorrowedCpy, double BookPrice, string Category, int BorrowPeriod)> Books = new List<(int BookID, string BookName, string AuthName, int Cpy, int BorrowedCpy, double BookPrice, string Category, int BorrowPeriod)>(); // Books list
         static List<(int UserID, int BookID, string BookName, int BorrowQty)> Borrows = new List<(int UserID, int BookID, string BookName, int BorrowQty)>(); // Current borrows list
         static List<(int UserID, int BookID, string BookName)> RecommendationSource = new List<(int UserID, int BookID, string BookName)>() ; // all borrows list
+        static List<(int CatID, string CatName, int CatBookCount)> Categories = new List<(int CatID, string CatName, int CatBookCount)> ();
 
 
         // FILE PATHS.
@@ -798,7 +799,7 @@ namespace BasicLibrary
             List<string> ExistingBooks = new List<string>();
             for (int i = 0; i < Books.Count; i++)
             {
-                ExistingBooks.Add(Books[i].BName.ToLower());
+                ExistingBooks.Add(Books[i].BookName.ToLower());
             }
             Console.WriteLine("\nEnter Book Name");
             string name;
@@ -817,19 +818,45 @@ namespace BasicLibrary
             int ID;
             if (Books.Count > 0)
             {
-                ID = Books[Books.Count - 1].ID + 1;
+                ID = Books[Books.Count - 1].BookID + 1;
             }
             else
             {
                 ID = 1;
             }
-            Console.WriteLine($"\nEnter available quantity of \"{name}\": ");
+            Console.WriteLine($"\nEnter available Copies of \"{name}\": ");
             int Qty;
             while ((!int.TryParse(Console.ReadLine(), out Qty)) || (Qty < 1))
             {
                 Console.WriteLine("\nInvalid input, please try again:");
             }
-            Books.Add(( name, author, ID,  Qty));
+            Console.WriteLine($"Enter the price of \"{name}\": ");
+            double BPrice;
+            while ((!double.TryParse(Console.ReadLine(),out BPrice)) || (BPrice <= 0))
+            {
+                Console.WriteLine("\nInvalid input, please try again.");
+            }
+            Console.WriteLine("\nCategories:\n");
+            StringBuilder SB = new StringBuilder();
+            for (int i = 0; i < Categories.Count; i++)
+            {
+                SB.Append((i+1) + ". " + Categories[i].CatName);
+            }
+            Console.WriteLine(SB.ToString());
+            Console.WriteLine($"Enter the number of a category from the list for the book \"{name}\": ");
+            int CatNo;
+            while ((!int.TryParse(Console.ReadLine(), out CatNo)) || (CatNo <= 0) || (CatNo > Categories.Count))
+            {
+                Console.WriteLine("Invalid input, please try again.");
+            }
+            Console.WriteLine($"Enter the maximum borrowing period of \"{name}\" in days:");
+            int BorrowPeriod;
+            while ((!int.TryParse(Console.ReadLine(), out BorrowPeriod)) || (BorrowPeriod <= 0) || (BorrowPeriod > 15))
+            {
+                Console.WriteLine("Invalid input or exceeds limit (15 days), please try again.");
+            }
+
+            Books.Add((ID, name, author, Qty, 0, BPrice, Categories[CatNo - 1].CatName, BorrowPeriod));
             Console.WriteLine($"\nBook \"{name}\" Added Succefully");
         }
         static void ViewAllBooks()
@@ -841,7 +868,9 @@ namespace BasicLibrary
             for (int i = 0; i < Books.Count; i++)
             {             
                 BookNumber = i + 1;
-                sb.AppendLine($"{BookNumber}. Book: {Books[i].BName} | Author: {Books[i].BAuthor} | ID: {Books[i].ID} | Qty: {Books[i].Qty}\n");
+                sb.AppendLine($"{BookNumber}. Book: {Books[i].BookName} | Author: {Books[i].AuthName} | ID: {Books[i].BookID} | Copies: {Books[i].Cpy}");
+                sb.AppendLine($"Copies Available: {Books[i].Cpy - Books[i].BorrowedCpy} | Price: {Books[i].BookPrice} | Category: {Books[i].Category} | Borrow max period: {Books[i].BorrowPeriod}");
+                sb.AppendLine("-----------------------");
             }
             Console.Clear();
             Console.WriteLine("Current available books:\n");
@@ -866,17 +895,20 @@ namespace BasicLibrary
             sb.Clear();
             for (int i = 0; i< Books.Count;i++)
             {
-                if (Books[i].BName.ToLower() == name.ToLower()) // prints book if the searched name is a book name
+                if (Books[i].BookName.ToLower() == name.ToLower()) // prints book if the searched name is a book name
                 {
                     Console.WriteLine($"\nBook details:" +
-                        $"\nName: {Books[i].BName} | Author: {Books[i].BAuthor} | Qty: {Books[i].Qty}");
+                        $"\nBook: {Books[i].BookName} | Author: {Books[i].AuthName} | ID: {Books[i].BookID} | Copies: {Books[i].Cpy}\n" +
+                        $"Copies Available: {Books[i].Cpy - Books[i].BorrowedCpy} | Price: {Books[i].BookPrice} | Category: {Books[i].Category} | Borrow max period: {Books[i].BorrowPeriod}");
                     BookIndex = i;
                     flag = true;
                     break;
                 }
-                if (Books[i].BAuthor.ToLower() == name.ToLower()) // prints a list of books made by the author if author name was searched.
+                if (Books[i].AuthName.ToLower() == name.ToLower()) // prints a list of books made by the author if author name was searched.
                 {
-                    sb.AppendLine($"{count}. Book Name: {Books[i].BName} | Quantity: {Books[i].Qty}");
+                    sb.AppendLine($"{count}. Book: {Books[i].BookName} | Author: {Books[i].AuthName} | ID: {Books[i].BookID} | Copies: {Books[i].Cpy}");
+                    sb.AppendLine($"Copies Available: {Books[i].Cpy - Books[i].BorrowedCpy} | Price: {Books[i].BookPrice} | Category: {Books[i].Category} | Borrow max period: {Books[i].BorrowPeriod}");
+                    sb.AppendLine("-----------------------");
                     count++;
                     AuthBooks = true;
                     BookIds.Add( i );
@@ -912,7 +944,7 @@ namespace BasicLibrary
             }
             else
             {
-                if (Books[BookIndex].Qty <= 0)
+                if (Books[BookIndex].Cpy == Books[BookIndex].BorrowedCpy)
                 {
                     Console.WriteLine("\nSorry, book is out of stock.");
                 }
@@ -985,17 +1017,17 @@ namespace BasicLibrary
             {
                 Console.WriteLine("\nEnter the quantity to borrow:");
                 int BorrowQty;
-                while ((!int.TryParse(Console.ReadLine(), out BorrowQty)) || (BorrowQty < 1) || (BorrowQty > Books[BookIndex].Qty) || (BorrowQty > 5))
+                while ((!int.TryParse(Console.ReadLine(), out BorrowQty)) || (BorrowQty < 1) || (BorrowQty > Books[BookIndex].Cpy) || (BorrowQty > 5))
                 {
                     Console.WriteLine("\nInvalid input or exceeds limit, please try again:");
                 }
 
                 bool BorrowedBefore = false;
                 int BorrowedBeforeIndex = -1;
-                Books[BookIndex] = (Books[BookIndex].BName, Books[BookIndex].BAuthor, Books[BookIndex].ID, (Books[BookIndex].Qty - BorrowQty));
+                Books[BookIndex] = (Books[BookIndex].BookID, Books[BookIndex].BookName, Books[BookIndex].AuthName, Books[BookIndex].Cpy, (Books[BookIndex].BorrowedCpy + 1), Books[BookIndex].BookPrice, Books[BookIndex].Category, Books[BookIndex].BorrowPeriod);
                 for (int i = 0; i < Borrows.Count; i++)
                 {
-                    if (Borrows[i].UserID == CurrentUser && Borrows[i].BookID == Books[BookIndex].ID)
+                    if (Borrows[i].UserID == CurrentUser && Borrows[i].BookID == Books[BookIndex].Cpy)
                     {
                         BorrowedBefore = true;
                         BorrowedBeforeIndex = i;
@@ -1008,16 +1040,16 @@ namespace BasicLibrary
                 }
                 else
                 {
-                    Borrows.Add((CurrentUser, Books[BookIndex].ID, Books[BookIndex].BName, BorrowQty));
+                    Borrows.Add((CurrentUser, Books[BookIndex].BookID, Books[BookIndex].BookName, BorrowQty));
                 }
                 
-                RecommendationSource.Add((CurrentUser, Books[BookIndex].ID, Books[BookIndex].BName));
+                RecommendationSource.Add((CurrentUser, Books[BookIndex].BookID, Books[BookIndex].BookName));
                 Console.Clear();
-                Console.WriteLine($"\n{BorrowQty} x {Books[BookIndex].BName} borrowed successfully!");
+                Console.WriteLine($"\n{BorrowQty} x {Books[BookIndex].BookName} borrowed successfully!");
                 SaveBorrowedListToFile();
                 SaveBooksToFile();
-                SaveRecommendationSourceToFile(CurrentUser, Books[BookIndex].ID, Books[BookIndex].BName);
-                RecommendationBooks(Books[BookIndex].ID, Books[BookIndex].BName, CurrentUser);
+                SaveRecommendationSourceToFile(CurrentUser, Books[BookIndex].BookID, Books[BookIndex].BookName);
+                RecommendationBooks(Books[BookIndex].BookID, Books[BookIndex].BookName, CurrentUser);
             }
         }
         static void ReturnBook() // shows borrowing users their current books to be returned, and allows them to return
@@ -1090,14 +1122,14 @@ namespace BasicLibrary
 
                         for (int i = 0; i < Books.Count; i++)
                         {
-                            if (Books[i].ID == BookChoice)
+                            if (Books[i].BookID == BookChoice)
                             {
-                                Books[i] = (Books[i].BName, Books[i].BAuthor, Books[i].ID, (Books[i].Qty + ReturnQty));
+                                Books[i] = (Books[i].BookID, Books[i].BookName, Books[i].AuthName, Books[i].Cpy, (Books[i].BorrowedCpy - 1), Books[i].BookPrice, Books[i].Category, Books[i].BorrowPeriod);
                                 break;
                             }
                         }
 
-                        Console.WriteLine($"\n{ReturnQty} x {Books[BookChoice - 1].BName} returned successfully!");
+                        Console.WriteLine($"\n{Books[BookChoice - 1].BookName} returned successfully!");
                         SaveBooksToFile();
                     }
                 }
@@ -1119,9 +1151,9 @@ namespace BasicLibrary
                         while ((line = reader.ReadLine()) != null)
                         {
                             var parts = line.Split('|');
-                            if (parts.Length == 4)
+                            if (parts.Length == 8)
                             {
-                                Books.Add((parts[0], parts[1], int.Parse(parts[2]), int.Parse(parts[3])));
+                                Books.Add((int.Parse(parts[0]), parts[1], parts[2], int.Parse(parts[3]), int.Parse(parts[4]), double.Parse(parts[5]), parts[6], int.Parse(parts[7])));
                             }
                         }
                     }
@@ -1140,7 +1172,7 @@ namespace BasicLibrary
                 {
                     foreach (var book in Books)
                     {
-                        writer.WriteLine($"{book.BName}|{book.BAuthor}|{book.ID}|{book.Qty}");
+                        writer.WriteLine($"{book.BookID}|{book.BookName}|{book.AuthName}|{book.Cpy}|{book.BorrowedCpy}|{book.BookPrice}|{book.Category}|{book.BorrowPeriod}");
                     }
                 }
             }
@@ -1184,44 +1216,44 @@ namespace BasicLibrary
                         List<string> ExistingBooks = new List<string>();
                         for (int i = 0; i < Books.Count; i++)
                         {
-                            ExistingBooks.Add(Books[i].BName.ToLower());
+                            ExistingBooks.Add(Books[i].BookName.ToLower());
                         }
-                        Console.WriteLine($"\nEnter the new name for {Books[ChosenBook - 1].BName}: ");
+                        Console.WriteLine($"\nEnter the new name for {Books[ChosenBook - 1].BookName}: ");
                         string NewName;
                         while((string.IsNullOrEmpty(NewName = Console.ReadLine())) || (ExistingBooks.Contains(NewName.ToLower())))
                         {
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
-                        string OldBName = Books[ChosenBook - 1].BName;
-                        Books[ChosenBook - 1] = (NewName, Books[ChosenBook - 1].BAuthor, Books[ChosenBook - 1].ID, Books[ChosenBook - 1].Qty);
+                        string OldBName = Books[ChosenBook - 1].BookName;
+                        Books[ChosenBook - 1] = (Books[ChosenBook - 1].BookID, NewName, Books[ChosenBook - 1].AuthName, Books[ChosenBook - 1].Cpy, Books[ChosenBook - 1].BorrowedCpy, Books[ChosenBook - 1].BookPrice, Books[ChosenBook - 1].Category, Books[ChosenBook - 1].BorrowPeriod);
                         Console.WriteLine($"\nBook \"{OldBName}\" name changed to: {NewName}.");
                         break;
 
                     case 2:
-                        Console.WriteLine($"\nEnter the new author name for {Books[ChosenBook - 1].BName}: ");
+                        Console.WriteLine($"\nEnter the new author name for {Books[ChosenBook - 1].BookName}: ");
                         string NewAuth;
                         while (string.IsNullOrEmpty(NewAuth = Console.ReadLine()))
                         {
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
                         string OldAuth = Books[ChosenBook - 1].BAuthor;
-                        Books[ChosenBook - 1] = (Books[ChosenBook - 1].BName, NewAuth, Books[ChosenBook - 1].ID, Books[ChosenBook - 1].Qty);
-                        Console.WriteLine($"\n\"{Books[ChosenBook - 1].BName}\" Author changed from: {OldAuth} to: {NewAuth}.");
+                        Books[ChosenBook - 1] = (Books[ChosenBook - 1].BookName, NewAuth, Books[ChosenBook - 1].ID, Books[ChosenBook - 1].Qty);
+                        Console.WriteLine($"\n\"{Books[ChosenBook - 1].BookName}\" Author changed from: {OldAuth} to: {NewAuth}.");
                         break;
 
                     case 3:
-                        Console.WriteLine($"\nEnter the additional quantity for {Books[ChosenBook - 1].BName}: ");
+                        Console.WriteLine($"\nEnter the additional quantity for {Books[ChosenBook - 1].BookName}: ");
                         int NewQty;
                         while ((!int.TryParse(Console.ReadLine(), out NewQty))||(NewQty < 1))
                         {
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
-                        Books[ChosenBook - 1] = (Books[ChosenBook - 1].BName, Books[ChosenBook - 1].BAuthor, Books[ChosenBook - 1].ID, (Books[ChosenBook - 1].Qty + NewQty));
-                        Console.WriteLine($"\n{Books[ChosenBook - 1].BName} Quantity has been increased to {Books[ChosenBook - 1].Qty} successfully.");
+                        Books[ChosenBook - 1] = (Books[ChosenBook - 1].BookName, Books[ChosenBook - 1].BAuthor, Books[ChosenBook - 1].ID, (Books[ChosenBook - 1].Qty + NewQty));
+                        Console.WriteLine($"\n{Books[ChosenBook - 1].BookName} Quantity has been increased to {Books[ChosenBook - 1].Qty} successfully.");
                         break;
 
                     case 4:
-                        string RemovedBook = Books[ChosenBook - 1].BName;
+                        string RemovedBook = Books[ChosenBook - 1].BookName;
                         Books.RemoveAt(ChosenBook - 1);
                         Console.WriteLine($"\nBook \"{RemovedBook}\" has been removed from the library File.");
                         break;
