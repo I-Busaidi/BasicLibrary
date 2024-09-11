@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace BasicLibrary
 {
@@ -18,7 +19,7 @@ namespace BasicLibrary
         static List<(int CatID, string CatName, int CatBookCount)> Categories = new List<(int CatID, string CatName, int CatBookCount)> (); // Categories List.
 
         // REGEX FORMATS
-        static string EmailFormat = @"^[^@\s]+@[^@\s]+\.(com|net|org|gov|om)$";
+        static string EmailFormat = @"^[^@\s]+@[^@\s]+\.(com|edu|om)$";
         static string PassFormat = @"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$";
 
 
@@ -241,19 +242,19 @@ namespace BasicLibrary
 
             Console.WriteLine("\nEnter new Admin Name:");
             string NewAdminName;
-            while ((string.IsNullOrEmpty(NewAdminName = Console.ReadLine().ToLower())))
+            while ((string.IsNullOrEmpty(NewAdminName = Console.ReadLine())))
             {
                 Console.WriteLine("\nInvalid name, please try again:");
             }
             Console.WriteLine("\nEnter new Admin Email:");
             string NewAdminEmail;
-            while((string.IsNullOrEmpty(NewAdminEmail = Console.ReadLine().ToLower().Trim())) || (ExistingAdmins.Contains(NewAdminEmail.ToLower().Trim())) || (Regex.IsMatch(NewAdminEmail, EmailFormat, RegexOptions.IgnoreCase)))
+            while((string.IsNullOrEmpty(NewAdminEmail = Console.ReadLine().ToLower().Trim())) || (ExistingAdmins.Contains(NewAdminEmail.ToLower().Trim())) || (!Regex.IsMatch(NewAdminEmail, EmailFormat, RegexOptions.IgnoreCase)))
             {
                 Console.WriteLine("\nInvalid Email, please try again:");
             }
             Console.WriteLine($"\nEnter the password for {NewAdminEmail}:");
             string NewAdminPass;
-            while (string.IsNullOrEmpty(NewAdminPass = Console.ReadLine().ToLower()) || (Regex.IsMatch(NewAdminPass, PassFormat)))
+            while (string.IsNullOrEmpty(NewAdminPass = Console.ReadLine()) || (!Regex.IsMatch(NewAdminPass, PassFormat)))
             {
                 Console.WriteLine("\nInvalid Password, please try again:");
             }
@@ -312,7 +313,7 @@ namespace BasicLibrary
                         }
                         Console.WriteLine($"\nEnter the new Email for {Admins[ChosenAdmin - 1].AdminEmail}: ");
                         string NewEmail;
-                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine().ToLower().Trim())) || (ExistingAdmins.Contains(NewEmail)))
+                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine().ToLower().Trim())) || (ExistingAdmins.Contains(NewEmail)) || (!Regex.IsMatch(NewEmail, EmailFormat, RegexOptions.IgnoreCase)))
                         {
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
@@ -324,7 +325,7 @@ namespace BasicLibrary
                     case 3:
                         Console.WriteLine($"\nEnter the new Password for {Admins[ChosenAdmin - 1].AdminEmail}: ");
                         string NewPass;
-                        while (string.IsNullOrEmpty(NewPass = Console.ReadLine().ToLower()))
+                        while (string.IsNullOrEmpty(NewPass = Console.ReadLine())||(!Regex.IsMatch(NewPass, PassFormat)))
                         {
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
@@ -567,7 +568,7 @@ namespace BasicLibrary
             }
             Console.WriteLine($"\nEnter the password for {NewUserEmail}:");
             string NewUserPass;
-            while (string.IsNullOrEmpty(NewUserPass = Console.ReadLine().ToLower()) || (Regex.IsMatch(NewUserPass, PassFormat)))
+            while (string.IsNullOrEmpty(NewUserPass = Console.ReadLine()) || (Regex.IsMatch(NewUserPass, PassFormat)))
             {
                 Console.WriteLine("\nInvalid Password, please try again:");
             }
@@ -625,7 +626,7 @@ namespace BasicLibrary
                         }
                         Console.WriteLine($"\nEnter the new Email for user {Users[ChosenUser - 1].UserID}: ");
                         string NewEmail;
-                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine().ToLower().Trim())) || (ExistingUsers.Contains(NewEmail.Trim())))
+                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine().ToLower().Trim())) || (ExistingUsers.Contains(NewEmail.Trim())) || (!Regex.IsMatch(NewEmail, EmailFormat, RegexOptions.IgnoreCase)))
                         {
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
@@ -636,7 +637,7 @@ namespace BasicLibrary
                     case 3:
                         Console.WriteLine($"\nEnter the new Password for user {Users[ChosenUser - 1].UserID}: ");
                         string NewPass;
-                        while (string.IsNullOrEmpty(NewPass = Console.ReadLine().ToLower()))
+                        while (string.IsNullOrEmpty(NewPass = Console.ReadLine()) || (!Regex.IsMatch(NewPass, PassFormat)))
                         {
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
@@ -941,11 +942,11 @@ namespace BasicLibrary
             }
             Console.WriteLine($"Enter the maximum borrowing period of \"{name}\" in days:");
             int BorrowPeriod;
-            while ((!int.TryParse(Console.ReadLine(), out BorrowPeriod)) || (BorrowPeriod <= 0) || (BorrowPeriod > 15))
+            while ((!int.TryParse(Console.ReadLine(), out BorrowPeriod)) || (BorrowPeriod <= 0))
             {
-                Console.WriteLine("Invalid input or exceeds limit (15 days), please try again.");
+                Console.WriteLine("Invalid input, please try again.");
             }
-
+            Categories[CatNo - 1] = ((Categories[CatNo - 1].CatID, Categories[CatNo - 1].CatName, (Categories[CatNo - 1].CatBookCount + 1)));
             Books.Add((ID, name, author, Qty, 0, BPrice, Categories[CatNo - 1].CatName, BorrowPeriod));
             Console.WriteLine($"\nBook \"{name}\" Added Succefully");
         }
@@ -1299,7 +1300,7 @@ namespace BasicLibrary
                 {
                     return;
                 }
-                Console.WriteLine($"\nChoose an editing option for \"{Books[ChosenBook - 1].BookName}\":\n1. Edit Book Name.\n2. Edit Book Author.\n3. Add quantity.\n4. Remove Book.\n\n0. Exit.");
+                Console.WriteLine($"\nChoose an editing option for \"{Books[ChosenBook - 1].BookName}\":\n1. Edit Book Name.\n2. Edit Book Author.\n3. Add copies.\n4. Edit price.\n5. Change category.\n6. Remove Book.\n\n0. Exit.");
                 int EditChoice;
                 while ((!int.TryParse(Console.ReadLine(), out EditChoice)) || (EditChoice > 4) || (EditChoice < 0))
                 {
@@ -1348,28 +1349,116 @@ namespace BasicLibrary
                         {
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
-                        Books[ChosenBook - 1] = (Books[ChosenBook - 1].BookID, Books[ChosenBook - 1].BookName, Books[ChosenBook - 1].AuthName, (Books[ChosenBook - 1].Cpy + NewQty), Books[ChosenBook - 1].BorrowedCpy, Books[ChosenBook - 1].BookPrice, Books[ChosenBook - 1].Category, Books[ChosenBook - 1].BorrowPeriod);
-                        Console.WriteLine($"\n{Books[ChosenBook - 1].BookName} Quantity has been increased to {Books[ChosenBook - 1].Cpy} successfully.");
+                        int ConfCpyeEdit;
+                        while ((!int.TryParse(Console.ReadLine(), out ConfCpyeEdit)) || (ConfCpyeEdit > 2) || (ConfCpyeEdit < 1))
+                        {
+                            Console.WriteLine("Invalid input, please try again:");
+                        }
+                        if (ConfCpyeEdit != 2)
+                        {
+                            Books[ChosenBook - 1] = (Books[ChosenBook - 1].BookID, Books[ChosenBook - 1].BookName, Books[ChosenBook - 1].AuthName, (Books[ChosenBook - 1].Cpy + NewQty), Books[ChosenBook - 1].BorrowedCpy, Books[ChosenBook - 1].BookPrice, Books[ChosenBook - 1].Category, Books[ChosenBook - 1].BorrowPeriod);
+                            Console.WriteLine($"\n{Books[ChosenBook - 1].BookName} Quantity has been increased to {Books[ChosenBook - 1].Cpy} successfully.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Copies addition cancelled...");
+                        }
                         break;
 
                     case 4:
+                        Console.WriteLine($"\nEnter the new price for {Books[ChosenBook - 1].BookName}: ");
+                        double NewPrice;
+                        while ((!double.TryParse(Console.ReadLine(), out NewPrice)) || (NewPrice <= 0))
+                        {
+                            Console.WriteLine("\nInvalid input, please try again:");
+                        }
+                        Console.WriteLine($"Price of \"{Books[ChosenBook - 1].BookName}\" will change from {Books[ChosenBook - 1].BookPrice} to {NewPrice}");
+                        Console.WriteLine("\nConfirm? (1) Yes / (2) No");
+                        int ConfPriceEdit;
+                        while((!int.TryParse(Console.ReadLine(), out ConfPriceEdit))||(ConfPriceEdit > 2)||(ConfPriceEdit < 1))
+                        {
+                            Console.WriteLine("Invalid input, please try again:");
+                        }
+                        if (ConfPriceEdit != 2)
+                        {
+                            Books[ChosenBook - 1] = (Books[ChosenBook - 1].BookID, Books[ChosenBook - 1].BookName, Books[ChosenBook - 1].AuthName, Books[ChosenBook - 1].Cpy, Books[ChosenBook - 1].BorrowedCpy, NewPrice, Books[ChosenBook - 1].Category, Books[ChosenBook - 1].BorrowPeriod);
+                            Console.WriteLine($"\n{Books[ChosenBook - 1].BookName} Quantity has been increased to {Books[ChosenBook - 1].Cpy} successfully.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Price Change cancelled...");
+                        }
+                        break;
+
+                    case 5:
+                        Console.WriteLine("\nCategories:\n");
+                        StringBuilder SB = new StringBuilder();
+                        int OldCatIndex = -1;
+                        for (int i = 0; i < Categories.Count; i++)
+                        {
+                            SB.Append((i + 1) + ". " + Categories[i].CatName);
+                            if (Categories[i].CatName == Books[ChosenBook - 1].Category)
+                            {
+                                OldCatIndex = i;
+                            }
+                        }
+                        Console.WriteLine(SB.ToString());
+                        Console.WriteLine($"\nCurrent category: {Books[ChosenBook - 1].Category}");
+                        Console.WriteLine($"Enter the number of a category from the list for the book \"{Books[ChosenBook - 1].BookName}\": ");
+                        int CatNo;
+                        while ((!int.TryParse(Console.ReadLine(), out CatNo)) || (CatNo <= 0) || (CatNo > Categories.Count))
+                        {
+                            Console.WriteLine("Invalid input, please try again.");
+                        }
+                        Console.WriteLine($"\nCategory of \"{Books[ChosenBook - 1].BookName}\" will be changed from \"{Books[ChosenBook - 1].Category}\" to \"{Categories[CatNo - 1].CatName}\" ");
+                        Console.WriteLine("Confirm? (1) Yes / (2) No");
+                        int ConfCatChange;
+                        while ((!int.TryParse(Console.ReadLine(), out ConfCatChange)) || (ConfCatChange > 2) || (ConfCatChange < 1))
+                        {
+                            Console.WriteLine("Invalid input, please try again.");
+                        }
+                        if (ConfCatChange == 1)
+                        {
+                            Categories[CatNo - 1] = (Categories[CatNo - 1].CatID, Categories[CatNo - 1].CatName, (Categories[CatNo - 1].CatBookCount + 1));
+                            Categories[OldCatIndex] = (Categories[OldCatIndex].CatID, Categories[OldCatIndex].CatName, (Categories[OldCatIndex].CatBookCount - 1));
+                            Books[ChosenBook - 1] = (Books[ChosenBook - 1].BookID, Books[ChosenBook - 1].BookName, Books[ChosenBook - 1].AuthName, Books[ChosenBook - 1].Cpy, Books[ChosenBook - 1].BorrowedCpy, Books[ChosenBook - 1].BookPrice, Categories[CatNo - 1].CatName, Books[ChosenBook - 1].BorrowPeriod);
+                            Console.WriteLine($"\nCategory of \"{Books[ChosenBook - 1].BookName}\" changed from \"{Books[ChosenBook - 1].Category}\" to \"{Categories[CatNo - 1].CatName}\" successfully!");
+                        }
+                        else
+                        {
+                            Console.WriteLine("\nCancelling category edit...");
+                        }
+                        break;
+
+
+                    case 6:
                         if (Books[ChosenBook - 1].BorrowedCpy > 0)
                         {
                             Console.WriteLine($"Book is currently borrowed by {Books[ChosenBook - 1].BorrowedCpy} user(s) and cannot be removed.");
                         }
                         else
-                        { 
+                        {
                             Console.WriteLine($"Are you sure you want to remove {Books[ChosenBook - 1].BookName} from the library?");
                             Console.WriteLine("\n(1) Yes / (2) No");
                             int ConfChoice;
-                            while((!int.TryParse(Console.ReadLine(), out ConfChoice))||(ConfChoice > 2) ||(ConfChoice < 1))
+                            while ((!int.TryParse(Console.ReadLine(), out ConfChoice)) || (ConfChoice > 2) || (ConfChoice < 1))
                             {
                                 Console.WriteLine("Invalid input, please try again.");
                             }
                             if (ConfChoice == 1)
                             {
+                                int RemovedBookCat = -1;
+                                for (int i = 0; i < Categories.Count; i++)
+                                {
+                                    if (Categories[i].CatName == Books[ChosenBook - 1].Category)
+                                    {
+                                        RemovedBookCat = i;
+                                        break;
+                                    }
+                                }
                                 string RemovedBook = Books[ChosenBook - 1].BookName;
                                 Books.RemoveAt(ChosenBook - 1);
+                                Categories[RemovedBookCat] = (Categories[RemovedBookCat].CatID, Categories[RemovedBookCat].CatName, (Categories[RemovedBookCat].CatBookCount - 1));
                                 Console.WriteLine($"\nBook \"{RemovedBook}\" has been removed from the library File.");
                             }
                             else
@@ -1378,6 +1467,7 @@ namespace BasicLibrary
                             }
                         }
                         break;
+
 
                     default:
                         Console.WriteLine("\nInvalid input, please try again.");
