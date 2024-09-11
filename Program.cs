@@ -727,51 +727,92 @@ namespace BasicLibrary
                 }
                 
             } while (!RegisterUser);
+
+
             bool ExitFlag = false;
             do
             {
-                Console.Clear();
-                Console.WriteLine("Welcome to the Library!");
-                Console.WriteLine("\nEnter the number of the service required:");
-                Console.WriteLine("\n1. Search book");
-                Console.WriteLine("\n2. Borrow book");
-                Console.WriteLine("\n3. Return book");
-                Console.WriteLine("\n4. View Profile");
-                Console.WriteLine("\n0. Save & Exit");
-
-                int choice;
-                while (!int.TryParse(Console.ReadLine(), out choice))
+                if (!OverDueCheck(CurrentUser))
                 {
-                    Console.WriteLine("\nInvalid input, please try again: ");
+                    Console.Clear();
+                    Console.WriteLine("Welcome to the Library!");
+                    Console.WriteLine("\nEnter the number of the service required:");
+                    Console.WriteLine("\n1. Search book");
+                    Console.WriteLine("\n2. Borrow book");
+                    Console.WriteLine("\n3. Return book");
+                    Console.WriteLine("\n4. View Profile");
+                    Console.WriteLine("\n0. Save & Exit");
+
+                    int choice;
+                    while (!int.TryParse(Console.ReadLine(), out choice))
+                    {
+                        Console.WriteLine("\nInvalid input, please try again: ");
+                    }
+                    Console.Clear();
+                    switch (choice)
+                    {
+                        case 1:
+                            SearchForBook(true);
+                            break;
+
+                        case 2:
+                            BorrowBook();
+                            break;
+
+                        case 3:
+                            ReturnBook();
+                            break;
+
+                        case 4:
+                            UserIndividualReport(CurrentUser);
+                            break;
+
+                        case 0:
+                            SaveBooksToFile();
+                            CurrentUser = -1;
+                            ExitFlag = true;
+                            break;
+
+                        default:
+                            Console.WriteLine("\nInvalid choice, please try again...");
+                            break;
+                    }
                 }
-                Console.Clear();
-                switch (choice)
+                else
                 {
-                    case 1:
-                        SearchForBook(true);
-                        break;
+                    Console.Clear();
+                    Console.WriteLine("Welcome to the Library!");
+                    Console.WriteLine("\n!You Must Return Books Overdue Before Using Other Services!");
+                    Console.WriteLine("\n1. Return book");
+                    Console.WriteLine("\n2. View Profile");
+                    Console.WriteLine("\n0. Save & Exit");
 
-                    case 2:
-                        BorrowBook();
-                        break;
+                    int choice;
+                    while (!int.TryParse(Console.ReadLine(), out choice))
+                    {
+                        Console.WriteLine("\nInvalid input, please try again: ");
+                    }
+                    Console.Clear();
+                    switch (choice)
+                    {
+                        case 1:
+                            ReturnBook();
+                            break;
 
-                    case 3:
-                        ReturnBook();
-                        break;
+                        case 2:
+                            UserIndividualReport(CurrentUser);
+                            break;
 
-                    case 4:
-                        UserIndividualReport(CurrentUser);
-                        break;
+                        case 0:
+                            SaveBooksToFile();
+                            CurrentUser = -1;
+                            ExitFlag = true;
+                            break;
 
-                    case 0:
-                        SaveBooksToFile();
-                        CurrentUser = -1;
-                        ExitFlag = true;
-                        break;
-
-                    default:
-                        Console.WriteLine("\nInvalid choice, please try again...");
-                        break;
+                        default:
+                            Console.WriteLine("\nInvalid choice, please try again...");
+                            break;
+                    }
                 }
                 Console.WriteLine("\nPress any key to continue...");
                 Console.ReadKey();
@@ -819,6 +860,20 @@ namespace BasicLibrary
             {
                 Console.WriteLine($"Error loading from file: {ex.Message}");
             }
+        }
+        static bool OverDueCheck(int UID)
+        {
+            for (int i = 0; i < Borrows.Count; i++)
+            {
+                if ((UID == Borrows[i].UserID) && (Borrows[i].IsReturned == false))
+                {
+                    if (DateTime.Parse(Borrows[i].DueDate) < DateTime.Now)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
 
@@ -920,43 +975,64 @@ namespace BasicLibrary
             bool AuthBooks = false;
             int BookIndex = -1;
             int count = 1;
+            List<int> BookIdsAuth = new List<int>();
             List<int> BookIds = new List<int>();
-            StringBuilder sb = new StringBuilder();
-            sb.Clear();
+            StringBuilder AuthBookList = new StringBuilder();
+            StringBuilder BooksList = new StringBuilder();
+            AuthBookList.Clear();
+            BooksList.Clear();
             for (int i = 0; i< Books.Count;i++)
             {
-                if (Books[i].BookName.ToLower() == name.ToLower()) // prints book if the searched name is a book name
+                if (Books[i].BookName.ToLower().Contains(name.ToLower())) // prints book if the searched name is a book name
                 {
-                    Console.WriteLine($"\nBook details:" +
-                        $"\nBook: {Books[i].BookName} | Author: {Books[i].AuthName} | ID: {Books[i].BookID} | Copies: {Books[i].Cpy}\n" +
-                        $"Copies Available: {Books[i].Cpy - Books[i].BorrowedCpy} | Price: {Books[i].BookPrice} | Category: {Books[i].Category} | Borrow max period: {Books[i].BorrowPeriod}");
-                    BookIndex = i;
+                    BooksList.AppendLine($"{count}. Book: {Books[i].BookName} | Author: {Books[i].AuthName} | ID: {Books[i].BookID} | Copies: {Books[i].Cpy}");
+                    BooksList.AppendLine($"Copies Available: {Books[i].Cpy - Books[i].BorrowedCpy} | Price: {Books[i].BookPrice} | Category: {Books[i].Category} | Borrow max period: {Books[i].BorrowPeriod}");
+                    BooksList.AppendLine("-----------------------");
+                    count++;
                     flag = true;
-                    break;
+                    BookIds.Add(i);
                 }
-                if (Books[i].AuthName.ToLower() == name.ToLower()) // prints a list of books made by the author if author name was searched.
+                if (Books[i].AuthName.ToLower().Contains(name.ToLower())) // prints a list of books made by the author if author name was searched.
                 {
-                    sb.AppendLine($"{count}. Book: {Books[i].BookName} | Author: {Books[i].AuthName} | ID: {Books[i].BookID} | Copies: {Books[i].Cpy}");
-                    sb.AppendLine($"Copies Available: {Books[i].Cpy - Books[i].BorrowedCpy} | Price: {Books[i].BookPrice} | Category: {Books[i].Category} | Borrow max period: {Books[i].BorrowPeriod}");
-                    sb.AppendLine("-----------------------");
+                    AuthBookList.AppendLine($"{count}. Book: {Books[i].BookName} | Author: {Books[i].AuthName} | ID: {Books[i].BookID} | Copies: {Books[i].Cpy}");
+                    AuthBookList.AppendLine($"Copies Available: {Books[i].Cpy - Books[i].BorrowedCpy} | Price: {Books[i].BookPrice} | Category: {Books[i].Category} | Borrow max period: {Books[i].BorrowPeriod}");
+                    AuthBookList.AppendLine("-----------------------");
                     count++;
                     AuthBooks = true;
-                    BookIds.Add( i );
+                    BookIdsAuth.Add( i );
                 }
 
             }
             if (AuthBooks && AdmnOrUsr) // if the person searching is a user
             {
                 Console.WriteLine("\nChoose a book to borrow:");
-                Console.WriteLine(sb.ToString());
+                Console.WriteLine(AuthBookList.ToString());
                 int BookChoice;
-                while((!int.TryParse(Console.ReadLine(), out BookChoice))||(BookChoice < 1) ||(BookChoice > BookIds.Count))
+                while((!int.TryParse(Console.ReadLine(), out BookChoice))||(BookChoice < 1) ||(BookChoice > BookIdsAuth.Count))
                 {
                     Console.WriteLine("\nInvalid input, please try again:");
                 }
-                for (int i = 0; i<BookIds.Count;i++)
+                for (int i = 0; i<BookIdsAuth.Count;i++)
                 {
-                    if((BookChoice - 1) == BookIds[i])
+                    if((BookChoice - 1) == BookIdsAuth[i])
+                    {
+                        BookIndex = BookIdsAuth[i];
+                        break;
+                    }
+                }
+            }
+            if (flag && AdmnOrUsr) // if the person searching is a user
+            {
+                Console.WriteLine("\nChoose a book to borrow:");
+                Console.WriteLine(BooksList.ToString());
+                int BookChoice;
+                while ((!int.TryParse(Console.ReadLine(), out BookChoice)) || (BookChoice < 1) || (BookChoice > BookIds.Count))
+                {
+                    Console.WriteLine("\nInvalid input, please try again:");
+                }
+                for (int i = 0; i < BookIds.Count; i++)
+                {
+                    if ((BookChoice - 1) == BookIds[i])
                     {
                         BookIndex = BookIds[i];
                         break;
@@ -966,11 +1042,11 @@ namespace BasicLibrary
 
             if (!flag && !AuthBooks) // if book is not found
             { 
-                Console.WriteLine("\nBook not found"); 
+                Console.WriteLine("\nBook or author not found"); 
             }
             else if (!AdmnOrUsr && (AuthBooks || flag)) // if the person searching is an admin only print book(s) info and stop
             {
-                Console.WriteLine(sb.ToString());
+                Console.WriteLine(AuthBookList.ToString());
             }
             else
             {
@@ -1741,7 +1817,8 @@ namespace BasicLibrary
                         break;
                     }
                 }
-
+                Console.WriteLine($"\nNumber of unique books in the library: {Books.Count}");
+                ViewCategories();
                 Console.WriteLine($"\n\nMost Common User: ID: {TopUserID} | Name: {Users[UserIndex].UserName} | Email: {Users[UserIndex].UserEmail}");
                 Console.WriteLine($"\n\nMost Common Book: ID: {TopBookID} | Name: {Books[BookIndex].BookName} | Author: {Books[BookIndex].AuthName} | Category: {Books[BookIndex].Category}");
             }
