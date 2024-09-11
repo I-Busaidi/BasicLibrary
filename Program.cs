@@ -32,6 +32,7 @@ namespace BasicLibrary
             LoadAdminsFromFile();
             LoadUsersFromFile();
             LoadBooksFromFile();
+            LoadCategoryFromFile();
             LoadBorrowedListFromFile();
             if(Admins.Count < 1)
             {
@@ -1110,6 +1111,7 @@ namespace BasicLibrary
                         try
                         {
                             Borrows[BorrowedIndex] = (Borrows[BorrowedIndex].UserID, Borrows[BorrowedIndex].BookID, Borrows[BorrowedIndex].BorrowDate, Borrows[BorrowedIndex].DueDate, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), BRating, true);
+                            SaveBorrowedListToFile();
                         }
                         catch (Exception ex)
                         {
@@ -1185,7 +1187,7 @@ namespace BasicLibrary
                 {
                     return;
                 }
-                Console.WriteLine("\nChoose an editing option:\n1. Edit Book Name.\n2. Edit Book Author.\n3. Add quantity.\n4. Remove Book.\n\n0. Exit.");
+                Console.WriteLine($"\nChoose an editing option for \"{Books[ChosenBook - 1].BookName}\":\n1. Edit Book Name.\n2. Edit Book Author.\n3. Add quantity.\n4. Remove Book.\n\n0. Exit.");
                 int EditChoice;
                 while ((!int.TryParse(Console.ReadLine(), out EditChoice)) || (EditChoice > 4) || (EditChoice < 0))
                 {
@@ -1270,13 +1272,47 @@ namespace BasicLibrary
         }
         static void ManageCategories()
         {
+            bool MngCatCont = true;
+            do
+            {
+                Console.Clear();
+                ViewCategories();
+                Console.WriteLine("Choose an option:\n1. Add New Category.\n2. Edit Category.\n\n0. Exit.");
+                int CatMenu;
+                while ((!int.TryParse(Console.ReadLine(), out CatMenu)) || (CatMenu > 2) || (CatMenu < 0))
+                {
+                    Console.WriteLine("Invalid option, please try again.");
+                }
+                switch (CatMenu)
+                {
+                    case 0:
+                        MngCatCont = false;
+                        break;
 
+                    case 1:
+                        AddCategory();
+                        break;
+
+                    case 2:
+                        EditCategory();
+                        break;
+                }
+            } while (MngCatCont);
         }
         static void AddCategory()
         {
             bool CatNotExist = false;
             bool CatValid = true;
-            string NewCatName;
+            string NewCatName = "";
+            int CatID;
+            if (Categories.Count > 0 )
+            {
+                CatID = Categories[Categories.Count - 1].CatID + 1;
+            }
+            else
+            {
+                CatID = 1;
+            }
             while (!CatNotExist)
             {
                 Console.Clear();
@@ -1305,10 +1341,73 @@ namespace BasicLibrary
                     }
                 }
             }
+            Categories.Add((CatID, NewCatName, 0));
+            SaveCategoriesToFile();
+            Console.WriteLine($"New Category \"{NewCatName}\" Added Successfully!");
         }
         static void EditCategory()
         {
+            bool ContCatEdit = true;
+            do
+            {
+                Console.Clear ();
+                ViewCategories();
+                Console.WriteLine($"\n0. Exit.\n\nChoose a category from the list to edit (1 - {Categories.Count}):");
+                int CatChoice;
+                while ((!int.TryParse(Console.ReadLine(), out CatChoice)) || (CatChoice > Categories.Count) || (CatChoice < 0))
+                {
+                    Console.WriteLine("Invalid input, please try again:");
+                }
+                Console.Clear ();
+                Console.WriteLine($"Choose an editing option for category \"{Categories[CatChoice-1].CatName}\":\n1. Edit Name.\n\n0. Cancel & Exit.");
+                int EditChoice;
+                while ((!int.TryParse(Console.ReadLine(), out EditChoice))||(EditChoice > 1) ||(EditChoice < 0))
+                {
+                    Console.WriteLine("Invalid option, please try again:");
+                }
+                switch (EditChoice)
+                {
+                    case 0:
+                        ContCatEdit = false;
+                        break;
 
+                    case 1:
+                        bool CatNotExist = false;
+                        bool CatValid = true;
+                        string NewCatName = "";
+                        while (!CatNotExist)
+                        {
+                            Console.Clear();
+                            Console.WriteLine($"Enter the New Category Name for {Categories[CatChoice - 1].CatName}: ");
+                            NewCatName = Console.ReadLine();
+                            if (string.IsNullOrEmpty(NewCatName))
+                            {
+                                Console.WriteLine("Invalid Input, please try again:");
+                                CatNotExist = false;
+                            }
+                            else
+                            {
+                                for (int i = 0; i < Categories.Count; i++)
+                                {
+                                    if (Categories[i].CatName == NewCatName)
+                                    {
+                                        Console.WriteLine("Name Already Exists...");
+                                        CatNotExist = false;
+                                        CatValid = false;
+                                        break;
+                                    }
+                                }
+                                if (CatValid)
+                                {
+                                    CatNotExist = true;
+                                }
+                            }
+                        }
+                        Categories[CatChoice - 1] = (Categories[CatChoice - 1].CatID, NewCatName, Categories[CatChoice - 1].CatBookCount);
+                        SaveCategoriesToFile();
+                        break;
+                }
+            } while (ContCatEdit);
         }
         static void SaveCategoriesToFile()
         {
