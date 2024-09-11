@@ -14,7 +14,7 @@ namespace BasicLibrary
         static List<(int UserID, string UserName, string UserEmail, string UserPass)> Users = new List<(int UserID, string UserName, string UserEmail, string UserPass)>(); // Users list
         static List<(int AdminID, string AdminName, string AdminEmail, string AdminPass)> Admins = new List<(int AdminID, string AdminName, string AdminEmail, string AdminPass)>() ; // Admins list
         static List<(int BookID, string BookName, string AuthName, int Cpy, int BorrowedCpy, double BookPrice, string Category, int BorrowPeriod)> Books = new List<(int BookID, string BookName, string AuthName, int Cpy, int BorrowedCpy, double BookPrice, string Category, int BorrowPeriod)>(); // Books list
-        static List<(int UserID, int BookID, string BorrowDate, string ReturnDate, string DueDate, float BRating, bool IsReturned)> Borrows = new List<(int UserID, int BookID, string BorrowDate, string ReturnDate, string DueDate, float BRating, bool IsReturned)>(); // Current borrows list
+        static List<(int UserID, int BookID, string BorrowDate, string DueDate, string ReturnDate, string BRating, bool IsReturned)> Borrows = new List<(int UserID, int BookID, string BorrowDate, string DueDate, string ReturnDate, string BRating, bool IsReturned)>(); // Current borrows list
         static List<(int CatID, string CatName, int CatBookCount)> Categories = new List<(int CatID, string CatName, int CatBookCount)> (); // Categories List.
 
         // REGEX FORMATS
@@ -23,11 +23,11 @@ namespace BasicLibrary
 
 
         // FILE PATHS.
-        static string filePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryBooks.txt"; // Library books are saved here.
-        static string adminsPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryAdmins.txt"; // Admins are saved here.
-        static string UsersPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\LibraryUsers.txt"; // Users are saved here
-        static string BorrowListPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\BorrowList.txt"; // Users currently borrowing books are saved here.
-        static string CategoriesPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\CategoryList.txt"; // The history of all borrowings is saved here.
+        static string filePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\BooksFile.txt"; // Library books are saved here.
+        static string adminsPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\AdminsFile.txt"; // Admins are saved here.
+        static string UsersPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\UsersFile.txt"; // Users are saved here
+        static string BorrowListPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\BorrowingFile.txt"; // Users currently borrowing books are saved here.
+        static string CategoriesPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\CategoriesFile.txt"; // The history of all borrowings is saved here.
 
 
 
@@ -83,18 +83,18 @@ namespace BasicLibrary
             bool MasterAdminFlag = false;
             Console.WriteLine($"!!TOP SECRET!! DO NOT SHARE\n(Master Admin Email: {Admins[0].AdminEmail})");
             Console.WriteLine("\nEnter Admin ID:");
-            while (string.IsNullOrEmpty(AdminID = Console.ReadLine().ToLower()))
+            while (string.IsNullOrEmpty(AdminID = Console.ReadLine().ToLower().Trim()))
             {
                 Console.WriteLine("\nInvalid input, please try again:");
             }
-            Console.WriteLine("\nEnter Admin Password (Hint: admin):");
-            while (string.IsNullOrEmpty(AdminPass = Console.ReadLine().ToLower()))
+            Console.WriteLine($"\nEnter Admin Password (Hint: Master Admin Pass ({Admins[0].AdminPass})):");
+            while (string.IsNullOrEmpty(AdminPass = Console.ReadLine().ToLower().Trim()))
             {
                 Console.WriteLine("\nInvalid input, please try again:");
             }
             for (int i = 0; i < Admins.Count; i++)
             {
-                if ((Admins[i].AdminEmail.ToLower() == AdminID) && (Admins[i].AdminPass.ToLower() == AdminPass)) //check if admin exist
+                if ((Admins[i].AdminEmail.ToLower().Trim() == AdminID.Trim()) && (Admins[i].AdminPass.ToLower().Trim() == AdminPass.Trim())) //check if admin exist
                 {
                     AdminFlag = true;
                 }
@@ -226,7 +226,7 @@ namespace BasicLibrary
             List<string> ExistingAdmins = new List<string>();
             for (int i = 0; i < Admins.Count; i++)
             {
-                ExistingAdmins.Add(Admins[i].AdminEmail.ToLower());
+                ExistingAdmins.Add(Admins[i].AdminEmail.ToLower().Trim());
             } // Adding current admins Ids to a temporary list to prevent dublicate admin Ids
 
             int AdminID;
@@ -247,7 +247,7 @@ namespace BasicLibrary
             }
             Console.WriteLine("\nEnter new Admin Email:");
             string NewAdminEmail;
-            while((string.IsNullOrEmpty(NewAdminEmail = Console.ReadLine().ToLower())) || (ExistingAdmins.Contains(NewAdminEmail.ToLower())) || (Regex.IsMatch(NewAdminEmail, EmailFormat, RegexOptions.IgnoreCase)))
+            while((string.IsNullOrEmpty(NewAdminEmail = Console.ReadLine().ToLower().Trim())) || (ExistingAdmins.Contains(NewAdminEmail.ToLower().Trim())) || (Regex.IsMatch(NewAdminEmail, EmailFormat, RegexOptions.IgnoreCase)))
             {
                 Console.WriteLine("\nInvalid Email, please try again:");
             }
@@ -308,11 +308,11 @@ namespace BasicLibrary
                         List<string> ExistingAdmins = new List<string>();
                         for (int i = 0; i < Admins.Count; i++)
                         {
-                            ExistingAdmins.Add(Admins[i].AdminEmail.ToLower());
+                            ExistingAdmins.Add(Admins[i].AdminEmail.ToLower().Trim());
                         }
                         Console.WriteLine($"\nEnter the new Email for {Admins[ChosenAdmin - 1].AdminEmail}: ");
                         string NewEmail;
-                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine().ToLower())) || (ExistingAdmins.Contains(NewEmail)))
+                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine().ToLower().Trim())) || (ExistingAdmins.Contains(NewEmail)))
                         {
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
@@ -512,12 +512,13 @@ namespace BasicLibrary
                         break;
 
                     case 3:
+                        Console.Clear();
                         StringBuilder sb = new StringBuilder();
                         for (int i = 0;i<Users.Count;i++)
                         {
                             sb.AppendLine($"{(i+1)}. User ID: {Users[i].UserID} | User Name: {Users[i].UserName}");
                         }
-                        Console.WriteLine("Users List:"+sb.ToString());
+                        Console.WriteLine("Users List:\n"+sb.ToString());
                         Console.WriteLine("\nChoose a user from the list to view profile:");
                         int UIDtoSearch;
                         while ((!int.TryParse(Console.ReadLine(),out UIDtoSearch)) || (UIDtoSearch < 0) || (UIDtoSearch > Users.Count))
@@ -541,7 +542,7 @@ namespace BasicLibrary
             List<string> ExistingUsers = new List<string>();
             for (int i = 0; i < Users.Count; i++)
             {
-                ExistingUsers.Add(Users[i].UserEmail.ToLower());
+                ExistingUsers.Add(Users[i].UserEmail.ToLower().Trim());
             }
             int NewUserID;
             if (Users.Count > 0)
@@ -560,7 +561,7 @@ namespace BasicLibrary
             }
             Console.WriteLine("\nEnter new User Email:");
             string NewUserEmail;
-            while ((string.IsNullOrEmpty(NewUserEmail = Console.ReadLine().ToLower())) || (ExistingUsers.Contains(NewUserEmail)) || (Regex.IsMatch(NewUserEmail, EmailFormat, RegexOptions.IgnoreCase)))
+            while ((string.IsNullOrEmpty(NewUserEmail = Console.ReadLine().ToLower().Trim())) || (ExistingUsers.Contains(NewUserEmail.Trim())) || (Regex.IsMatch(NewUserEmail, EmailFormat, RegexOptions.IgnoreCase)))
             {
                 Console.WriteLine("\nInvalid Email, please try again:");
             }
@@ -620,11 +621,11 @@ namespace BasicLibrary
                         List<string> ExistingUsers = new List<string>();
                         for (int i = 0; i < Users.Count; i++)
                         {
-                            ExistingUsers.Add(Users[i].UserEmail.ToLower());
+                            ExistingUsers.Add(Users[i].UserEmail.ToLower().Trim());
                         }
                         Console.WriteLine($"\nEnter the new Email for user {Users[ChosenUser - 1].UserID}: ");
                         string NewEmail;
-                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine().ToLower())) || (ExistingUsers.Contains(NewEmail)))
+                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine().ToLower().Trim())) || (ExistingUsers.Contains(NewEmail.Trim())))
                         {
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
@@ -690,13 +691,13 @@ namespace BasicLibrary
                 Console.WriteLine("\nInvalid input, please try again:");
             }
             Console.WriteLine("\nEnter user Password:");
-            while (string.IsNullOrEmpty(UsrPass = Console.ReadLine().ToLower()))
+            while (string.IsNullOrEmpty(UsrPass = Console.ReadLine()))
             {
                 Console.WriteLine("\nInvalid input, please try again:");
             }
             for (int i = 0; i < Users.Count; i++)
             {
-                if ((Users[i].UserEmail == UsrEmail) && (Users[i].UserPass == UsrPass))
+                if ((Users[i].UserEmail.Trim() == UsrEmail.Trim()) && (Users[i].UserPass.Trim() == UsrPass.Trim()))
                 {
                     CurrentUser = Users[i].UserID;
                     return true;
@@ -1140,7 +1141,7 @@ namespace BasicLibrary
                 }
                 else
                 {
-                    Borrows.Add((CurrentUser, Books[BookIndex].BookID, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), DateTime.Today.AddDays(Books[BookIndex].BorrowPeriod).ToString("yyyy-MM-dd HH:mm:ss"), "Not Returned", 0, false));
+                    Borrows.Add((CurrentUser, Books[BookIndex].BookID, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), DateTime.Today.AddDays(Books[BookIndex].BorrowPeriod).ToString("yyyy-MM-dd HH:mm:ss"), "N/A", "N/A", false));
                     Books[BookIndex] = (Books[BookIndex].BookID, Books[BookIndex].BookName, Books[BookIndex].AuthName, Books[BookIndex].Cpy, (Books[BookIndex].BorrowedCpy + 1), Books[BookIndex].BookPrice, Books[BookIndex].Category, Books[BookIndex].BorrowPeriod);
                     Console.Clear();
                     Console.WriteLine($"\n{Books[BookIndex].BookName} borrowed successfully!");
@@ -1163,7 +1164,7 @@ namespace BasicLibrary
                 {
                     IDs.Add(Borrows[i].BookID);
                     UserBorrowed = true;
-                    sb.AppendLine($"ID: {Borrows[i].BookID} | Borrowed On: {Borrows[i].BorrowDate} | Due Date: {Borrows[i].DueDate} | Days Left: {(DateTime.Parse(Borrows[i].BorrowDate) - DateTime.Parse(Borrows[i].DueDate)).Days}");
+                    sb.AppendLine($"ID: {Borrows[i].BookID} | Borrowed On: {Borrows[i].BorrowDate} | Due Date: {Borrows[i].DueDate} | Days Left: {(DateTime.Parse(Borrows[i].DueDate) - DateTime.Now).Days}");
                 }
             }
             if (UserBorrowed)
@@ -1221,7 +1222,7 @@ namespace BasicLibrary
                         }
                         try
                         {
-                            Borrows[BorrowedIndex] = (Borrows[BorrowedIndex].UserID, Borrows[BorrowedIndex].BookID, Borrows[BorrowedIndex].BorrowDate, Borrows[BorrowedIndex].DueDate, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), BRating, true);
+                            Borrows[BorrowedIndex] = (Borrows[BorrowedIndex].UserID, Borrows[BorrowedIndex].BookID, Borrows[BorrowedIndex].BorrowDate, Borrows[BorrowedIndex].DueDate, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), BRating.ToString(), true);
                             SaveBorrowedListToFile();
                         }
                         catch (Exception ex)
@@ -1619,7 +1620,7 @@ namespace BasicLibrary
                             var parts = line.Split('|');
                             if (parts.Length == 7)
                             {
-                                Borrows.Add((int.Parse(parts[0]), int.Parse(parts[1]), parts[2], parts[3], parts[4], int.Parse(parts[5]), bool.Parse(parts[6])));
+                                Borrows.Add((int.Parse(parts[0]), int.Parse(parts[1]), parts[2], parts[3], parts[4], parts[5], bool.Parse(parts[6])));
                             }
                         }
                     }
@@ -1868,7 +1869,7 @@ namespace BasicLibrary
             {
                 if (!Borrows[i].IsReturned)
                 {
-                    sb.AppendLine($"\nUser ID: {Borrows[i].UserID} | Book ID: {Borrows[i].BookID} | Borrowed on: {Borrows[i].BorrowDate} | Due Date: {Borrows[i].DueDate} | Days Left: {DateTime.Parse(Borrows[i].BorrowDate) - DateTime.Parse(Borrows[i].DueDate)}");
+                    sb.AppendLine($"\nUser ID: {Borrows[i].UserID} | Book ID: {Borrows[i].BookID} | Borrowed on: {Borrows[i].BorrowDate} | Due Date: {Borrows[i].DueDate} | Days Left: {(DateTime.Parse(Borrows[i].DueDate) - DateTime.Now).Days}");
                 }
             }
             Console.WriteLine(sb.ToString());
@@ -1891,7 +1892,7 @@ namespace BasicLibrary
                 }
                 if ((UID == Borrows[i].UserID) && (Borrows[i].IsReturned == false))
                 {
-                    BorrowedNOTReturned.AppendLine($"Book ID: {Borrows[i].BookID} | Borrow Date: {Borrows[i].BorrowDate} | Due Date: {Borrows[i].DueDate} | Days Left: {(DateTime.Parse(Borrows[i].BorrowDate) - DateTime.Parse(Borrows[i].DueDate)).Days}");
+                    BorrowedNOTReturned.AppendLine($"Book ID: {Borrows[i].BookID} | Borrow Date: {Borrows[i].BorrowDate} | Due Date: {Borrows[i].DueDate} | Days Left: {(DateTime.Parse(Borrows[i].DueDate) - DateTime.Now).Days}");
                     FoundNotReturned = true;
 
                     if (DateTime.Parse(Borrows[i].DueDate) < DateTime.Now)
@@ -1914,15 +1915,15 @@ namespace BasicLibrary
             Console.WriteLine("User Details: "+UserInfo.ToString());
             if (FoundReturned)
             {
-                Console.WriteLine("\nBorrowed and Returned Books:" + BorrowedAndReturned.ToString());
+                Console.WriteLine("\nBorrowed and Returned Books:\n" + BorrowedAndReturned.ToString());
             }
             if (FoundNotReturned)
             {
-                Console.WriteLine("\nCurrently Borrowed Books: " + BorrowedNOTReturned.ToString());
+                Console.WriteLine("\nCurrently Borrowed Books: \n" + BorrowedNOTReturned.ToString());
             }
             if (OverDue)
             {
-                Console.WriteLine("!BOOKS OVERDUE!" + BooksOverDue.ToString());
+                Console.WriteLine("!BOOKS OVERDUE!\n" + BooksOverDue.ToString());
             }
         }
     }
