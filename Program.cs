@@ -2,6 +2,7 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace BasicLibrary
 {
@@ -127,7 +128,8 @@ namespace BasicLibrary
                 Console.WriteLine("\n4. Edit Book Info.");
                 Console.WriteLine("\n5. Manage Library Admins.");
                 Console.WriteLine("\n6. Manage Library Users.");
-                Console.WriteLine("\n7. View Library Report.");
+                Console.WriteLine("\n7. Manage Categories.");
+                Console.WriteLine("\n8. View Library Report.");
                 Console.WriteLine("\n\n0. Save & Exit.");
 
                 int choice;
@@ -163,6 +165,10 @@ namespace BasicLibrary
                         break;
 
                     case 7:
+                        ManageCategories();
+                        break;
+
+                    case 8:
                         ReportLibStats();
                         break;
 
@@ -378,8 +384,9 @@ namespace BasicLibrary
                 Console.WriteLine("\n2. Display All Books.");
                 Console.WriteLine("\n3. Search for Book.");
                 Console.WriteLine("\n4. Edit Book Info.");
-                Console.WriteLine("\n5. Manage Usera.");
-                Console.WriteLine("\n6. View Library Report.");
+                Console.WriteLine("\n5. Manage Users.");
+                Console.WriteLine("\n6. Manage Categories.");
+                Console.WriteLine("\n7. View Library Report.");
                 Console.WriteLine("\n\n0. Save & Exit.");
 
                 int choice;
@@ -411,6 +418,10 @@ namespace BasicLibrary
                         break;
 
                     case 6:
+                        ManageCategories();
+                        break;
+
+                    case 7:
                         ReportLibStats();
                         break;
 
@@ -480,7 +491,7 @@ namespace BasicLibrary
             bool ExitFlag = false;
             do
             {
-                Console.WriteLine("\nChoose an option:\n1. Register new User.\n2. Edit existing User.\n\n0. Save & Exit.");
+                Console.WriteLine("\nChoose an option:\n1. Register new User.\n2. Edit existing User.\n3. View a user's Profile.\n\n0. Save & Exit.");
                 int Choice;
                 while ((!int.TryParse(Console.ReadLine(), out Choice)) || (Choice > 3) || (Choice < 0))
                 {
@@ -496,6 +507,21 @@ namespace BasicLibrary
                         EditUser();
                         break;
 
+                    case 3:
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0;i<Users.Count;i++)
+                        {
+                            sb.AppendLine($"{(i+1)}. User ID: {Users[i].UserID} | User Name: {Users[i].UserName}");
+                        }
+                        Console.WriteLine("Users List:"+sb.ToString());
+                        Console.WriteLine("\nChoose a user from the list to view profile:");
+                        int UIDtoSearch;
+                        while ((!int.TryParse(Console.ReadLine(),out UIDtoSearch)) || (UIDtoSearch < 0) || (UIDtoSearch > Users.Count))
+                        {
+                            Console.WriteLine("Invalid input, please try again.");
+                        }
+                        UserIndividualReport(Users[UIDtoSearch-1].UserID);
+                        break;
 
                     case 0:
                         ExitFlag = true;
@@ -710,6 +736,7 @@ namespace BasicLibrary
                 Console.WriteLine("\n1. Search book");
                 Console.WriteLine("\n2. Borrow book");
                 Console.WriteLine("\n3. Return book");
+                Console.WriteLine("\n4. View Profile");
                 Console.WriteLine("\n0. Save & Exit");
 
                 int choice;
@@ -730,6 +757,10 @@ namespace BasicLibrary
 
                     case 3:
                         ReturnBook();
+                        break;
+
+                    case 4:
+                        UserIndividualReport(CurrentUser);
                         break;
 
                     case 0:
@@ -1052,7 +1083,7 @@ namespace BasicLibrary
                 {
                     IDs.Add(Borrows[i].BookID);
                     UserBorrowed = true;
-                    sb.AppendLine($"ID: {Borrows[i].BookID} | Borrowed On: {Borrows[i].BorrowDate} | Due Date: {Borrows[i].DueDate}");
+                    sb.AppendLine($"ID: {Borrows[i].BookID} | Borrowed On: {Borrows[i].BorrowDate} | Due Date: {Borrows[i].DueDate} | Days Left: {(DateTime.Parse(Borrows[i].BorrowDate) - DateTime.Parse(Borrows[i].DueDate)).Days}");
                 }
             }
             if (UserBorrowed)
@@ -1739,6 +1770,58 @@ namespace BasicLibrary
                 }
             }
             Console.WriteLine(sb.ToString());
+        }
+        static void UserIndividualReport(int UID)
+        {
+            StringBuilder BorrowedAndReturned = new StringBuilder();
+            bool FoundReturned = false;
+            StringBuilder BorrowedNOTReturned = new StringBuilder();
+            bool FoundNotReturned = false;
+            StringBuilder BooksOverDue = new StringBuilder();
+            bool OverDue = false;
+            StringBuilder UserInfo = new StringBuilder();
+            for(int i = 0;i < Borrows.Count;++i)
+            {
+                if ((UID == Borrows[i].UserID) && (Borrows[i].IsReturned == true))
+                {
+                    BorrowedAndReturned.AppendLine($"Book ID: {Borrows[i].BookID} | Borrow Date: {Borrows[i].BorrowDate} | Returned On: {Borrows[i].ReturnDate} | Rating: {Borrows[i].BRating}");
+                    FoundReturned = true;
+                }
+                if ((UID == Borrows[i].UserID) && (Borrows[i].IsReturned == false))
+                {
+                    BorrowedNOTReturned.AppendLine($"Book ID: {Borrows[i].BookID} | Borrow Date: {Borrows[i].BorrowDate} | Due Date: {Borrows[i].DueDate} | Days Left: {(DateTime.Parse(Borrows[i].BorrowDate) - DateTime.Parse(Borrows[i].DueDate)).Days}");
+                    FoundNotReturned = true;
+
+                    if (DateTime.Parse(Borrows[i].DueDate) < DateTime.Now)
+                    {
+                        BooksOverDue.AppendLine($"Book ID: {Borrows[i].BookID} | Book Borrow Date: {Borrows[i].BorrowDate}");
+                        OverDue = true;
+                    }
+                }
+            }
+
+            for (int i = 0;i<Users.Count;++i)
+            {
+                if (Users[i].UserID == UID)
+                {
+                    UserInfo.AppendLine($"User ID: {Users[i].UserID} | User Name: {Users[i].UserName} | Email: {Users[i].UserEmail} | Password: {Users[i].UserPass}");
+                    break;
+                }
+            }
+            Console.Clear();
+            Console.WriteLine("User Details: "+UserInfo.ToString());
+            if (FoundReturned)
+            {
+                Console.WriteLine("\nBorrowed and Returned Books:" + BorrowedAndReturned.ToString());
+            }
+            if (FoundNotReturned)
+            {
+                Console.WriteLine("\nCurrently Borrowed Books: " + BorrowedNOTReturned.ToString());
+            }
+            if (OverDue)
+            {
+                Console.WriteLine("!BOOKS OVERDUE!" + BooksOverDue.ToString());
+            }
         }
     }
 }
