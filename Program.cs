@@ -3,6 +3,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using System.Text.RegularExpressions;
 
 namespace BasicLibrary
 {
@@ -15,6 +16,10 @@ namespace BasicLibrary
         static List<(int BookID, string BookName, string AuthName, int Cpy, int BorrowedCpy, double BookPrice, string Category, int BorrowPeriod)> Books = new List<(int BookID, string BookName, string AuthName, int Cpy, int BorrowedCpy, double BookPrice, string Category, int BorrowPeriod)>(); // Books list
         static List<(int UserID, int BookID, string BorrowDate, string ReturnDate, string DueDate, float BRating, bool IsReturned)> Borrows = new List<(int UserID, int BookID, string BorrowDate, string ReturnDate, string DueDate, float BRating, bool IsReturned)>(); // Current borrows list
         static List<(int CatID, string CatName, int CatBookCount)> Categories = new List<(int CatID, string CatName, int CatBookCount)> (); // Categories List.
+
+        // REGEX FORMATS
+        static string EmailFormat = @"^[^@\s]+@[^@\s]+\.(com|net|org|gov|om)$";
+        static string PassFormat = @"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$";
 
 
         // FILE PATHS.
@@ -209,7 +214,6 @@ namespace BasicLibrary
                         EditAdmin();
                         break;
 
-
                     case 0:
                         ExitFlag = true;
                         break;
@@ -243,13 +247,13 @@ namespace BasicLibrary
             }
             Console.WriteLine("\nEnter new Admin Email:");
             string NewAdminEmail;
-            while((string.IsNullOrEmpty(NewAdminEmail = Console.ReadLine().ToLower())) || (ExistingAdmins.Contains(NewAdminEmail.ToLower())))
+            while((string.IsNullOrEmpty(NewAdminEmail = Console.ReadLine().ToLower())) || (ExistingAdmins.Contains(NewAdminEmail.ToLower())) || (Regex.IsMatch(NewAdminEmail, EmailFormat, RegexOptions.IgnoreCase)))
             {
                 Console.WriteLine("\nInvalid Email, please try again:");
             }
             Console.WriteLine($"\nEnter the password for {NewAdminEmail}:");
             string NewAdminPass;
-            while (string.IsNullOrEmpty(NewAdminPass = Console.ReadLine().ToLower()))
+            while (string.IsNullOrEmpty(NewAdminPass = Console.ReadLine().ToLower()) || (Regex.IsMatch(NewAdminPass, PassFormat)))
             {
                 Console.WriteLine("\nInvalid Password, please try again:");
             }
@@ -556,13 +560,13 @@ namespace BasicLibrary
             }
             Console.WriteLine("\nEnter new User Email:");
             string NewUserEmail;
-            while ((string.IsNullOrEmpty(NewUserEmail = Console.ReadLine().ToLower())) || (ExistingUsers.Contains(NewUserEmail)))
+            while ((string.IsNullOrEmpty(NewUserEmail = Console.ReadLine().ToLower())) || (ExistingUsers.Contains(NewUserEmail)) || (Regex.IsMatch(NewUserEmail, EmailFormat, RegexOptions.IgnoreCase)))
             {
                 Console.WriteLine("\nInvalid Email, please try again:");
             }
             Console.WriteLine($"\nEnter the password for {NewUserEmail}:");
             string NewUserPass;
-            while (string.IsNullOrEmpty(NewUserPass = Console.ReadLine().ToLower()))
+            while (string.IsNullOrEmpty(NewUserPass = Console.ReadLine().ToLower()) || (Regex.IsMatch(NewUserPass, PassFormat)))
             {
                 Console.WriteLine("\nInvalid Password, please try again:");
             }
@@ -1348,9 +1352,30 @@ namespace BasicLibrary
                         break;
 
                     case 4:
-                        string RemovedBook = Books[ChosenBook - 1].BookName;
-                        Books.RemoveAt(ChosenBook - 1);
-                        Console.WriteLine($"\nBook \"{RemovedBook}\" has been removed from the library File.");
+                        if (Books[ChosenBook - 1].BorrowedCpy > 0)
+                        {
+                            Console.WriteLine($"Book is currently borrowed by {Books[ChosenBook - 1].BorrowedCpy} user(s) and cannot be removed.");
+                        }
+                        else
+                        { 
+                            Console.WriteLine($"Are you sure you want to remove {Books[ChosenBook - 1].BookName} from the library?");
+                            Console.WriteLine("\n(1) Yes / (2) No");
+                            int ConfChoice;
+                            while((!int.TryParse(Console.ReadLine(), out ConfChoice))||(ConfChoice > 2) ||(ConfChoice < 1))
+                            {
+                                Console.WriteLine("Invalid input, please try again.");
+                            }
+                            if (ConfChoice == 1)
+                            {
+                                string RemovedBook = Books[ChosenBook - 1].BookName;
+                                Books.RemoveAt(ChosenBook - 1);
+                                Console.WriteLine($"\nBook \"{RemovedBook}\" has been removed from the library File.");
+                            }
+                            else
+                            {
+                                Console.WriteLine("\nCancelling book removal...");
+                            }
+                        }
                         break;
 
                     default:
