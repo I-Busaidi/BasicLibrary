@@ -18,17 +18,20 @@ namespace BasicLibrary
         static List<(int UserID, int BookID, string BorrowDate, string DueDate, string ReturnDate, string BRating, bool IsReturned)> Borrows = new List<(int UserID, int BookID, string BorrowDate, string DueDate, string ReturnDate, string BRating, bool IsReturned)>(); // Current borrows list
         static List<(int CatID, string CatName, int CatBookCount)> Categories = new List<(int CatID, string CatName, int CatBookCount)> (); // Categories List.
 
+
         // REGEX FORMATS
-        static string EmailFormat = @"^[^@\s]+@[^@\s]+\.(com|edu|om)$";
-        static string PassFormat = @"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$";
+        static string EmailFormat = @"^[^@\s]+@[^@\s]+\.(com|edu|om)$"; // allows only emails in the format: example@example.com(OR .edu / .om)
+        static string PassFormat = @"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"; // Accepts only 8 character password, atleast 1 cap letter, 1 small letter, one number and one special character.
+        static string NameCheck = @"^[A-Za-z]+( [A-Za-z]+)*$"; // Allows only letters and only one space between each 2 words.
 
 
         // FILE PATHS.
         static string filePath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\BooksFile.txt"; // Library books are saved here.
         static string adminsPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\AdminsFile.txt"; // Admins are saved here.
-        static string UsersPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\UsersFile.txt"; // Users are saved here
+        static string UsersPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\UsersFile.txt"; // Users are saved here.
         static string BorrowListPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\BorrowingFile.txt"; // Users currently borrowing books are saved here.
         static string CategoriesPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\CategoriesFile.txt"; // The history of all borrowings is saved here.
+        static string AdminRequestPath = "C:\\Users\\Lenovo\\Desktop\\Ibrahim_Projects\\LibrarySystemFiles\\AdminRequestFile.txt"; // stores admin requests if any.
 
 
 
@@ -80,7 +83,8 @@ namespace BasicLibrary
         {
             string AdminID;
             string AdminPass;
-            bool AdminFlag = false;
+            bool AdminEmailFlag = false;
+            bool AdminPassFlag = false;
             bool MasterAdminFlag = false;
             Console.WriteLine($"!!TOP SECRET!! DO NOT SHARE\n(Master Admin Email: {Admins[0].AdminEmail})");
             Console.WriteLine("\nEnter Admin ID:");
@@ -95,11 +99,15 @@ namespace BasicLibrary
             }
             for (int i = 0; i < Admins.Count; i++)
             {
-                if ((Admins[i].AdminEmail.ToLower().Trim() == AdminID.Trim()) && (Admins[i].AdminPass.ToLower().Trim() == AdminPass.Trim())) //check if admin exist
+                if (Admins[i].AdminEmail.ToLower().Trim() == AdminID.Trim()) //check if admin exist
                 {
-                    AdminFlag = true;
+                    AdminEmailFlag = true;
                 }
-                if (AdminFlag) // if admin id and pass are correct, check if it is Master admin (first admin)
+                if (Admins[i].AdminPass.ToLower().Trim() == AdminPass.Trim())
+                {
+                    AdminPassFlag = true;
+                }
+                if (AdminEmailFlag && AdminPassFlag) // if admin id and pass are correct, check if it is Master admin (first admin)
                 {
                     if (i == 0)
                     {
@@ -107,17 +115,21 @@ namespace BasicLibrary
                     }
                 }
             }
-            if (AdminFlag && !MasterAdminFlag)
+            if (AdminEmailFlag && AdminPassFlag && !MasterAdminFlag)
             {
                 AdminMenu();
             }
-            else if (AdminFlag && MasterAdminFlag)
+            else if (AdminEmailFlag && AdminPassFlag && MasterAdminFlag)
             {
                 MasterAdmin();
             }
+            else if (AdminEmailFlag && !AdminPassFlag)
+            {
+                Console.WriteLine("\nInvalid Admin Password, please try again.");
+            }
             else
             {
-                Console.WriteLine("\nInvalid Admin Email or Password, please try again.");
+                Console.WriteLine("Invalid admin email, register new email");
             }
         }
         static void MasterAdmin() // Master admin menu
@@ -224,12 +236,6 @@ namespace BasicLibrary
         }
         static void AddNewAdmin() // used in ManageAdmins() to add admins
         {
-            List<string> ExistingAdmins = new List<string>();
-            for (int i = 0; i < Admins.Count; i++)
-            {
-                ExistingAdmins.Add(Admins[i].AdminEmail.ToLower().Trim());
-            } // Adding current admins Ids to a temporary list to prevent dublicate admin Ids
-
             int AdminID;
             if (Admins.Count < 1)
             {
@@ -241,23 +247,34 @@ namespace BasicLibrary
             }
 
             Console.WriteLine("\nEnter new Admin Name:");
-            string NewAdminName;
-            while ((string.IsNullOrEmpty(NewAdminName = Console.ReadLine())))
+            var NameValidation = EntryValidation(Admins, Console.ReadLine(), 1);
+            while (!NameValidation.Item1)
             {
-                Console.WriteLine("\nInvalid name, please try again:");
+                Console.Clear();
+                Console.WriteLine(NameValidation.Item2);
+                NameValidation = EntryValidation(Admins, Console.ReadLine(), 1);
             }
+            string NewAdminName = NameValidation.Item2;
+
             Console.WriteLine("\nEnter new Admin Email:");
-            string NewAdminEmail;
-            while((string.IsNullOrEmpty(NewAdminEmail = Console.ReadLine().ToLower().Trim())) || (ExistingAdmins.Contains(NewAdminEmail.ToLower().Trim())) || (!Regex.IsMatch(NewAdminEmail, EmailFormat, RegexOptions.IgnoreCase)))
+            var EmailValidation = EntryValidation(Admins, Console.ReadLine(), 2);
+            while(!EmailValidation.Item1)
             {
-                Console.WriteLine("\nInvalid Email, please try again:");
+                Console.Clear();
+                Console.WriteLine(EmailValidation.Item2);
+                EmailValidation = EntryValidation(Admins, Console.ReadLine(), 2);
             }
+            string NewAdminEmail = EmailValidation.Item2;
+            
             Console.WriteLine($"\nEnter the password for {NewAdminEmail}:");
-            string NewAdminPass;
-            while (string.IsNullOrEmpty(NewAdminPass = Console.ReadLine()) || (!Regex.IsMatch(NewAdminPass, PassFormat)))
+            var PassValidation = EntryValidation(Admins, Console.ReadLine(), 3);
+            while (!PassValidation.Item1)
             {
-                Console.WriteLine("\nInvalid Password, please try again:");
+                Console.Clear();
+                Console.WriteLine(PassValidation.Item2);
+                PassValidation = EntryValidation(Admins, Console.ReadLine(), 3);
             }
+            string NewAdminPass = PassValidation.Item2;
 
             Admins.Add((AdminID, NewAdminName, NewAdminEmail, NewAdminPass));
             Console.WriteLine($"\nAdmin {NewAdminEmail} added successfully.");
@@ -295,28 +312,29 @@ namespace BasicLibrary
 
                     case 1:
                         Console.WriteLine($"\nEnter the new Name for {Admins[ChosenAdmin - 1].AdminEmail}: ");
-                        string NewName;
-                        while ((string.IsNullOrEmpty(NewName = Console.ReadLine())))
+                        var NameValidation = EntryValidation(Admins, Console.ReadLine(), 1);
+                        while (!NameValidation.Item1)
                         {
-                            Console.WriteLine("\nInvalid input, please try again:");
+                            Console.Clear();
+                            Console.WriteLine(NameValidation.Item2);
+                            NameValidation = EntryValidation(Admins, Console.ReadLine(), 1);
                         }
+                        string NewName = NameValidation.Item2;
                         string OldName = Admins[ChosenAdmin - 1].AdminEmail;
                         Admins[ChosenAdmin - 1] = (Admins[ChosenAdmin - 1].AdminID, NewName, Admins[ChosenAdmin - 1].AdminEmail, Admins[ChosenAdmin - 1].AdminPass);
                         Console.WriteLine($"\nAdmin \"{OldName}\" Name changed to: \"{NewName}\".");
                         break;
 
                     case 2:
-                        List<string> ExistingAdmins = new List<string>();
-                        for (int i = 0; i < Admins.Count; i++)
-                        {
-                            ExistingAdmins.Add(Admins[i].AdminEmail.ToLower().Trim());
-                        }
                         Console.WriteLine($"\nEnter the new Email for {Admins[ChosenAdmin - 1].AdminEmail}: ");
-                        string NewEmail;
-                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine().ToLower().Trim())) || (ExistingAdmins.Contains(NewEmail)) || (!Regex.IsMatch(NewEmail, EmailFormat, RegexOptions.IgnoreCase)))
+                        var EmailValidation = EntryValidation(Admins, Console.ReadLine(), 2);
+                        while (!EmailValidation.Item1)
                         {
-                            Console.WriteLine("\nInvalid input, please try again:");
+                            Console.Clear();
+                            Console.WriteLine(EmailValidation.Item2);
+                            EmailValidation = EntryValidation(Admins, Console.ReadLine(), 2);
                         }
+                        string NewEmail = EmailValidation.Item2;
                         string OldEmail = Admins[ChosenAdmin - 1].AdminEmail;
                         Admins[ChosenAdmin - 1] = (Admins[ChosenAdmin - 1].AdminID, Admins[ChosenAdmin - 1].AdminName, NewEmail, Admins[ChosenAdmin - 1].AdminPass);
                         Console.WriteLine($"\nAdmin \"{OldEmail}\" Email changed to: {NewEmail}.");
@@ -324,11 +342,14 @@ namespace BasicLibrary
 
                     case 3:
                         Console.WriteLine($"\nEnter the new Password for {Admins[ChosenAdmin - 1].AdminEmail}: ");
-                        string NewPass;
-                        while (string.IsNullOrEmpty(NewPass = Console.ReadLine())||(!Regex.IsMatch(NewPass, PassFormat)))
+                        var PassValidation = EntryValidation(Admins, Console.ReadLine(), 3);
+                        while (!PassValidation.Item1)
                         {
-                            Console.WriteLine("\nInvalid input, please try again:");
+                            Console.Clear();
+                            Console.WriteLine(PassValidation.Item2);
+                            PassValidation = EntryValidation(Admins, Console.ReadLine(), 3);
                         }
+                        string NewPass = PassValidation.Item2;
                         string OldPass = Admins[ChosenAdmin - 1].AdminPass;
                         Admins[ChosenAdmin - 1] = (Admins[ChosenAdmin - 1].AdminID, Admins[ChosenAdmin - 1].AdminName, Admins[ChosenAdmin - 1].AdminEmail, NewPass);
                         Console.WriteLine($"\n\"{Admins[ChosenAdmin - 1].AdminEmail}\" Password changed from: {OldPass} to: {NewPass}.");
@@ -540,11 +561,6 @@ namespace BasicLibrary
         }
         static void AddNewUser()
         {
-            List<string> ExistingUsers = new List<string>();
-            for (int i = 0; i < Users.Count; i++)
-            {
-                ExistingUsers.Add(Users[i].UserEmail.ToLower().Trim());
-            }
             int NewUserID;
             if (Users.Count > 0)
             {
@@ -554,24 +570,37 @@ namespace BasicLibrary
             {
                 NewUserID = 1;
             }
+
             Console.WriteLine("\nEnter new User Name:");
-            string NewUserName;
-            while ((string.IsNullOrEmpty(NewUserName = Console.ReadLine().ToLower())))
+            var NameValidation = EntryValidation(Users, Console.ReadLine(), 1);
+            while (!NameValidation.Item1)
             {
-                Console.WriteLine("\nInvalid Name, please try again:");
+                Console.Clear();
+                Console.WriteLine(NameValidation.Item2);
+                NameValidation = EntryValidation(Users, Console.ReadLine(), 1);
             }
+            string NewUserName = NameValidation.Item2;
+
             Console.WriteLine("\nEnter new User Email:");
-            string NewUserEmail;
-            while ((string.IsNullOrEmpty(NewUserEmail = Console.ReadLine().ToLower().Trim())) || (ExistingUsers.Contains(NewUserEmail.Trim())) || (Regex.IsMatch(NewUserEmail, EmailFormat, RegexOptions.IgnoreCase)))
+            var EmailValidation = EntryValidation(Users, Console.ReadLine(), 2);
+            while (!EmailValidation.Item1)
             {
-                Console.WriteLine("\nInvalid Email, please try again:");
+                Console.Clear();
+                Console.WriteLine(EmailValidation.Item2);
+                EmailValidation = EntryValidation(Users, Console.ReadLine(), 2);
             }
+            string NewUserEmail = EmailValidation.Item2;
+
             Console.WriteLine($"\nEnter the password for {NewUserEmail}:");
-            string NewUserPass;
-            while (string.IsNullOrEmpty(NewUserPass = Console.ReadLine()) || (Regex.IsMatch(NewUserPass, PassFormat)))
+            var PassValidation = EntryValidation(Users, Console.ReadLine(), 3);
+            while (!PassValidation.Item1)
             {
-                Console.WriteLine("\nInvalid Password, please try again:");
+                Console.Clear();
+                Console.WriteLine(PassValidation.Item2);
+                PassValidation = EntryValidation(Users, Console.ReadLine(), 3);
             }
+            string NewUserPass = PassValidation.Item2;
+
             Users.Add((NewUserID, NewUserName, NewUserEmail, NewUserPass));
             Console.WriteLine($"\nUser {NewUserID} added successfully.");
         }
@@ -608,39 +637,43 @@ namespace BasicLibrary
 
                     case 1:
                         Console.WriteLine($"\nEnter the new Name for user {Users[ChosenUser - 1].UserEmail}: ");
-                        string NewName;
-                        while (string.IsNullOrEmpty(NewName = Console.ReadLine()))
+                        var NameValidation = EntryValidation(Users, Console.ReadLine(), 1);
+                        while (!NameValidation.Item1)
                         {
-                            Console.WriteLine("\nInvalid input, please try again:");
+                            Console.Clear();
+                            Console.WriteLine(NameValidation.Item2);
+                            NameValidation = EntryValidation(Users, Console.ReadLine(), 1);
                         }
+                        string NewName = NameValidation.Item2;
                         string OldName = Users[ChosenUser - 1].UserName;
                         Users[ChosenUser - 1] = (Users[ChosenUser - 1].UserID, NewName, Users[ChosenUser - 1].UserEmail, Users[ChosenUser - 1].UserPass);
                         Console.WriteLine($"\n\"{Users[ChosenUser - 1].UserID}\" Password changed from: {OldName} to: {NewName}.");
                         break;
 
                     case 2:
-                        List<string> ExistingUsers = new List<string>();
-                        for (int i = 0; i < Users.Count; i++)
-                        {
-                            ExistingUsers.Add(Users[i].UserEmail.ToLower().Trim());
-                        }
                         Console.WriteLine($"\nEnter the new Email for user {Users[ChosenUser - 1].UserID}: ");
-                        string NewEmail;
-                        while ((string.IsNullOrEmpty(NewEmail = Console.ReadLine().ToLower().Trim())) || (ExistingUsers.Contains(NewEmail.Trim())) || (!Regex.IsMatch(NewEmail, EmailFormat, RegexOptions.IgnoreCase)))
+                        var EmailValidation = EntryValidation(Users, Console.ReadLine(), 2);
+                        while (!EmailValidation.Item1)
                         {
-                            Console.WriteLine("\nInvalid input, please try again:");
+                            Console.Clear();
+                            Console.WriteLine(EmailValidation.Item2);
+                            EmailValidation = EntryValidation(Users, Console.ReadLine(), 2);
                         }
+                        string NewEmail = EmailValidation.Item2;
                         Users[ChosenUser - 1] = (Users[ChosenUser - 1].UserID, Users[ChosenUser - 1].UserName, NewEmail, Users[ChosenUser - 1].UserPass);
                         Console.WriteLine($"\nUser \"{Users[ChosenUser - 1].UserID}\" Email changed to: {NewEmail}.");
                         break;
 
                     case 3:
                         Console.WriteLine($"\nEnter the new Password for user {Users[ChosenUser - 1].UserID}: ");
-                        string NewPass;
-                        while (string.IsNullOrEmpty(NewPass = Console.ReadLine()) || (!Regex.IsMatch(NewPass, PassFormat)))
+                        var PassValidation = EntryValidation(Users, Console.ReadLine(), 3);
+                        while (!PassValidation.Item1)
                         {
-                            Console.WriteLine("\nInvalid input, please try again:");
+                            Console.Clear();
+                            Console.WriteLine(PassValidation.Item2);
+                            PassValidation = EntryValidation(Users, Console.ReadLine(), 3);
                         }
+                        string NewPass = PassValidation.Item2;
                         string OldPass = Users[ChosenUser - 1].UserPass;
                         Users[ChosenUser - 1] = (Users[ChosenUser - 1].UserID, Users[ChosenUser - 1].UserName, Users[ChosenUser - 1].UserEmail, NewPass);
                         Console.WriteLine($"\n\"{Users[ChosenUser - 1].UserID}\" Password changed from: {OldPass} to: {NewPass}.");
@@ -2015,6 +2048,58 @@ namespace BasicLibrary
             {
                 Console.WriteLine("!BOOKS OVERDUE!\n" + BooksOverDue.ToString());
             }
+        }
+        //static (bool, List<(string, string, string)>) RequestAdminAccount(string AName, string AEmail, string APass)
+        //{
+        //    List<(string Name, string Email, string Pass)> AdminRequests = new List<(string Name, string Email, string Pass)>();
+        //    bool AdminRequestFlag = false;
+            
+        //    return (AdminRequestFlag, AdminRequests);
+        //}
+        static (bool, string)EntryValidation(List<(int, string, string, string)> ListToCheck, string ItemToCheck, int CheckOperation)
+        {
+            if (CheckOperation == 1)
+            {
+                if (!Regex.IsMatch(ItemToCheck, NameCheck))
+                {
+                    return (false, "Invalid Name, Please Try Again.");
+                }
+                else
+                {
+                    for (int i = 0; i < ListToCheck.Count; i++)
+                    {
+                        if (ListToCheck[i].Item2.ToLower().Trim() == ItemToCheck.ToLower().Trim())
+                        {
+                            return (false, "Name Already Exists, Please Try Again.");
+                        }
+                    }
+                }
+            }
+            else if (CheckOperation == 2)
+            {
+                if (!Regex.IsMatch(ItemToCheck, EmailFormat))
+                {
+                    return (false, "Invalid Email Pattern, Please Try Again.");
+                }
+                else
+                {
+                    for (int i = 0; i < ListToCheck.Count; i++)
+                    {
+                        if (ListToCheck[i].Item3.ToLower().Trim() == ItemToCheck.ToLower().Trim())
+                        {
+                            return (false, "Email Already Exists, Please Try Again.");
+                        }
+                    }
+                }
+            }
+            else if (CheckOperation == 3)
+            {
+                if (!Regex.IsMatch(ItemToCheck, PassFormat))
+                {
+                    return (false, "Password does not comply with the standards, please try again.");
+                }
+            }
+            return (true, ItemToCheck);
         }
     }
 }
