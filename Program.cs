@@ -716,7 +716,8 @@ namespace BasicLibrary
         }
         static bool UserLogin() // returns true or false to be used in the login menu to determine the next action
         {
-
+            bool EmailFlag = false;
+            bool PassFlag = false;
             string UsrEmail;
             string UsrPass;
             Console.WriteLine("\nEnter user Email:");
@@ -731,11 +732,27 @@ namespace BasicLibrary
             }
             for (int i = 0; i < Users.Count; i++)
             {
-                if ((Users[i].UserEmail.Trim() == UsrEmail.Trim()) && (Users[i].UserPass.Trim() == UsrPass.Trim()))
+                if (Users[i].UserEmail.Trim().ToLower() == UsrEmail.Trim().ToLower())
+                {
+                    EmailFlag = true;
+                }
+                if (Users[i].UserPass.Trim() == UsrPass.Trim())
+                {
+                    PassFlag = true;
+                }
+                if (EmailFlag && PassFlag)
                 {
                     CurrentUser = Users[i].UserID;
                     return true;
                 }
+            }
+            if (!EmailFlag)
+            {
+                Console.WriteLine("Invalid Email Address.");
+            }
+            else if (EmailFlag && !PassFlag)
+            {
+                Console.WriteLine("Invalid Password.");
             }
             return false;
         }
