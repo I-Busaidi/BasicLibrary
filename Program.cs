@@ -17,6 +17,7 @@ namespace BasicLibrary
         static List<(int BookID, string BookName, string AuthName, int Cpy, int BorrowedCpy, double BookPrice, string Category, int BorrowPeriod)> Books = new List<(int BookID, string BookName, string AuthName, int Cpy, int BorrowedCpy, double BookPrice, string Category, int BorrowPeriod)>(); // Books list
         static List<(int UserID, int BookID, string BorrowDate, string DueDate, string ReturnDate, string BRating, bool IsReturned)> Borrows = new List<(int UserID, int BookID, string BorrowDate, string DueDate, string ReturnDate, string BRating, bool IsReturned)>(); // Current borrows list
         static List<(int CatID, string CatName, int CatBookCount)> Categories = new List<(int CatID, string CatName, int CatBookCount)> (); // Categories List.
+        static List<(string Name, string Email, string Pass)> AdminReq = new List<(string Name, string Email, string Pass)> ();
 
 
         // REGEX FORMATS
@@ -44,7 +45,8 @@ namespace BasicLibrary
             LoadBooksFromFile();
             LoadCategoryFromFile();
             LoadBorrowedListFromFile();
-            if(Admins.Count < 1)
+            LoadAdminRequests();
+            if (Admins.Count < 1)
             {
                 Admins.Add((1,"admin","admin", "admin")); //temporary admin id and pass in case there is no admin registered.
             }
@@ -129,7 +131,20 @@ namespace BasicLibrary
             }
             else
             {
-                Console.WriteLine("Invalid admin email, register new email");
+                Console.WriteLine("\nInvalid admin email, register new email? (1) Yes / (2) No");
+                int RegAdmin;
+                while((!int.TryParse(Console.ReadLine(), out RegAdmin))||(RegAdmin > 2) ||(RegAdmin < 1))
+                {
+                    Console.WriteLine("\nInvalid input, please try again:");
+                }
+                if (RegAdmin == 2)
+                {
+                    Console.WriteLine("\nReturning to main menu...");
+                }
+                else
+                {
+                    RequestAdminAccount(false);
+                }
             }
         }
         static void MasterAdmin() // Master admin menu
@@ -149,7 +164,10 @@ namespace BasicLibrary
                 Console.WriteLine("\n7. Manage Categories.");
                 Console.WriteLine("\n8. View Library Report.");
                 Console.WriteLine("\n\n0. Save & Exit.");
-
+                if (RequestAdminAccount(true))
+                {
+                    Console.WriteLine("\n*(Admin requests available, go to \"Manage Library Admins\")");
+                }
                 int choice;
                 while (!int.TryParse(Console.ReadLine(), out choice))
                 {
@@ -211,7 +229,7 @@ namespace BasicLibrary
             bool ExitFlag = false;
             do
             {
-                Console.WriteLine("\nChoose an option:\n1. Register new admin.\n2. Edit existing admin.\n\n0. Save & Exit.");
+                Console.WriteLine("\nChoose an option:\n1. Register new admin.\n2. Edit existing admin.\n3. View Admin Requests.\n\n0. Save & Exit.");
                 int Choice;
                 while ((!int.TryParse(Console.ReadLine(), out Choice))||(Choice > 3)||(Choice < 0))
                 {
@@ -227,6 +245,51 @@ namespace BasicLibrary
                         EditAdmin();
                         break;
 
+                    case 3:
+                        if(!RequestAdminAccount(true))
+                        {
+                            Console.WriteLine("\nNo Requests Available.");
+                        }
+                        else
+                        {
+                            StringBuilder sb = new StringBuilder();
+                            for (int i = 0; i < AdminReq.Count; i++)
+                            {
+                                sb.AppendLine($"\n{i+1}. Name: {AdminReq[i].Name} | Email: {AdminReq[i].Email} | Pass: {AdminReq[i].Pass}");
+                            }
+                            Console.WriteLine("\nRequests: \n"+sb.ToString());
+                            Console.WriteLine("\n0. Exit.");
+                            int ReqChoice;
+                            while ((!int.TryParse(Console.ReadLine(),out ReqChoice))||(ReqChoice > AdminReq.Count)||(ReqChoice < 0))
+                            {
+                                Console.WriteLine("\nInvalid input, please try again:");
+                            }
+                            if (ReqChoice == 0)
+                            {
+                                Console.WriteLine("\nReturning to menu...");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"\nAccept {AdminReq[ReqChoice - 1].Name}'s request? (1) Yes / (2) No");
+                                int AcceptReq;
+                                while ((!int.TryParse(Console.ReadLine(), out AcceptReq)) || (AcceptReq > 2)||(AcceptReq < 1))
+                                {
+                                    Console.WriteLine("\nInvalid input, please try again:");
+                                }
+                                if (AcceptReq == 2)
+                                {
+                                    Console.WriteLine("\nReturning to menu...");
+                                }
+                                else
+                                {
+                                    AddNewAdmin(AdminReq[ReqChoice - 1].Name, AdminReq[ReqChoice - 1].Email, AdminReq[ReqChoice - 1].Pass, true);
+                                    AdminReq.RemoveAt(ReqChoice - 1);
+                                    SaveAdminRequests();
+                                }
+                            }
+                        }
+                        break;
+
                     case 0:
                         ExitFlag = true;
                         break;
@@ -234,7 +297,7 @@ namespace BasicLibrary
                 Console.Clear();
             } while (!ExitFlag);
         }
-        static void AddNewAdmin() // used in ManageAdmins() to add admins
+        static void AddNewAdmin(string AdminName = null, string AdminEmail = null, string AdminPass = null, bool AdminRequest = false) // used in ManageAdmins() to add admins
         {
             int AdminID;
             if (Admins.Count < 1)
@@ -246,38 +309,46 @@ namespace BasicLibrary
                 AdminID = Admins[Admins.Count - 1].AdminID + 1;
             }
 
-            Console.WriteLine("\nEnter new Admin Name:");
-            var NameValidation = EntryValidation(Admins, Console.ReadLine(), 1);
-            while (!NameValidation.Item1)
+            if (!AdminRequest)
             {
-                Console.Clear();
-                Console.WriteLine(NameValidation.Item2);
-                NameValidation = EntryValidation(Admins, Console.ReadLine(), 1);
-            }
-            string NewAdminName = NameValidation.Item2;
+                Console.WriteLine("\nEnter new Admin Name:");
+                var NameValidation = EntryValidation(Admins, Console.ReadLine(), 1);
+                while (!NameValidation.Item1)
+                {
+                    Console.Clear();
+                    Console.WriteLine(NameValidation.Item2);
+                    NameValidation = EntryValidation(Admins, Console.ReadLine(), 1);
+                }
+                string NewAdminName = NameValidation.Item2;
 
-            Console.WriteLine("\nEnter new Admin Email:");
-            var EmailValidation = EntryValidation(Admins, Console.ReadLine(), 2);
-            while(!EmailValidation.Item1)
-            {
-                Console.Clear();
-                Console.WriteLine(EmailValidation.Item2);
-                EmailValidation = EntryValidation(Admins, Console.ReadLine(), 2);
-            }
-            string NewAdminEmail = EmailValidation.Item2;
-            
-            Console.WriteLine($"\nEnter the password for {NewAdminEmail}:");
-            var PassValidation = EntryValidation(Admins, Console.ReadLine(), 3);
-            while (!PassValidation.Item1)
-            {
-                Console.Clear();
-                Console.WriteLine(PassValidation.Item2);
-                PassValidation = EntryValidation(Admins, Console.ReadLine(), 3);
-            }
-            string NewAdminPass = PassValidation.Item2;
+                Console.WriteLine("\nEnter new Admin Email:");
+                var EmailValidation = EntryValidation(Admins, Console.ReadLine(), 2);
+                while (!EmailValidation.Item1)
+                {
+                    Console.Clear();
+                    Console.WriteLine(EmailValidation.Item2);
+                    EmailValidation = EntryValidation(Admins, Console.ReadLine(), 2);
+                }
+                string NewAdminEmail = EmailValidation.Item2;
 
-            Admins.Add((AdminID, NewAdminName, NewAdminEmail, NewAdminPass));
-            Console.WriteLine($"\nAdmin {NewAdminEmail} added successfully.");
+                Console.WriteLine($"\nEnter the password for {NewAdminEmail}:");
+                var PassValidation = EntryValidation(Admins, Console.ReadLine(), 3);
+                while (!PassValidation.Item1)
+                {
+                    Console.Clear();
+                    Console.WriteLine(PassValidation.Item2);
+                    PassValidation = EntryValidation(Admins, Console.ReadLine(), 3);
+                }
+                string NewAdminPass = PassValidation.Item2;
+
+                Admins.Add((AdminID, NewAdminName, NewAdminEmail, NewAdminPass));
+                Console.WriteLine($"\nAdmin {NewAdminEmail} added successfully.");
+            }
+            else
+            {
+                Admins.Add((AdminID, AdminName, AdminEmail, AdminPass));
+                Console.WriteLine($"\nAdmin {AdminName} added successfully.");
+            }
         }
         static void EditAdmin() // used in ManageAdmins() to edit / remove admins
         {
@@ -749,6 +820,20 @@ namespace BasicLibrary
             if (!EmailFlag)
             {
                 Console.WriteLine("Invalid Email Address.");
+                Console.WriteLine("\nRegister new user? (1) Yes / (2) No");
+                int RegUser;
+                while((!int.TryParse(Console.ReadLine(), out RegUser))||(RegUser > 2) ||(RegUser < 1))
+                {
+                    Console.WriteLine("\nInvalid input, please try again:");
+                }
+                if (RegUser == 2)
+                {
+                    Console.WriteLine("\nReturning to main menu...");
+                }
+                else
+                {
+                    AddNewUser();
+                }
             }
             else if (EmailFlag && !PassFlag)
             {
@@ -2066,13 +2151,96 @@ namespace BasicLibrary
                 Console.WriteLine("!BOOKS OVERDUE!\n" + BooksOverDue.ToString());
             }
         }
-        //static (bool, List<(string, string, string)>) RequestAdminAccount(string AName, string AEmail, string APass)
-        //{
-        //    List<(string Name, string Email, string Pass)> AdminRequests = new List<(string Name, string Email, string Pass)>();
-        //    bool AdminRequestFlag = false;
-            
-        //    return (AdminRequestFlag, AdminRequests);
-        //}
+        static bool RequestAdminAccount(bool MAdmin)
+        {
+            if (!MAdmin)
+            {
+                Console.Clear();
+                Console.WriteLine("\nEnter new Admin Name:");
+                var NameValidation = EntryValidation(Admins, Console.ReadLine(), 1);
+                while (!NameValidation.Item1)
+                {
+                    Console.Clear();
+                    Console.WriteLine(NameValidation.Item2);
+                    NameValidation = EntryValidation(Admins, Console.ReadLine(), 1);
+                }
+                string NewAdminName = NameValidation.Item2;
+
+                Console.WriteLine("\nEnter new Admin Email:");
+                var EmailValidation = EntryValidation(Admins, Console.ReadLine(), 2);
+                while (!EmailValidation.Item1)
+                {
+                    Console.Clear();
+                    Console.WriteLine(EmailValidation.Item2);
+                    EmailValidation = EntryValidation(Admins, Console.ReadLine(), 2);
+                }
+                string NewAdminEmail = EmailValidation.Item2;
+
+                Console.WriteLine($"\nEnter the password for {NewAdminEmail}:");
+                var PassValidation = EntryValidation(Admins, Console.ReadLine(), 3);
+                while (!PassValidation.Item1)
+                {
+                    Console.Clear();
+                    Console.WriteLine(PassValidation.Item2);
+                    PassValidation = EntryValidation(Admins, Console.ReadLine(), 3);
+                }
+                string NewAdminPass = PassValidation.Item2;
+
+                AdminReq.Add((NewAdminName, NewAdminEmail, NewAdminPass));
+
+                Console.WriteLine("Admin request sent to master admin...\nRequest must be approved by master admin before your account is registered.");
+            }
+            else
+            {
+                if (AdminReq.Count > 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        static void SaveAdminRequests()
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(AdminRequestPath))
+                {
+                    foreach (var Req in AdminReq)
+                    {
+                        writer.WriteLine($"{Req.Name}|{Req.Email}|{Req.Pass}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving to file: {ex.Message}");
+            }
+        }
+        static void LoadAdminRequests()
+        {
+            try
+            {
+                if (File.Exists(AdminRequestPath))
+                {
+                    using (StreamReader reader = new StreamReader(AdminRequestPath))
+                    {
+                        string line;
+                        while ((line = reader.ReadLine()) != null)
+                        {
+                            var parts = line.Split('|');
+                            if (parts.Length == 3)
+                            {
+                                AdminReq.Add((parts[0], parts[1], parts[2]));
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading from file: {ex.Message}");
+            }
+        }
         static (bool, string)EntryValidation(List<(int, string, string, string)> ListToCheck, string ItemToCheck, int CheckOperation)
         {
             if (CheckOperation == 1)
