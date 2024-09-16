@@ -457,7 +457,8 @@ namespace BasicLibrary
             for (int i = 0; i < Admins.Count; i++)
             {
                 AdmnNumber = i + 1;
-                sb.AppendLine($"\n{AdmnNumber, -4} | {Admins[i].AdminID, -5} | {Admins[i].AdminName, -30} | {Admins[i].AdminEmail, -40} | {Admins[i].AdminPass, -15}");
+                sb.AppendLine($"{AdmnNumber, -4} | {Admins[i].AdminID, -5} | {Admins[i].AdminName, -30} | {Admins[i].AdminEmail, -40} | {Admins[i].AdminPass, -15}");
+                sb.AppendLine($"{"",-4} | {"",-5} | {"",-30} | {"",-40} | {"",-15}");
             }
             Console.WriteLine(sb.ToString());
             sb.Clear();
@@ -606,7 +607,8 @@ namespace BasicLibrary
                         sb.AppendLine(border);
                         for (int i = 0;i<Users.Count;i++)
                         {
-                            sb.AppendLine($"\n{(i+1), -4} | {Users[i].UserID, -4} | {Users[i].UserName, -30}");
+                            sb.AppendLine($"{(i+1), -4} | {Users[i].UserID, -4} | {Users[i].UserName, -30}");
+                            sb.AppendLine($"{"",-4} | {"",-4} | {"",-30}");
                         }
                         Console.WriteLine("Users List:\n"+sb.ToString());
                         Console.WriteLine("\n0. Exit.");
@@ -776,7 +778,8 @@ namespace BasicLibrary
             for (int i = 0; i < Users.Count; i++)
             {
                 UserNumber = i + 1;
-                sb.AppendLine($"\n{UserNumber,-4} | {Users[i].UserID,-5} | {Users[i].UserName,-30} | {Users[i].UserEmail,-40} | {Users[i].UserPass,-15}");
+                sb.AppendLine($"{UserNumber,-4} | {Users[i].UserID,-5} | {Users[i].UserName,-30} | {Users[i].UserEmail,-40} | {Users[i].UserPass,-15}");
+                sb.AppendLine($"{"",-4} | {"",-5} | {"",-30} | {"",-40} | {"",-15}");
             }
             Console.WriteLine(sb.ToString());
             sb.Clear();
@@ -1018,6 +1021,7 @@ namespace BasicLibrary
         // BOOKS RELATED FUNCTIONS.
         static void AddnNewBook()
         {
+            Console.Clear();
             List<string> ExistingBooks = new List<string>();
             for (int i = 0; i < Books.Count; i++)
             {
@@ -1091,7 +1095,8 @@ namespace BasicLibrary
             for (int i = 0; i < Books.Count; i++)
             {             
                 BookNumber = i + 1;
-                sb.AppendLine($"\n{BookNumber,-4} | {Books[i].BookID,-5} | {Books[i].BookName,-35} | {Books[i].AuthName,-20} | {Books[i].Category,-10} | {Books[i].Cpy,-11} | {(Books[i].Cpy - Books[i].BorrowedCpy),-11} | {Books[i].BookPrice,-7}");
+                sb.AppendLine($"{BookNumber,-4} | {Books[i].BookID,-5} | {Books[i].BookName,-35} | {Books[i].AuthName,-20} | {Books[i].Category,-10} | {Books[i].Cpy,-11} | {(Books[i].Cpy - Books[i].BorrowedCpy),-11} | {Books[i].BookPrice,-7}");
+                sb.AppendLine($"{"",-4} | {"",-5} | {"",-35} | {"",-20} | {"",-10} | {"",-11} | {"",-11} | {"",-7}");
             }
             Console.Clear();
             Console.WriteLine("Current available books:\n");
@@ -1274,7 +1279,7 @@ namespace BasicLibrary
                 }
                 else
                 {
-                    Borrows.Add((CurrentUser, Books[BookIndex].BookID, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), DateTime.Today.AddDays(Books[BookIndex].BorrowPeriod).ToString("yyyy-MM-dd HH:mm:ss"), "N/A", "N/A", false));
+                    Borrows.Add((CurrentUser, Books[BookIndex].BookID, DateTime.Now.ToString("yyyy-MM-dd"), DateTime.Today.AddDays(Books[BookIndex].BorrowPeriod).ToString("yyyy-MM-dd"), "N/A", "N/A", false));
                     Books[BookIndex] = (Books[BookIndex].BookID, Books[BookIndex].BookName, Books[BookIndex].AuthName, Books[BookIndex].Cpy, (Books[BookIndex].BorrowedCpy + 1), Books[BookIndex].BookPrice, Books[BookIndex].Category, Books[BookIndex].BorrowPeriod);
                     Console.Clear();
                     Console.WriteLine($"\n{Books[BookIndex].BookName} borrowed successfully!");
@@ -1301,6 +1306,7 @@ namespace BasicLibrary
                     IDs.Add(Borrows[i].BookID);
                     UserBorrowed = true;
                     sb.AppendLine($"{Borrows[i].BookID, -4} | {Borrows[i].BorrowDate, -20} | {Borrows[i].DueDate, -20} | {(DateTime.Parse(Borrows[i].DueDate) - DateTime.Now).Days, -11}");
+                    sb.AppendLine($"{"",-4} | {"",-20} | {"",-20} | {"",-11}");
                 }
             }
             if (UserBorrowed)
@@ -1365,8 +1371,10 @@ namespace BasicLibrary
                         {
                             Console.WriteLine($"\nCould not update borrows list...{ex}");
                         }
+                        Console.Clear();
                         Console.WriteLine($"\n{Books[ReturnedIndex].BookName} returned successfully!");
                         SaveBooksToFile();
+                        RecommendationBooks(Books[ReturnedIndex].BookID, Books[ReturnedIndex].BookName, CurrentUser);
                     }
                 }
             }
@@ -1624,6 +1632,7 @@ namespace BasicLibrary
             {
                 CatNumber = i + 1;
                 sb.AppendLine($"{CatNumber, -4} | {Categories[i].CatID, -4} | {Categories[i].CatName, -20} | {Categories[i].CatBookCount, -20}");
+                sb.AppendLine($"{"",-4} | {"",-4} | {"",-20} | {"",-20}");
             }
             Console.Clear();
             Console.WriteLine("Current available Categories:\n");
@@ -1889,14 +1898,18 @@ namespace BasicLibrary
                     }
                 }
                 int count = 1;
+                string border = new string('-', 60);
                 sb.Clear();
+                sb.AppendLine($"{"No.", -4} | {"ID", -4} | {"Book Name", -35} | {"Available", -12}");
+                sb.AppendLine(border);
                 for (int i = 0; i < OtherBooksUsersBorrowed.Count; i++)
                 {
                     for (int j = 0; j < Books.Count; j++)
                     {
                         if (OtherBooksUsersBorrowed[i] == Books[i].BookID)
                         {
-                            sb.AppendLine(count + ". Book Name: " + Books[i].BookName + " | ID: " + OtherBooksUsersBorrowed[i] + " | Copies Available: " + (Books[i].Cpy - Books[i].BorrowedCpy));
+                            sb.AppendLine($"{count,-4} | {Books[i].BookID,-4} | {Books[i].BookName,-35} | {(Books[i].Cpy - Books[i].BorrowedCpy),-12}");
+                            sb.AppendLine($"{"",-4} | {"",-4} | {"",-35} | {"",-12}");
                             count++;
                             if (count == 5)
                             {
@@ -2071,8 +2084,8 @@ namespace BasicLibrary
                         break;
                     }
                 }
-                Console.WriteLine($"\nNumber of unique books in the library: {Books.Count}");
                 ViewCategories();
+                Console.WriteLine($"\n\nNumber of unique books in the library: {Books.Count}");
                 Console.WriteLine($"\n\nMost Common User: ID: {TopUserID} | Name: {Users[UserIndex].UserName} | Email: {Users[UserIndex].UserEmail}");
                 Console.WriteLine($"\n\nMost Common Book: ID: {TopBookID} | Name: {Books[BookIndex].BookName} | Author: {Books[BookIndex].AuthName} | Category: {Books[BookIndex].Category}");
             }
@@ -2080,12 +2093,17 @@ namespace BasicLibrary
         static void ViewBorrowedBooksStats()
         {
             StringBuilder sb = new StringBuilder();
+            string border = new string('-', 80);
             bool BorrowedBooks = false;
+            sb.Clear();
+            sb.AppendLine($"{"ID", -5} | {"Book Name", -35} | {"Copies", -10} | {"Borrowed", -10} | {"Available", -10}");
+            sb.AppendLine(border);
             for (int i = 0; i < Books.Count;i++)
             {
                 if (Books[i].BorrowedCpy > 0)
                 {
-                    sb.AppendLine($"ID: {Books[i].BookID} | Name: {Books[i].BookName} | Total Copies: {Books[i].Cpy} | Copies Borrowed: {Books[i].BorrowedCpy} | Available Copies: {Books[i].Cpy - Books[i].BorrowedCpy}");
+                    sb.AppendLine($"{Books[i].BookID, -5} | {Books[i].BookName, -35} | {Books[i].Cpy, -10} | {Books[i].BorrowedCpy, -10} | {(Books[i].Cpy - Books[i].BorrowedCpy), -10}");
+                    sb.AppendLine($"{"",-5} | {"",-35} | {"",-10} | {"",-10} | {"",-10}");
                 }
             }
             Console.WriteLine(sb.ToString());
@@ -2093,11 +2111,16 @@ namespace BasicLibrary
         static void ViewBorrowingUsersStats()
         {
             StringBuilder sb = new StringBuilder();
+            sb.Clear();
+            string border = new string('-', 70);
+            sb.AppendLine($"{"U ID", -5} | {"B ID", -5} | {"Borrow Date", -20} | {"Due Date", -20} | {"Days Left", -10}");
+            sb.AppendLine(border);
             for (int i = 0; i < Borrows.Count; i++)
             {
                 if (!Borrows[i].IsReturned)
                 {
-                    sb.AppendLine($"\nUser ID: {Borrows[i].UserID} | Book ID: {Borrows[i].BookID} | Borrowed on: {Borrows[i].BorrowDate} | Due Date: {Borrows[i].DueDate} | Days Left: {(DateTime.Parse(Borrows[i].DueDate) - DateTime.Now).Days}");
+                    sb.AppendLine($"{Borrows[i].UserID, -5} | {Borrows[i].BookID, -5} | {Borrows[i].BorrowDate, -20} | {Borrows[i].DueDate, -20} | {(DateTime.Parse(Borrows[i].DueDate) - DateTime.Now).Days, -10}");
+                    sb.AppendLine($"{"",-5} | {"",-5} | {"",-20} | {"",-20} | {"",-10}");
                 }
             }
             Console.WriteLine(sb.ToString());
@@ -2120,6 +2143,10 @@ namespace BasicLibrary
                 if ((UID == Borrows[i].UserID) && (Borrows[i].IsReturned == true))
                 {
                     BorrowedAndReturned.AppendLine($"\n{Borrows[i].BookID, -4} | {Borrows[i].BorrowDate, -20} | {Borrows[i].ReturnDate, -20} | {Borrows[i].BRating, -8}");
+                    if (DateTime.Parse(Borrows[i].ReturnDate) > DateTime.Parse(Borrows[i].DueDate))
+                    {
+                        BorrowedAndReturned.Append("*Returned past due date*\n");
+                    }
                     FoundReturned = true;
                 }
                 if ((UID == Borrows[i].UserID) && (Borrows[i].IsReturned == false))
