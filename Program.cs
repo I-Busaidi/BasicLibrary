@@ -94,7 +94,7 @@ namespace BasicLibrary
             {
                 Console.WriteLine("\nInvalid input, please try again:");
             }
-            Console.WriteLine($"\nEnter Admin Password (Hint: Master Admin Pass ({Admins[0].AdminPass})):");
+            Console.WriteLine($"\nEnter Admin Password (*Hint* Master Admin Pass: {Admins[0].AdminPass}):");
             while (string.IsNullOrEmpty(AdminPass = Console.ReadLine().ToLower().Trim()))
             {
                 Console.WriteLine("\nInvalid input, please try again:");
@@ -872,7 +872,7 @@ namespace BasicLibrary
             bool ExitFlag = false;
             do
             {
-                if (!OverDueCheck(CurrentUser))
+                if (!OverDueCheck(CurrentUser).Item1)
                 {
                     Console.Clear();
                     Console.WriteLine("Welcome to the Library!");
@@ -920,10 +920,22 @@ namespace BasicLibrary
                 }
                 else
                 {
+                    var OverdueList = OverDueCheck(CurrentUser).Item2;
+                    StringBuilder sb = new StringBuilder();
+                    sb.Clear();
+                    sb.AppendLine($"\n{"B.ID", -4} | {"Borrow Date", -20} | {"Due Date", -20} | {"Days Overdue", -20}");
+                    string border = new string('-', 70);
+                    sb.AppendLine(border);
+                    for (int i = 0; i < OverdueList.Count; i++)
+                    {
+                        sb.AppendLine($"{OverdueList[i].Item1,-4} | {OverdueList[i].Item2,-20} | {OverdueList[i].Item3,-20} | {OverdueList[i].Item4,-20}");
+                        sb.AppendLine($"{"",-4} | {"",-20} | {"",-20} | {"",-20}");
+                    }
                     Console.Clear();
                     Console.WriteLine("Welcome to the Library!");
                     Console.WriteLine("\n!You Must Return Books Overdue Before Using Other Services!");
-                    Console.WriteLine("\n1. Return book");
+                    Console.WriteLine(sb.ToString());
+                    Console.WriteLine("\n\n1. Return book");
                     Console.WriteLine("\n2. View Profile");
                     Console.WriteLine("\n0. Save & Exit");
 
@@ -1001,19 +1013,22 @@ namespace BasicLibrary
                 Console.WriteLine($"Error loading from file: {ex.Message}");
             }
         }
-        static bool OverDueCheck(int UID)
+        static (bool, List<(int, string, string, int)>) OverDueCheck(int UID)
         {
+            List<(int, string, string, int)> OverdueList = new List<(int, string, string, int)> ();
+            bool Overdue = false;
             for (int i = 0; i < Borrows.Count; i++)
             {
                 if ((UID == Borrows[i].UserID) && (Borrows[i].IsReturned == false))
                 {
                     if (DateTime.Parse(Borrows[i].DueDate) < DateTime.Now)
                     {
-                        return true;
+                        OverdueList.Add((Borrows[i].BookID, Borrows[i].BorrowDate, Borrows[i].DueDate, (DateTime.Parse(Borrows[i].DueDate) - DateTime.Now).Days));
+                        Overdue = true;
                     }
                 }
             }
-            return false;
+            return (Overdue, OverdueList);
         }
 
 
@@ -1306,6 +1321,10 @@ namespace BasicLibrary
                     IDs.Add(Borrows[i].BookID);
                     UserBorrowed = true;
                     sb.AppendLine($"{Borrows[i].BookID, -4} | {Borrows[i].BorrowDate, -20} | {Borrows[i].DueDate, -20} | {(DateTime.Parse(Borrows[i].DueDate) - DateTime.Now).Days, -11}");
+                    if (DateTime.Parse(Borrows[i].DueDate) < DateTime.Now)
+                    {
+                        sb.AppendLine($"{"",-4} | {"******************OVERDUE******************", -43} | {"",-11}");
+                    }
                     sb.AppendLine($"{"",-4} | {"",-20} | {"",-20} | {"",-11}");
                 }
             }
@@ -2033,12 +2052,15 @@ namespace BasicLibrary
         }
         static void MostCommonUserAndBook() // prints the most borrowed book / the most frequent user
         {
+            int TopOverdue = 0;
+            int TopOverdueID = 0;
             int TopUser = 0;
             int TopBook = 0;
             int TopUserID = 0;
             int TopBookID = 0;
             for (int i = 0;i < Borrows.Count;i++)
             {
+                int OverdueOccur = 0;
                 int BookOccur = 0;
                 int UserOccur = 0;
                 for (int j = 0; j < Borrows.Count; j++)
@@ -2051,6 +2073,20 @@ namespace BasicLibrary
                     {
                         BookOccur++;
                     }
+                    if (Borrows[i].IsReturned && (Borrows[i].UserID == Borrows[j].UserID))
+                    {
+                        if ((DateTime.Parse(Borrows[i].DueDate) < DateTime.Parse(Borrows[i].ReturnDate)))
+                        {
+                            OverdueOccur++;
+                        }
+                    }
+                    else if (!Borrows[i].IsReturned && (Borrows[i].UserID == Borrows[j].UserID))
+                    {
+                        if ((DateTime.Parse(Borrows[i].DueDate) < DateTime.Now))
+                        {
+                            OverdueOccur++;
+                        }
+                    }
                 }
                 if (UserOccur > TopUser)
                 {
@@ -2062,11 +2098,17 @@ namespace BasicLibrary
                     TopBook = BookOccur;
                     TopBookID = Borrows[i].BookID;
                 }
+                if (OverdueOccur > TopOverdue)
+                {
+                    TopOverdue = OverdueOccur;
+                    TopOverdueID = Borrows[i].UserID;
+                }
             }
             if ((TopUser != 0) && (TopBook != 0))
             {
                 int UserIndex = -1;
                 int BookIndex = -1;
+                int OverdueIndex = -1;
                 for (int i = 0; i < Books.Count;i++)
                 {
                     if (TopBookID == Books[i].BookID)
@@ -2084,9 +2126,20 @@ namespace BasicLibrary
                         break;
                     }
                 }
+                if (TopOverdue != 0)
+                {
+                    for (int i = 0;i < Users.Count;i++)
+                    {
+                        if (TopOverdueID == Users[i].UserID)
+                        {
+                            OverdueIndex = i;
+                            break;
+                        }
+                    }
+                }
                 ViewCategories();
-                Console.WriteLine($"\n\nNumber of unique books in the library: {Books.Count}");
                 Console.WriteLine($"\n\nMost Common User: ID: {TopUserID} | Name: {Users[UserIndex].UserName} | Email: {Users[UserIndex].UserEmail}");
+                Console.WriteLine($"\n\nUser With Most Overdue Returns: ID: {TopOverdueID} | Name: {Users[OverdueIndex].UserName} | Email: {Users[OverdueIndex].UserEmail}");
                 Console.WriteLine($"\n\nMost Common Book: ID: {TopBookID} | Name: {Books[BookIndex].BookName} | Author: {Books[BookIndex].AuthName} | Category: {Books[BookIndex].Category}");
             }
         }
@@ -2095,6 +2148,8 @@ namespace BasicLibrary
             StringBuilder sb = new StringBuilder();
             string border = new string('-', 80);
             bool BorrowedBooks = false;
+            int CurrentBorrowed = 0;
+            int TotalCopies = 0;
             sb.Clear();
             sb.AppendLine($"{"ID", -5} | {"Book Name", -35} | {"Copies", -10} | {"Borrowed", -10} | {"Available", -10}");
             sb.AppendLine(border);
@@ -2104,12 +2159,16 @@ namespace BasicLibrary
                 {
                     sb.AppendLine($"{Books[i].BookID, -5} | {Books[i].BookName, -35} | {Books[i].Cpy, -10} | {Books[i].BorrowedCpy, -10} | {(Books[i].Cpy - Books[i].BorrowedCpy), -10}");
                     sb.AppendLine($"{"",-5} | {"",-35} | {"",-10} | {"",-10} | {"",-10}");
+                    CurrentBorrowed += Books[i].BorrowedCpy;
                 }
+                TotalCopies += Books[i].Cpy;
             }
+            sb.AppendLine($"\n\nTotal Book Copies: {TotalCopies}\n\nNumber of Currently Borrowed Copies: {CurrentBorrowed}\n");
             Console.WriteLine(sb.ToString());
         }
         static void ViewBorrowingUsersStats()
         {
+            int TotalReturns = 0;
             StringBuilder sb = new StringBuilder();
             sb.Clear();
             string border = new string('-', 70);
@@ -2122,7 +2181,13 @@ namespace BasicLibrary
                     sb.AppendLine($"{Borrows[i].UserID, -5} | {Borrows[i].BookID, -5} | {Borrows[i].BorrowDate, -20} | {Borrows[i].DueDate, -20} | {(DateTime.Parse(Borrows[i].DueDate) - DateTime.Now).Days, -10}");
                     sb.AppendLine($"{"",-5} | {"",-5} | {"",-20} | {"",-20} | {"",-10}");
                 }
+                else
+                {
+                    TotalReturns++;
+                }
             }
+
+            sb.AppendLine($"\n\nTotal Borrows By Users: {Borrows.Count}\n\nTotal Number of Returns: {TotalReturns}\n");
             Console.WriteLine(sb.ToString());
         }
         static void UserIndividualReport(int UID)
@@ -2142,21 +2207,24 @@ namespace BasicLibrary
             {
                 if ((UID == Borrows[i].UserID) && (Borrows[i].IsReturned == true))
                 {
-                    BorrowedAndReturned.AppendLine($"\n{Borrows[i].BookID, -4} | {Borrows[i].BorrowDate, -20} | {Borrows[i].ReturnDate, -20} | {Borrows[i].BRating, -8}");
+                    BorrowedAndReturned.AppendLine($"{Borrows[i].BookID, -4} | {Borrows[i].BorrowDate, -20} | {Borrows[i].ReturnDate, -20} | {Borrows[i].BRating, -8}");
                     if (DateTime.Parse(Borrows[i].ReturnDate) > DateTime.Parse(Borrows[i].DueDate))
                     {
-                        BorrowedAndReturned.Append("*Returned past due date*\n");
+                        BorrowedAndReturned.AppendLine($"{"",-4} | {"******************OVERDUE******************",-43} | {"",-8}");
                     }
+                    BorrowedAndReturned.AppendLine($"{"",-4} | {"",-20} | {"",-20} | {"",-8}");
                     FoundReturned = true;
                 }
                 if ((UID == Borrows[i].UserID) && (Borrows[i].IsReturned == false))
                 {
-                    BorrowedNOTReturned.AppendLine($"\n{Borrows[i].BookID, -4} | {Borrows[i].BorrowDate, -20} | {Borrows[i].DueDate, -20} | {(DateTime.Parse(Borrows[i].DueDate) - DateTime.Now).Days, -11}");
+                    BorrowedNOTReturned.AppendLine($"{Borrows[i].BookID, -4} | {Borrows[i].BorrowDate, -20} | {Borrows[i].DueDate, -20} | {(DateTime.Parse(Borrows[i].DueDate) - DateTime.Now).Days, -11}");
+                    BorrowedNOTReturned.AppendLine($"{"",-4} | {"",-20} | {"",-20} | {"",-11}");
                     FoundNotReturned = true;
 
                     if (DateTime.Parse(Borrows[i].DueDate) < DateTime.Now)
                     {
                         BooksOverDue.AppendLine($"\n{Borrows[i].BookID, -4} | {Borrows[i].DueDate, -20} | {(DateTime.Parse(Borrows[i].DueDate) - DateTime.Now).Days,-15}");
+                        BooksOverDue.AppendLine($"{"",-4} | {"",-20} | {"",-15}");
                         OverDue = true;
                     }
                 }
