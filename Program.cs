@@ -1170,14 +1170,7 @@ namespace BasicLibrary
                 {
                     Console.WriteLine("\nInvalid input, please try again:");
                 }
-                for (int i = 0; i<BookIdsAuth.Count;i++)
-                {
-                    if((BookChoice - 1) == BookIdsAuth[i])
-                    {
-                        BookIndex = BookIdsAuth[i];
-                        break;
-                    }
-                }
+                BookIndex = BookIdsAuth[BookChoice-1];
             }
             if (flag && AdmnOrUsr) // if the person searching is a user
             {
@@ -1188,14 +1181,7 @@ namespace BasicLibrary
                 {
                     Console.WriteLine("\nInvalid input, please try again:");
                 }
-                for (int i = 0; i < BookIds.Count; i++)
-                {
-                    if ((BookChoice - 1) == BookIds[i])
-                    {
-                        BookIndex = BookIds[i];
-                        break;
-                    }
-                }
+                BookIndex = BookIds[BookChoice - 1];
             }
 
             if (!flag && !AuthBooks) // if book is not found
@@ -1511,6 +1497,7 @@ namespace BasicLibrary
                         {
                             Console.WriteLine("\nInvalid input, please try again:");
                         }
+                        Console.WriteLine("\nConfirm copies addition? (1) Yes / (2) No");
                         int ConfCpyeEdit;
                         while ((!int.TryParse(Console.ReadLine(), out ConfCpyeEdit)) || (ConfCpyeEdit > 2) || (ConfCpyeEdit < 1))
                         {
@@ -1925,9 +1912,9 @@ namespace BasicLibrary
                 {
                     for (int j = 0; j < Books.Count; j++)
                     {
-                        if (OtherBooksUsersBorrowed[i] == Books[i].BookID)
+                        if (OtherBooksUsersBorrowed[i] == Books[j].BookID)
                         {
-                            sb.AppendLine($"{count,-4} | {Books[i].BookID,-4} | {Books[i].BookName,-35} | {(Books[i].Cpy - Books[i].BorrowedCpy),-12}");
+                            sb.AppendLine($"{count,-4} | {Books[j].BookID,-4} | {Books[j].BookName,-35} | {(Books[j].Cpy - Books[j].BorrowedCpy),-12}");
                             sb.AppendLine($"{"",-4} | {"",-4} | {"",-35} | {"",-12}");
                             count++;
                             if (count == 5)
