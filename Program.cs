@@ -229,7 +229,8 @@ namespace BasicLibrary
             bool ExitFlag = false;
             do
             {
-                Console.WriteLine("\nChoose an option:\n1. Register new admin.\n2. Edit existing admin.\n3. View Admin Requests.\n\n0. Save & Exit.");
+                Console.Clear();
+                Console.WriteLine("\nChoose an option:\n\n1. Register new admin.\n\n2. Edit existing admin.\n\n3. View Admin Requests.\n\n\n0. Save & Exit.");
                 int Choice;
                 while ((!int.TryParse(Console.ReadLine(), out Choice))||(Choice > 3)||(Choice < 0))
                 {
@@ -294,7 +295,6 @@ namespace BasicLibrary
                         ExitFlag = true;
                         break;
                 }
-                Console.Clear();
             } while (!ExitFlag);
         }
         static void AddNewAdmin(string AdminName = null, string AdminEmail = null, string AdminPass = null, bool AdminRequest = false) // used in ManageAdmins() to add admins
@@ -450,24 +450,17 @@ namespace BasicLibrary
         static void ViewAllAdmins()
         {
             StringBuilder sb = new StringBuilder();
-
+            string border = new string('-', 110);
             int AdmnNumber = 0;
-
+            sb.AppendLine($"{"No.", -4} | {"ID", -5} | {"Name", -30} | {"Email", -40} | {"Password", -15}");
+            sb.AppendLine(border);
             for (int i = 0; i < Admins.Count; i++)
             {
                 AdmnNumber = i + 1;
-                sb.Append("Admin ").Append(AdmnNumber).Append(" Email: ").Append(Admins[i].AdminEmail).Append(" Name: ").Append(Admins[i].AdminName);
-                if(i == 0)
-                {
-                    sb.Append(" *ADMIN MASTER*");
-                }
-                sb.AppendLine();
-                sb.Append(" Password: ").Append(Admins[i].AdminPass).Append(" ID: ").Append(Admins[i].AdminID);
-                sb.AppendLine().AppendLine();
-                Console.WriteLine(sb.ToString());
-                sb.Clear();
-
+                sb.AppendLine($"\n{AdmnNumber, -4} | {Admins[i].AdminID, -5} | {Admins[i].AdminName, -30} | {Admins[i].AdminEmail, -40} | {Admins[i].AdminPass, -15}");
             }
+            Console.WriteLine(sb.ToString());
+            sb.Clear();
         }
         static void AdminMenu()
         {
@@ -588,7 +581,8 @@ namespace BasicLibrary
             bool ExitFlag = false;
             do
             {
-                Console.WriteLine("\nChoose an option:\n1. Register new User.\n2. Edit existing User.\n3. View a user's Profile.\n\n0. Save & Exit.");
+                Console.Clear();
+                Console.WriteLine("\nChoose an option:\n\n1. Register new User.\n\n2. Edit existing User.\n\n3. View a user's Profile.\n\n\n0. Save & Exit.");
                 int Choice;
                 while ((!int.TryParse(Console.ReadLine(), out Choice)) || (Choice > 3) || (Choice < 0))
                 {
@@ -607,27 +601,35 @@ namespace BasicLibrary
                     case 3:
                         Console.Clear();
                         StringBuilder sb = new StringBuilder();
+                        string border = new string('-', 45);
+                        sb.AppendLine($"{"No.", -4} | {"ID", -4} | {"Name", -30}");
+                        sb.AppendLine(border);
                         for (int i = 0;i<Users.Count;i++)
                         {
-                            sb.AppendLine($"{(i+1)}. User ID: {Users[i].UserID} | User Name: {Users[i].UserName}");
+                            sb.AppendLine($"\n{(i+1), -4} | {Users[i].UserID, -4} | {Users[i].UserName, -30}");
                         }
                         Console.WriteLine("Users List:\n"+sb.ToString());
+                        Console.WriteLine("\n0. Exit.");
                         Console.WriteLine("\nChoose a user from the list to view profile:");
                         int UIDtoSearch;
                         while ((!int.TryParse(Console.ReadLine(),out UIDtoSearch)) || (UIDtoSearch < 0) || (UIDtoSearch > Users.Count))
                         {
                             Console.WriteLine("Invalid input, please try again.");
                         }
-                        UserIndividualReport(Users[UIDtoSearch-1].UserID);
+                        if (UIDtoSearch == 0)
+                        {
+                            Console.WriteLine("Returning to menu...");
+                        }
+                        else
+                        {
+                            UserIndividualReport(Users[UIDtoSearch - 1].UserID);
+                        }
                         break;
 
                     case 0:
                         ExitFlag = true;
                         break;
                 }
-                Console.WriteLine("\nPress any key to continue...");
-                Console.ReadKey();
-                Console.Clear();
             } while (!ExitFlag);
         }
         static void AddNewUser()
@@ -767,23 +769,17 @@ namespace BasicLibrary
         static void ViewAllUsers()
         {
             StringBuilder sb = new StringBuilder();
-
+            string border = new string('-', 110);
             int UserNumber = 0;
-
+            sb.AppendLine($"{"No.",-4} | {"ID",-5} | {"Name",-30} | {"Email",-40} | {"Password",-15}");
+            sb.AppendLine(border);
             for (int i = 0; i < Users.Count; i++)
             {
                 UserNumber = i + 1;
-                sb.Append("User ").Append(UserNumber).Append(" Email: ").Append(Users[i].UserEmail);
-                sb.AppendLine();
-                sb.Append(" Password: ").Append(Users[i].UserPass);
-                sb.AppendLine();
-                sb.Append(" ID: ").Append(Users[i].UserID);
-                sb.Append(" Name: ").Append(Users[i].UserName);
-                sb.AppendLine().AppendLine();
-                Console.WriteLine(sb.ToString());
-                sb.Clear();
-
+                sb.AppendLine($"\n{UserNumber,-4} | {Users[i].UserID,-5} | {Users[i].UserName,-30} | {Users[i].UserEmail,-40} | {Users[i].UserPass,-15}");
             }
+            Console.WriteLine(sb.ToString());
+            sb.Clear();
         }
         static bool UserLogin() // returns true or false to be used in the login menu to determine the next action
         {
@@ -1088,15 +1084,14 @@ namespace BasicLibrary
         static void ViewAllBooks()
         {
             StringBuilder sb = new StringBuilder();
-
+            string border = new string('-', 130);
             int BookNumber = 0;
-
+            sb.AppendLine($"{"No.",-4} | {"B ID",-5} | {"Book Name",-35} | {"Author Name",-20} | {"Category", -10} | {"Copies",-11} | {"Available", -11} | {"Price", -7}");
+            sb.AppendLine(border);
             for (int i = 0; i < Books.Count; i++)
             {             
                 BookNumber = i + 1;
-                sb.AppendLine($"{BookNumber}. Book: {Books[i].BookName} | Author: {Books[i].AuthName} | ID: {Books[i].BookID} | Copies: {Books[i].Cpy}");
-                sb.AppendLine($"Copies Available: {Books[i].Cpy - Books[i].BorrowedCpy} | Price: {Books[i].BookPrice} | Category: {Books[i].Category} | Borrow max period: {Books[i].BorrowPeriod}");
-                sb.AppendLine("-----------------------");
+                sb.AppendLine($"\n{BookNumber,-4} | {Books[i].BookID,-5} | {Books[i].BookName,-35} | {Books[i].AuthName,-20} | {Books[i].Category,-10} | {Books[i].Cpy,-11} | {(Books[i].Cpy - Books[i].BorrowedCpy),-11} | {Books[i].BookPrice,-7}");
             }
             Console.Clear();
             Console.WriteLine("Current available books:\n");
@@ -1120,24 +1115,26 @@ namespace BasicLibrary
             List<int> BookIds = new List<int>();
             StringBuilder AuthBookList = new StringBuilder();
             StringBuilder BooksList = new StringBuilder();
+            string border = new string('-', 140);
             AuthBookList.Clear();
+            AuthBookList.AppendLine($"{"No.",-4} | {"B ID",-5} | {"Book Name",-35} | {"Author Name",-20} | {"Category",-10} | {"Copies",-11} | {"Available",-11} | {"Price",-7} | {"Borrow Period", -15}");
+            AuthBookList.AppendLine(border);
+            
             BooksList.Clear();
+            BooksList.AppendLine($"{"No.",-4} | {"B ID",-5} | {"Book Name",-35} | {"Author Name",-20} | {"Category",-10} | {"Copies",-11} | {"Available",-11} | {"Price",-7} | {"Borrow Period",-15}");
+            BooksList.AppendLine(border);
             for (int i = 0; i< Books.Count;i++)
             {
                 if (Books[i].BookName.ToLower().Contains(name.ToLower())) // prints book if the searched name is a book name
                 {
-                    BooksList.AppendLine($"{count}. Book: {Books[i].BookName} | Author: {Books[i].AuthName} | ID: {Books[i].BookID} | Copies: {Books[i].Cpy}");
-                    BooksList.AppendLine($"Copies Available: {Books[i].Cpy - Books[i].BorrowedCpy} | Price: {Books[i].BookPrice} | Category: {Books[i].Category} | Borrow max period: {Books[i].BorrowPeriod}");
-                    BooksList.AppendLine("-----------------------");
+                    BooksList.AppendLine($"{count, -4} | {Books[i].BookID, -5} | {Books[i].BookName, -35} | {Books[i].AuthName, -20} | {Books[i].Category, -10} | {Books[i].Cpy, -11} | {(Books[i].Cpy - Books[i].BorrowedCpy), -11} | {Books[i].BookPrice, -7} | {Books[i].BorrowPeriod, -15}");
                     count++;
                     flag = true;
                     BookIds.Add(i);
                 }
                 if (Books[i].AuthName.ToLower().Contains(name.ToLower())) // prints a list of books made by the author if author name was searched.
                 {
-                    AuthBookList.AppendLine($"{count}. Book: {Books[i].BookName} | Author: {Books[i].AuthName} | ID: {Books[i].BookID} | Copies: {Books[i].Cpy}");
-                    AuthBookList.AppendLine($"Copies Available: {Books[i].Cpy - Books[i].BorrowedCpy} | Price: {Books[i].BookPrice} | Category: {Books[i].Category} | Borrow max period: {Books[i].BorrowPeriod}");
-                    AuthBookList.AppendLine("-----------------------");
+                    AuthBookList.AppendLine($"{count,-4} | {Books[i].BookID,-5} | {Books[i].BookName,-35} | {Books[i].AuthName,-20} | {Books[i].Category,-10} | {Books[i].Cpy,-11} | {(Books[i].Cpy - Books[i].BorrowedCpy),-11} | {Books[i].BookPrice,-7} | {Books[i].BorrowPeriod,-15}");
                     count++;
                     AuthBooks = true;
                     BookIdsAuth.Add( i );
@@ -1293,14 +1290,17 @@ namespace BasicLibrary
             int BorrowedIndex = -1;
             List<int> IDs = new List<int>();
             StringBuilder sb = new StringBuilder();
+            string border = new string('-', 60);
             sb.AppendLine("Borrowed Books:\n");
+            sb.AppendLine($"{"ID", -4} | {"Borrow Date", -20} | {"Due Date", -20} | {"Days Left", -11}");
+            sb.AppendLine(border);
             for (int i = 0; i < Borrows.Count; i++)
             {
                 if ((Borrows[i].UserID == CurrentUser) && (Borrows[i].IsReturned == false))
                 {
                     IDs.Add(Borrows[i].BookID);
                     UserBorrowed = true;
-                    sb.AppendLine($"ID: {Borrows[i].BookID} | Borrowed On: {Borrows[i].BorrowDate} | Due Date: {Borrows[i].DueDate} | Days Left: {(DateTime.Parse(Borrows[i].DueDate) - DateTime.Now).Days}");
+                    sb.AppendLine($"{Borrows[i].BookID, -4} | {Borrows[i].BorrowDate, -20} | {Borrows[i].DueDate, -20} | {(DateTime.Parse(Borrows[i].DueDate) - DateTime.Now).Days, -11}");
                 }
             }
             if (UserBorrowed)
@@ -1358,7 +1358,7 @@ namespace BasicLibrary
                         }
                         try
                         {
-                            Borrows[BorrowedIndex] = (Borrows[BorrowedIndex].UserID, Borrows[BorrowedIndex].BookID, Borrows[BorrowedIndex].BorrowDate, Borrows[BorrowedIndex].DueDate, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), BRating.ToString(), true);
+                            Borrows[BorrowedIndex] = (Borrows[BorrowedIndex].UserID, Borrows[BorrowedIndex].BookID, Borrows[BorrowedIndex].BorrowDate, Borrows[BorrowedIndex].DueDate, DateTime.Now.ToString("yyyy-MM-dd"), BRating.ToString(), true);
                             SaveBorrowedListToFile();
                         }
                         catch (Exception ex)
@@ -1615,13 +1615,15 @@ namespace BasicLibrary
         static void ViewCategories()
         {
             StringBuilder sb = new StringBuilder();
-
+            string border = new string('-', 60);
+            sb.AppendLine($"{"No.", -4} | {"ID", -4} | {"Name", -20} | {"Books in Category", -20}");
+            sb.AppendLine(border);
             int CatNumber = 0;
 
             for (int i = 0; i < Categories.Count; i++)
             {
                 CatNumber = i + 1;
-                sb.AppendLine($"{CatNumber}. Category ID: {Categories[i].CatID} | Category Name: {Categories[i].CatName} | Books in {Categories[i].CatName}: {Categories[i].CatBookCount}");
+                sb.AppendLine($"{CatNumber, -4} | {Categories[i].CatID, -4} | {Categories[i].CatName, -20} | {Categories[i].CatBookCount, -20}");
             }
             Console.Clear();
             Console.WriteLine("Current available Categories:\n");
@@ -1635,11 +1637,11 @@ namespace BasicLibrary
             {
                 Console.Clear();
                 ViewCategories();
-                Console.WriteLine("Choose an option:\n1. Add New Category.\n2. Edit Category.\n\n0. Exit.");
+                Console.WriteLine("Choose an option:\n\n1. Add New Category.\n\n2. Edit Category.\n\n\n0. Exit.");
                 int CatMenu;
                 while ((!int.TryParse(Console.ReadLine(), out CatMenu)) || (CatMenu > 2) || (CatMenu < 0))
                 {
-                    Console.WriteLine("Invalid option, please try again.");
+                    Console.WriteLine("\nInvalid option, please try again.");
                 }
                 switch (CatMenu)
                 {
@@ -1710,18 +1712,18 @@ namespace BasicLibrary
             {
                 Console.Clear ();
                 ViewCategories();
-                Console.WriteLine($"\n0. Exit.\n\nChoose a category from the list to edit (1 - {Categories.Count}):");
+                Console.WriteLine($"\n0. Exit.\n\nChoose a category from the list to edit:");
                 int CatChoice;
                 while ((!int.TryParse(Console.ReadLine(), out CatChoice)) || (CatChoice > Categories.Count) || (CatChoice < 0))
                 {
-                    Console.WriteLine("Invalid input, please try again:");
+                    Console.WriteLine("\nInvalid input, please try again:");
                 }
                 Console.Clear ();
-                Console.WriteLine($"Choose an editing option for category \"{Categories[CatChoice-1].CatName}\":\n1. Edit Name.\n\n0. Cancel & Exit.");
+                Console.WriteLine($"Choose an editing option for category \"{Categories[CatChoice-1].CatName}\":\n\n1. Edit Name.\n\n\n0. Cancel & Exit.");
                 int EditChoice;
                 while ((!int.TryParse(Console.ReadLine(), out EditChoice))||(EditChoice > 1) ||(EditChoice < 0))
                 {
-                    Console.WriteLine("Invalid option, please try again:");
+                    Console.WriteLine("\nInvalid option, please try again:");
                 }
                 switch (EditChoice)
                 {
@@ -1740,7 +1742,7 @@ namespace BasicLibrary
                             NewCatName = Console.ReadLine();
                             if (string.IsNullOrEmpty(NewCatName))
                             {
-                                Console.WriteLine("Invalid Input, please try again:");
+                                Console.WriteLine("\nInvalid Input, please try again:");
                                 CatNotExist = false;
                             }
                             else
@@ -1749,7 +1751,7 @@ namespace BasicLibrary
                                 {
                                     if (Categories[i].CatName == NewCatName)
                                     {
-                                        Console.WriteLine("Name Already Exists...");
+                                        Console.WriteLine("\nName Already Exists...");
                                         CatNotExist = false;
                                         CatValid = false;
                                         break;
@@ -1763,6 +1765,7 @@ namespace BasicLibrary
                         }
                         Categories[CatChoice - 1] = (Categories[CatChoice - 1].CatID, NewCatName, Categories[CatChoice - 1].CatBookCount);
                         SaveCategoriesToFile();
+                        Console.WriteLine($"\nCategory name changed to \"{NewCatName}\" successfully!");
                         break;
                 }
             } while (ContCatEdit);
@@ -2108,21 +2111,25 @@ namespace BasicLibrary
             StringBuilder BooksOverDue = new StringBuilder();
             bool OverDue = false;
             StringBuilder UserInfo = new StringBuilder();
+            string border = new string('-', 60);
+            BorrowedAndReturned.AppendLine($"{"ID", -4} | {"Borrow Date", -20} | {"Return Date", -20} | {"Rating", -8}").AppendLine(border);
+            BorrowedNOTReturned.AppendLine($"{"ID", -4} | {"Borrow Date", -20} | {"Due Date", -20} | {"Days Left", -11}").AppendLine(border);
+            BooksOverDue.AppendLine($"{"ID", -4} | {"Due Date", -20} | {"Days Overdue", -15}").AppendLine(border);
             for(int i = 0;i < Borrows.Count;++i)
             {
                 if ((UID == Borrows[i].UserID) && (Borrows[i].IsReturned == true))
                 {
-                    BorrowedAndReturned.AppendLine($"Book ID: {Borrows[i].BookID} | Borrow Date: {Borrows[i].BorrowDate} | Returned On: {Borrows[i].ReturnDate} | Rating: {Borrows[i].BRating}");
+                    BorrowedAndReturned.AppendLine($"\n{Borrows[i].BookID, -4} | {Borrows[i].BorrowDate, -20} | {Borrows[i].ReturnDate, -20} | {Borrows[i].BRating, -8}");
                     FoundReturned = true;
                 }
                 if ((UID == Borrows[i].UserID) && (Borrows[i].IsReturned == false))
                 {
-                    BorrowedNOTReturned.AppendLine($"Book ID: {Borrows[i].BookID} | Borrow Date: {Borrows[i].BorrowDate} | Due Date: {Borrows[i].DueDate} | Days Left: {(DateTime.Parse(Borrows[i].DueDate) - DateTime.Now).Days}");
+                    BorrowedNOTReturned.AppendLine($"\n{Borrows[i].BookID, -4} | {Borrows[i].BorrowDate, -20} | {Borrows[i].DueDate, -20} | {(DateTime.Parse(Borrows[i].DueDate) - DateTime.Now).Days, -11}");
                     FoundNotReturned = true;
 
                     if (DateTime.Parse(Borrows[i].DueDate) < DateTime.Now)
                     {
-                        BooksOverDue.AppendLine($"Book ID: {Borrows[i].BookID} | Book Borrow Date: {Borrows[i].BorrowDate}");
+                        BooksOverDue.AppendLine($"\n{Borrows[i].BookID, -4} | {Borrows[i].DueDate, -20} | {(DateTime.Parse(Borrows[i].DueDate) - DateTime.Now).Days,-15}");
                         OverDue = true;
                     }
                 }
@@ -2140,16 +2147,19 @@ namespace BasicLibrary
             Console.WriteLine("User Details: "+UserInfo.ToString());
             if (FoundReturned)
             {
-                Console.WriteLine("\nBorrowed and Returned Books:\n" + BorrowedAndReturned.ToString());
+                Console.WriteLine("\nBorrowed and Returned Books:\n\n" + BorrowedAndReturned.ToString());
             }
             if (FoundNotReturned)
             {
-                Console.WriteLine("\nCurrently Borrowed Books: \n" + BorrowedNOTReturned.ToString());
+                Console.WriteLine("\nCurrently Borrowed Books: \n\n" + BorrowedNOTReturned.ToString());
             }
             if (OverDue)
             {
-                Console.WriteLine("!BOOKS OVERDUE!\n" + BooksOverDue.ToString());
+                Console.WriteLine("\n!BOOKS OVERDUE!\n" + BooksOverDue.ToString());
             }
+
+            Console.WriteLine("\nPress any key to continue...");
+            Console.ReadKey();
         }
         static bool RequestAdminAccount(bool MAdmin)
         {
