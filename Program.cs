@@ -331,16 +331,33 @@ namespace BasicLibrary
                 }
                 string NewAdminEmail = EmailValidation.Item2;
 
-                Console.WriteLine($"\nEnter the password for {NewAdminEmail}:");
-                var PassValidation = EntryValidation(Admins, Console.ReadLine(), 3);
-                while (!PassValidation.Item1)
+                string NewAdminPass;
+                string SecondAdminPass;
+                bool PassMatch = false;
+                do
                 {
-                    Console.Clear();
-                    Console.WriteLine(PassValidation.Item2);
-                    PassValidation = EntryValidation(Admins, Console.ReadLine(), 3);
-                }
-                string NewAdminPass = PassValidation.Item2;
+                    Console.WriteLine($"\nEnter the password for {NewAdminEmail}:");
+                    var PassValidation = EntryValidation(Admins, Console.ReadLine(), 3);
+                    while (!PassValidation.Item1)
+                    {
+                        Console.Clear();
+                        Console.WriteLine(PassValidation.Item2);
+                        PassValidation = EntryValidation(Admins, Console.ReadLine(), 3);
+                    }
+                    NewAdminPass = PassValidation.Item2;
+                    Console.WriteLine("\nRe-enter the password:");
+                    SecondAdminPass = Console.ReadLine();
 
+                    if (NewAdminPass != SecondAdminPass)
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Password does not match, please try again.\n");
+                    }
+                    else
+                    {
+                        PassMatch = true;
+                    }
+                } while (!PassMatch);
                 Admins.Add((AdminID, NewAdminName, NewAdminEmail, NewAdminPass));
                 Console.WriteLine($"\nAdmin {NewAdminEmail} added successfully.");
             }
@@ -666,15 +683,32 @@ namespace BasicLibrary
             }
             string NewUserEmail = EmailValidation.Item2;
 
-            Console.WriteLine($"\nEnter the password for {NewUserEmail}:");
-            var PassValidation = EntryValidation(Users, Console.ReadLine(), 3);
-            while (!PassValidation.Item1)
+            string NewUserPass;
+            string SecondUserPass;
+            bool PassMatch = false;
+            do
             {
-                Console.Clear();
-                Console.WriteLine(PassValidation.Item2);
-                PassValidation = EntryValidation(Users, Console.ReadLine(), 3);
-            }
-            string NewUserPass = PassValidation.Item2;
+                Console.WriteLine($"\nEnter the password for {NewUserEmail}:");
+                var PassValidation = EntryValidation(Users, Console.ReadLine(), 3);
+                while (!PassValidation.Item1)
+                {
+                    Console.Clear();
+                    Console.WriteLine(PassValidation.Item2);
+                    PassValidation = EntryValidation(Users, Console.ReadLine(), 3);
+                }
+                NewUserPass = PassValidation.Item2;
+                Console.WriteLine($"\nRe-enter the password:");
+                SecondUserPass = Console.ReadLine();
+                if (NewUserPass != SecondUserPass)
+                {
+                    Console.Clear() ;
+                    Console.WriteLine("Passwords do not match, please try again.\n");
+                }
+                else
+                {
+                    PassMatch = true;
+                }
+            } while (!PassMatch);
 
             Users.Add((NewUserID, NewUserName, NewUserEmail, NewUserPass));
             Console.WriteLine($"\nUser {NewUserID} added successfully.");
