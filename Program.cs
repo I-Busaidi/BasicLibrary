@@ -711,6 +711,7 @@ namespace BasicLibrary
             } while (!PassMatch);
 
             Users.Add((NewUserID, NewUserName, NewUserEmail, NewUserPass));
+            SaveUsersToFile();
             Console.WriteLine($"\nUser {NewUserID} added successfully.");
         }
         static void EditUser() // edit user email and/or password or delete user
@@ -1310,17 +1311,37 @@ namespace BasicLibrary
                 }
                 if (AlreadyBorrowed)
                 {
-                    Console.WriteLine("You have already borrowed this book before...");
+                    Console.WriteLine("\nYou have already borrowed this book before...");
+                }
+                else if (Books[BookIndex].Cpy == Books[BookIndex].BorrowedCpy)
+                {
+                    Console.WriteLine($"\nSorry, no copies available for \"{Books[BookIndex].BookName}\" currently\nPlease check again later.");
+                    Console.WriteLine("\nPress any key to continue...");
+                    Console.ReadKey();
                 }
                 else
                 {
-                    Borrows.Add((CurrentUser, Books[BookIndex].BookID, DateTime.Now.ToString("yyyy-MM-dd"), DateTime.Today.AddDays(Books[BookIndex].BorrowPeriod).ToString("yyyy-MM-dd"), "N/A", "N/A", false));
-                    Books[BookIndex] = (Books[BookIndex].BookID, Books[BookIndex].BookName, Books[BookIndex].AuthName, Books[BookIndex].Cpy, (Books[BookIndex].BorrowedCpy + 1), Books[BookIndex].BookPrice, Books[BookIndex].Category, Books[BookIndex].BorrowPeriod);
-                    Console.Clear();
-                    Console.WriteLine($"\n{Books[BookIndex].BookName} borrowed successfully!");
-                    SaveBorrowedListToFile();
-                    SaveBooksToFile();
-                    RecommendationBooks(Books[BookIndex].BookID, Books[BookIndex].BookName, CurrentUser);
+                    Console.WriteLine($"\nYou are borrowing {Books[BookIndex].BookName}\nConfirm? (1) Yes / (2) No");
+                    int ConfBorrow;
+                    while ((!int.TryParse(Console.ReadLine(), out ConfBorrow))||(ConfBorrow > 2)||(ConfBorrow < 1))
+                    {
+                        Console.WriteLine("\nInvalid input, please try again:");
+                    }
+                    if (ConfBorrow == 1)
+                    {
+                        Borrows.Add((CurrentUser, Books[BookIndex].BookID, DateTime.Now.ToString("yyyy-MM-dd"), DateTime.Today.AddDays(Books[BookIndex].BorrowPeriod).ToString("yyyy-MM-dd"), "N/A", "N/A", false));
+                        Books[BookIndex] = (Books[BookIndex].BookID, Books[BookIndex].BookName, Books[BookIndex].AuthName, Books[BookIndex].Cpy, (Books[BookIndex].BorrowedCpy + 1), Books[BookIndex].BookPrice, Books[BookIndex].Category, Books[BookIndex].BorrowPeriod);
+                        Console.Clear();
+                        Console.WriteLine($"\n{Books[BookIndex].BookName} borrowed successfully!");
+                        Console.WriteLine($"\nDue Date for \"{Books[BookIndex].BookName}\" is {DateTime.Today.AddDays(Books[BookIndex].BorrowPeriod)}");
+                        SaveBorrowedListToFile();
+                        SaveBooksToFile();
+                        RecommendationBooks(Books[BookIndex].BookID, Books[BookIndex].BookName, CurrentUser);
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nReturning to menu...");
+                    }
                 }
             }
         }
