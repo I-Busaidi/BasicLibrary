@@ -2492,18 +2492,18 @@ namespace BasicLibrary
                 Console.ResetColor();
             }
         }
-        static void DisplayMainMenu(string[] Items, int Index)
-        {
-            for (int i = 0; i < Items.Length; i++)
-            {
-                if (i == Index)
-                {
-                    Console.BackgroundColor = ConsoleColor.Gray;
-                    Console.ForegroundColor = ConsoleColor.Black;
-                }
-                Console.WriteLine(Items[i]);
-                Console.ResetColor();
-            }
-        }
+        //static void DisplayMainMenu(string[] Items, int Index)
+        //{
+        //    for (int i = 0; i < Items.Length; i++)
+        //    {
+        //        if (i == Index)
+        //        {
+        //            Console.BackgroundColor = ConsoleColor.Gray;
+        //            Console.ForegroundColor = ConsoleColor.Black;
+        //        }
+        //        Console.WriteLine(Items[i]);
+        //        Console.ResetColor();
+        //    }
+        //}
     }
 }
