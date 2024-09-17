@@ -16,8 +16,8 @@ namespace BasicLibrary
         static List<(int AdminID, string AdminName, string AdminEmail, string AdminPass)> Admins = new List<(int AdminID, string AdminName, string AdminEmail, string AdminPass)>() ; // Admins list
         static List<(int BookID, string BookName, string AuthName, int Cpy, int BorrowedCpy, double BookPrice, string Category, int BorrowPeriod)> Books = new List<(int BookID, string BookName, string AuthName, int Cpy, int BorrowedCpy, double BookPrice, string Category, int BorrowPeriod)>(); // Books list
         static List<(int UserID, int BookID, string BorrowDate, string DueDate, string ReturnDate, string BRating, bool IsReturned)> Borrows = new List<(int UserID, int BookID, string BorrowDate, string DueDate, string ReturnDate, string BRating, bool IsReturned)>(); // Current borrows list
-        static List<(int CatID, string CatName, int CatBookCount)> Categories = new List<(int CatID, string CatName, int CatBookCount)> (); // Categories List.
-        static List<(string Name, string Email, string Pass)> AdminReq = new List<(string Name, string Email, string Pass)> ();
+        static List<(int CatID, string CatName, int CatBookCount)> Categories = new List<(int CatID, string CatName, int CatBookCount)>(); // Categories List.
+        static List<(string Name, string Email, string Pass)> AdminReq = new List<(string Name, string Email, string Pass)>();
 
 
         // REGEX FORMATS
@@ -39,7 +39,17 @@ namespace BasicLibrary
         // MAIN FUNCTION.
         static void Main(string[] args)
         {
-            //Loading the .txt files into the lists of tuples.
+            // Setting console window size.
+            try
+            {
+                Console.WindowHeight = 50;
+                Console.WindowWidth = 200;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Could not set window size..."+ex);
+            }
+            // Loading the .txt files into the lists of tuples.
             LoadAdminsFromFile();
             LoadUsersFromFile();
             LoadBooksFromFile();
@@ -48,7 +58,7 @@ namespace BasicLibrary
             LoadAdminRequests();
             if (Admins.Count < 1)
             {
-                Admins.Add((1,"admin","admin", "admin")); //temporary admin id and pass in case there is no admin registered.
+                Admins.Add((1,"admin","admin", "admin")); // temporary admin id and pass in case there is no admin registered.
             }
             int AccessLevel;
             bool StopApp = false;
@@ -101,7 +111,7 @@ namespace BasicLibrary
             }
             for (int i = 0; i < Admins.Count; i++)
             {
-                if (Admins[i].AdminEmail.ToLower().Trim() == AdminID.Trim()) //check if admin exist
+                if (Admins[i].AdminEmail.ToLower().Trim() == AdminID.Trim()) // check if admin exist
                 {
                     AdminEmailFlag = true;
                 }
@@ -1112,27 +1122,34 @@ namespace BasicLibrary
             {
                 Console.WriteLine("\nInvalid input, please try again.");
             }
-            Console.WriteLine("\nCategories:\n");
-            StringBuilder SB = new StringBuilder();
-            for (int i = 0; i < Categories.Count; i++)
+            int CatNo = 0;
+            ConsoleKeyInfo PressedKey;
+            do
             {
-                SB.Append((i+1) + ". " + Categories[i].CatName);
-            }
-            Console.WriteLine(SB.ToString());
-            Console.WriteLine($"Enter the number of a category from the list for the book \"{name}\": ");
-            int CatNo;
-            while ((!int.TryParse(Console.ReadLine(), out CatNo)) || (CatNo <= 0) || (CatNo > Categories.Count))
-            {
-                Console.WriteLine("Invalid input, please try again.");
-            }
+                Console.Clear();
+                Console.WriteLine($"Select a category from the list for the book \"{name}\": \n");
+                Console.WriteLine("\nCategories:\n");
+                DisplayCategoryMenu(Categories, CatNo);
+                PressedKey = Console.ReadKey(true);
+                if (PressedKey.Key == ConsoleKey.UpArrow)
+                {
+                    CatNo = (CatNo > 0) ? CatNo - 1 : Categories.Count - 1;
+                }
+                else if (PressedKey.Key == ConsoleKey.DownArrow)
+                {
+                    CatNo = (CatNo < Categories.Count - 1) ? CatNo + 1 : 0;
+                }
+            } while (PressedKey.Key != ConsoleKey.Enter);
             Console.WriteLine($"Enter the maximum borrowing period of \"{name}\" in days:");
             int BorrowPeriod;
             while ((!int.TryParse(Console.ReadLine(), out BorrowPeriod)) || (BorrowPeriod <= 0))
             {
                 Console.WriteLine("Invalid input, please try again.");
             }
-            Categories[CatNo - 1] = ((Categories[CatNo - 1].CatID, Categories[CatNo - 1].CatName, (Categories[CatNo - 1].CatBookCount + 1)));
-            Books.Add((ID, name, author, Qty, 0, BPrice, Categories[CatNo - 1].CatName, BorrowPeriod));
+            Categories[CatNo] = ((Categories[CatNo].CatID, Categories[CatNo].CatName, (Categories[CatNo].CatBookCount + 1)));
+            Books.Add((ID, name, author, Qty, 0, BPrice, Categories[CatNo].CatName, BorrowPeriod));
+            SaveBooksToFile();
+            SaveCategoriesToFile();
             Console.WriteLine($"\nBook \"{name}\" Added Succefully");
         }
         static void ViewAllBooks()
@@ -2432,6 +2449,19 @@ namespace BasicLibrary
                 }
             }
             return (true, ItemToCheck);
+        }
+        static void DisplayCategoryMenu(List<(int CatID, string CatName, int CatBookCount)> Items, int Index)
+        {
+            for (int i = 0; i < Items.Count; i++)
+            {
+                if ( i == Index)
+                {
+                    Console.BackgroundColor = ConsoleColor.Gray;
+                    Console.ForegroundColor = ConsoleColor.Black;
+                }
+                Console.WriteLine(Items[i].CatName);
+                Console.ResetColor();
+            }
         }
     }
 }
