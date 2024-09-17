@@ -1832,6 +1832,10 @@ namespace BasicLibrary
                     Console.WriteLine("\nInvalid input, please try again:");
                 }
                 Console.Clear ();
+                if (CatChoice == 0)
+                {
+                    break;
+                }
                 Console.WriteLine($"Choose an editing option for category \"{Categories[CatChoice-1].CatName}\":\n\n1. Edit Name.\n\n\n0. Cancel & Exit.");
                 int EditChoice;
                 while ((!int.TryParse(Console.ReadLine(), out EditChoice))||(EditChoice > 1) ||(EditChoice < 0))
@@ -2492,6 +2496,8 @@ namespace BasicLibrary
                 Console.ResetColor();
             }
         }
+
+        // *Will be used to make selection in every menu by arrows.*
         //static void DisplayMainMenu(string[] Items, int Index)
         //{
         //    for (int i = 0; i < Items.Length; i++)
